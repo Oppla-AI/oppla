@@ -119,6 +119,9 @@ impl Database {
         github_name: Option<&str>,
         github_user_created_at: DateTimeUtc,
         initial_channel_id: Option<ChannelId>,
+        oppla_user_id: Option<&str>,
+        oppla_account_id: Option<&str>,
+        username: Option<&str>,
     ) -> Result<User> {
         self.transaction(|tx| async move {
             self.update_or_create_user_by_github_account_tx(
@@ -128,6 +131,9 @@ impl Database {
                 github_name,
                 github_user_created_at.naive_utc(),
                 initial_channel_id,
+                oppla_user_id,
+                oppla_account_id,
+                username,
                 &tx,
             )
             .await
@@ -143,6 +149,9 @@ impl Database {
         github_name: Option<&str>,
         github_user_created_at: NaiveDateTime,
         initial_channel_id: Option<ChannelId>,
+        oppla_user_id: Option<&str>,
+        oppla_account_id: Option<&str>,
+        username: Option<&str>,
         tx: &DatabaseTransaction,
     ) -> Result<User> {
         if let Some(existing_user) = self
@@ -161,6 +170,19 @@ impl Database {
                 existing_user.name = ActiveValue::set(Some(github_name.into()));
             }
 
+            // Update Oppla fields if provided
+            if let Some(oppla_user_id) = oppla_user_id {
+                existing_user.oppla_user_id = ActiveValue::set(Some(oppla_user_id.into()));
+            }
+
+            if let Some(oppla_account_id) = oppla_account_id {
+                existing_user.oppla_account_id = ActiveValue::set(Some(oppla_account_id.into()));
+            }
+
+            if let Some(username) = username {
+                existing_user.username = ActiveValue::set(Some(username.into()));
+            }
+
             Ok(existing_user.update(tx).await?)
         } else {
             let user = user::Entity::insert(user::ActiveModel {
@@ -173,6 +195,9 @@ impl Database {
                 invite_count: ActiveValue::set(0),
                 invite_code: ActiveValue::set(None),
                 metrics_id: ActiveValue::set(Uuid::new_v4()),
+                oppla_user_id: ActiveValue::set(oppla_user_id.map(|id| id.into())),
+                oppla_account_id: ActiveValue::set(oppla_account_id.map(|id| id.into())),
+                username: ActiveValue::set(username.map(|u| u.into())),
                 ..Default::default()
             })
             .exec_with_returning(tx)

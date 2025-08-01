@@ -134,6 +134,9 @@ pub async fn seed(config: &Config, db: &Database, force: bool) -> anyhow::Result
                 github_user.name.as_deref(),
                 github_user.created_at,
                 None,
+                None, // oppla_user_id
+                None, // oppla_account_id
+                None, // username
             )
             .await
             .expect("failed to insert user");

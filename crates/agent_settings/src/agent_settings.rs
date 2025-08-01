@@ -353,7 +353,7 @@ impl JsonSchema for LanguageModelProviderSetting {
                 "lmstudio",
                 "ollama",
                 "openai",
-                "zed.dev",
+                "oppla.dev",
                 "copilot_chat",
                 "deepseek",
                 "openrouter",

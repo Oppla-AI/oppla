@@ -23,6 +23,9 @@ pub struct Model {
     pub created_at: NaiveDateTime,
     pub accepted_tos_at: Option<NaiveDateTime>,
     pub custom_llm_monthly_allowance_in_cents: Option<i32>,
+    pub oppla_user_id: Option<String>,
+    pub oppla_account_id: Option<String>,
+    pub username: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

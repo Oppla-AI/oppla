@@ -111,6 +111,9 @@ async fn test_update_or_create_user_by_github_account(db: &Arc<Database>) {
             None,
             Utc::now(),
             None,
+            None, // oppla_user_id
+            None, // oppla_account_id
+            None, // username
         )
         .await
         .unwrap();
@@ -126,6 +129,9 @@ async fn test_update_or_create_user_by_github_account(db: &Arc<Database>) {
             None,
             Utc::now(),
             None,
+            None, // oppla_user_id
+            None, // oppla_account_id
+            None, // username
         )
         .await
         .unwrap();

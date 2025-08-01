@@ -89,6 +89,9 @@ impl UserBackfiller {
                             user.name.as_deref(),
                             github_user.created_at,
                             initial_channel_id,
+                            None, // oppla_user_id
+                            None, // oppla_account_id
+                            None, // username
                         )
                         .await?;
 

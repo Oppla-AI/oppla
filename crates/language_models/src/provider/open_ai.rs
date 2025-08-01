@@ -580,7 +580,15 @@ impl OpenAiEventMapper {
             }
             Some("tool_calls") => {
                 events.extend(self.tool_calls_by_index.drain().map(|(_, tool_call)| {
-                    match serde_json::Value::from_str(&tool_call.arguments) {
+                    // The model can output an empty string to indicate the absence of arguments.
+                    // When that happens, create an empty object instead.
+                    let arguments = if tool_call.arguments.is_empty() {
+                        Ok(serde_json::Value::Object(Default::default()))
+                    } else {
+                        serde_json::Value::from_str(&tool_call.arguments)
+                    };
+                    
+                    match arguments {
                         Ok(input) => Ok(LanguageModelCompletionEvent::ToolUse(
                             LanguageModelToolUse {
                                 id: tool_call.id.clone().into(),

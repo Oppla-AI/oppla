@@ -213,8 +213,7 @@ impl HttpClientWithUrl {
     pub fn build_zed_api_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://zed.dev" => "https://api.zed.dev",
-            "https://staging.zed.dev" => "https://api-staging.zed.dev",
+            "https://app.oppla.ai/home" => "https://api.oppla.dev",
             "http://localhost:3000" => "http://localhost:8080",
             other => other,
         };
@@ -229,9 +228,23 @@ impl HttpClientWithUrl {
     pub fn build_zed_llm_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://zed.dev" => "https://cloud.zed.dev",
-            "https://staging.zed.dev" => "https://llm-staging.zed.dev",
+            "https://app.oppla.ai/home" => "https://llm.oppla.dev",
             "http://localhost:3000" => "http://localhost:8787",
+            other => other,
+        };
+
+        Ok(Url::parse_with_params(
+            &format!("{}{}", base_api_url, path),
+            query,
+        )?)
+    }
+
+    /// Builds a Oppla <> Zed API URL using the given path ONLY for Extensions Marketplace sync.
+    pub fn build_zed_ext_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
+        let base_url = self.base_url();
+        let base_api_url = match base_url.as_ref() {
+            "https://app.oppla.ai/home" => "https://api.zed.dev",
+            "http://localhost:3000" => "http://localhost:8080",
             other => other,
         };
 

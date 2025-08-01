@@ -41,8 +41,11 @@ use zed_llm_client::{
     TOOL_USE_LIMIT_REACHED_HEADER_NAME, ZED_VERSION_HEADER_NAME,
 };
 
-use crate::provider::anthropic::{AnthropicEventMapper, count_anthropic_tokens, into_anthropic};
-use crate::provider::google::{GoogleEventMapper, into_google};
+// COMMENTED OUT UNUSED IMPORTS TO FIX COMPILATION WARNINGS
+// use crate::provider::anthropic::{AnthropicEventMapper, count_anthropic_tokens, into_anthropic};
+use crate::provider::anthropic::count_anthropic_tokens;
+// use crate::provider::google::{GoogleEventMapper, into_google};
+use crate::provider::google::into_google;
 use crate::provider::open_ai::{OpenAiEventMapper, count_open_ai_tokens, into_open_ai};
 
 const PROVIDER_ID: LanguageModelProviderId = language_model::ZED_CLOUD_PROVIDER_ID;
@@ -891,8 +894,68 @@ impl LanguageModel for CloudLanguageModel {
         let intent = request.intent;
         let mode = request.mode;
         let app_version = cx.update(|cx| AppVersion::global(cx)).ok();
-        let thinking_allowed = request.thinking_allowed;
-        match self.model.provider {
+        let _thinking_allowed = request.thinking_allowed;
+
+        // MODIFIED FOR LITELLM: Always use OpenAI format for cloud provider
+        // LiteLLM expects OpenAI-compatible requests regardless of the actual model provider
+        let client = self.client.clone();
+        let model_id = self.model.id.0.clone();
+        let model_name = self.model.id.to_string();
+
+        // Convert to OpenAI format for all models when using cloud provider
+        let openai_request = into_open_ai(
+            request,
+            &model_id,
+            true, // supports_parallel_tool_calls - LiteLLM handles this
+            Some(self.model.max_output_tokens as u64), // Convert usize to Option<u64>
+        );
+
+        let llm_api_token = self.llm_api_token.clone();
+        let _provider = self.model.provider.clone();
+
+        let future = self.request_limiter.stream(async move {
+            let PerformLlmCompletionResponse {
+                response,
+                usage,
+                includes_status_messages,
+                tool_use_limit_reached,
+            } = Self::perform_llm_completion(
+                client.clone(),
+                llm_api_token,
+                app_version,
+                CompletionBody {
+                    thread_id,
+                    prompt_id,
+                    intent,
+                    mode,
+                    provider: zed_llm_client::LanguageModelProvider::OpenAi, // Always use OpenAI as provider for LiteLLM
+                    model: model_name,
+                    provider_request: serde_json::to_value(&openai_request)
+                        .map_err(|e| anyhow!(e))?,
+                },
+            )
+            .await
+            .map_err(|err| match err.downcast::<ApiError>() {
+                Ok(api_err) => anyhow!(LanguageModelCompletionError::from(api_err)),
+                Err(err) => anyhow!(err),
+            })?;
+
+            // Always use OpenAI event mapper since we're using OpenAI format
+            let mut mapper = OpenAiEventMapper::new();
+            Ok(map_cloud_completion_events(
+                Box::pin(
+                    response_lines(response, includes_status_messages)
+                        .chain(usage_updated_event(usage))
+                        .chain(tool_use_limit_reached_event(tool_use_limit_reached)),
+                ),
+                move |event| mapper.map_event(event),
+            ))
+        });
+
+        async move { Ok(future.await?.boxed()) }.boxed()
+
+        // ORIGINAL CODE COMMENTED OUT FOR REFERENCE
+        /*match self.model.provider {
             zed_llm_client::LanguageModelProvider::Anthropic => {
                 let request = into_anthropic(
                     request,
@@ -1036,7 +1099,7 @@ impl LanguageModel for CloudLanguageModel {
                 });
                 async move { Ok(future.await?.boxed()) }.boxed()
             }
-        }
+        }*/
     }
 }
 

@@ -775,7 +775,7 @@
     // The default model to use when creating new threads.
     "default_model": {
       // The provider to use.
-      "provider": "zed.dev",
+      "provider": "oppla.dev",
       // The model to use.
       "model": "claude-sonnet-4"
     },
@@ -1801,7 +1801,7 @@
   },
   // The server to connect to. If the environment variable
   // ZED_SERVER_URL is set, it will override this setting.
-  "server_url": "https://zed.dev",
+  "server_url": "https://app.oppla.ai/home",
   // Settings overrides to use when using Zed Preview.
   // Mostly useful for developers who are managing multiple instances of Zed.
   "preview": {

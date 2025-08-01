@@ -78,6 +78,9 @@ impl Database {
                     github_name,
                     github_user_created_at.naive_utc(),
                     initial_channel_id,
+                    None, // oppla_user_id
+                    None, // oppla_account_id
+                    None, // username
                     &tx,
                 )
                 .await?;

@@ -148,11 +148,18 @@ pub async fn validate_api_token<B>(req: Request<B>, next: Next<B>) -> impl IntoR
 
 #[derive(Debug, Deserialize)]
 struct AuthenticatedUserParams {
+    // GitHub fields (from GitHub OAuth)
     github_user_id: i32,
     github_login: String,
     github_email: Option<String>,
     github_name: Option<String>,
     github_user_created_at: chrono::DateTime<chrono::Utc>,
+    // Oppla fields (from Oppla auth)
+    oppla_user_id: Option<String>,
+    oppla_account_id: Option<String>,
+    username: Option<String>,
+    email: Option<String>,
+    name: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -168,6 +175,7 @@ async fn update_or_create_authenticated_user(
 ) -> Result<Json<AuthenticatedUserResponse>> {
     let initial_channel_id = app.config.auto_join_channel_id;
 
+    // Create or update user with GitHub info and optional Oppla fields
     let user = app
         .db
         .update_or_create_user_by_github_account(
@@ -177,8 +185,12 @@ async fn update_or_create_authenticated_user(
             params.github_name.as_deref(),
             params.github_user_created_at,
             initial_channel_id,
+            params.oppla_user_id.as_deref(),
+            params.oppla_account_id.as_deref(),
+            params.username.as_deref(),
         )
         .await?;
+
     let metrics_id = app.db.get_user_metrics_id(user.id).await?;
     let feature_flags = app.db.get_user_flags(user.id).await?;
     Ok(Json(AuthenticatedUserResponse {
