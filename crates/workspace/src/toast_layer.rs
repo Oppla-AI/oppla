@@ -5,7 +5,7 @@ use std::{
 
 use gpui::{AnyView, DismissEvent, Entity, FocusHandle, ManagedView, Subscription, Task};
 use ui::{animation::DefaultAnimations, prelude::*};
-use zed_actions::toast;
+use oppla_actions::toast;
 
 use crate::Workspace;
 

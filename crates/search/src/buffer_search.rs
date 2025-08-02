@@ -28,7 +28,7 @@ use serde::Deserialize;
 use settings::Settings;
 use std::sync::Arc;
 use theme::ThemeSettings;
-use zed_actions::outline::ToggleOutline;
+use oppla_actions::outline::ToggleOutline;
 
 use ui::{
     BASE_REM_SIZE_IN_PX, IconButton, IconButtonShape, IconName, Tooltip, h_flex, prelude::*,

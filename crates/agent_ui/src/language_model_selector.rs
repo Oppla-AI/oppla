@@ -555,7 +555,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                             .icon_position(IconPosition::Start)
                             .on_click(|_, window, cx| {
                                 window
-                                    .dispatch_action(Box::new(zed_actions::OpenAccountSettings), cx)
+                                    .dispatch_action(Box::new(oppla_actions::OpenAccountSettings), cx)
                             }),
                         Plan::Free | Plan::ZedProTrial => Button::new(
                             "try-pro",
@@ -576,7 +576,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                         .icon_position(IconPosition::Start)
                         .on_click(|_, window, cx| {
                             window.dispatch_action(
-                                zed_actions::agent::OpenConfiguration.boxed_clone(),
+                                oppla_actions::agent::OpenConfiguration.boxed_clone(),
                                 cx,
                             );
                         }),

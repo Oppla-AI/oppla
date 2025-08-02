@@ -16,7 +16,7 @@ use rpc::ExtensionProvides;
 use tree_sitter::{Language, Query, WasmStore};
 
 #[derive(Parser, Debug)]
-#[command(name = "zed-extension")]
+#[command(name = "oppla-extension")]
 struct Args {
     /// The path to the extension directory
     #[arg(long)]

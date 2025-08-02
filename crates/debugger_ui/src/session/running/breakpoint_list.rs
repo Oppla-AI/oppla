@@ -31,7 +31,7 @@ use ui::{
 };
 use util::ResultExt;
 use workspace::Workspace;
-use zed_actions::{ToggleEnableBreakpoint, UnsetBreakpoint};
+use oppla_actions::{ToggleEnableBreakpoint, UnsetBreakpoint};
 
 actions!(
     debugger,

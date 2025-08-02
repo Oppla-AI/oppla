@@ -30,7 +30,7 @@ use ui::ActiveTheme;
 use util::ResultExt;
 use workspace::{Item, SaveIntent, notifications::NotifyResultExt};
 use workspace::{SplitDirection, notifications::DetachAndPromptErr};
-use zed_actions::{OpenDocs, RevealTarget};
+use oppla_actions::{OpenDocs, RevealTarget};
 
 use crate::{
     ToggleMarksView, ToggleRegistersView, Vim,
@@ -1115,7 +1115,7 @@ fn generate_commands(_: &App) -> Vec<VimCommand> {
         .bang(workspace::CloseAllItemsAndPanes {
             save_intent: Some(SaveIntent::Overwrite),
         }),
-        VimCommand::new(("cq", "uit"), zed_actions::Quit),
+        VimCommand::new(("cq", "uit"), oppla_actions::Quit),
         VimCommand::new(("sp", "lit"), workspace::SplitHorizontal).args(|_, args| {
             Some(
                 VimSplit {

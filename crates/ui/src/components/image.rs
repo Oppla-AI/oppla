@@ -159,6 +159,6 @@ mod tests {
 
     #[test]
     fn vector_path() {
-        assert_eq!(VectorName::ZedLogo.path().as_ref(), "images/zed_logo.svg");
+        assert_eq!(VectorName::ZedLogo.path().as_ref(), "images/oppla_logo.svg");
     }
 }

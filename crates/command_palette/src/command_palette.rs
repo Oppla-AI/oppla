@@ -24,7 +24,7 @@ use settings::Settings;
 use ui::{HighlightedLabel, KeyBinding, ListItem, ListItemSpacing, h_flex, prelude::*, v_flex};
 use util::ResultExt;
 use workspace::{ModalView, Workspace, WorkspaceSettings};
-use zed_actions::{OpenZedUrl, command_palette::Toggle};
+use oppla_actions::{OpenZedUrl, command_palette::Toggle};
 
 pub fn init(cx: &mut App) {
     client::init_settings(cx);

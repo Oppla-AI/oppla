@@ -37,7 +37,7 @@ use ui::{
     CheckboxWithLabel, IconButtonShape, KeyBinding, Popover, PopoverMenuHandle, Tooltip, prelude::*,
 };
 use workspace::Workspace;
-use zed_actions::agent::ToggleModelSelector;
+use oppla_actions::agent::ToggleModelSelector;
 
 pub struct PromptEditor<T> {
     pub editor: Entity<Editor>,
@@ -295,7 +295,7 @@ impl<T: 'static> PromptEditor<T> {
         };
 
         let agent_panel_keybinding =
-            ui::text_for_action(&zed_actions::assistant::ToggleFocus, window, cx)
+            ui::text_for_action(&oppla_actions::assistant::ToggleFocus, window, cx)
                 .map(|keybinding| format!("{keybinding} to chat ― "))
                 .unwrap_or_default();
 
@@ -752,7 +752,7 @@ impl<T: 'static> PromptEditor<T> {
                                 .child(Button::new("more-info", "More Info").on_click(
                                     |_event, window, cx| {
                                         window.dispatch_action(
-                                            Box::new(zed_actions::OpenAccountSettings),
+                                            Box::new(oppla_actions::OpenAccountSettings),
                                             cx,
                                         )
                                     },

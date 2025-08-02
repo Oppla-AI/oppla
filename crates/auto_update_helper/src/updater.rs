@@ -19,7 +19,7 @@ type Job = fn(&Path) -> Result<()>;
 pub(crate) const JOBS: [Job; 6] = [
     // Delete old files
     |app_dir| {
-        let zed_executable = app_dir.join("Zed.exe");
+        let zed_executable = app_dir.join("Oppla.exe");
         log::info!("Removing old file: {}", zed_executable.display());
         std::fs::remove_file(&zed_executable).context(format!(
             "Failed to remove old file {}",
@@ -27,15 +27,15 @@ pub(crate) const JOBS: [Job; 6] = [
         ))
     },
     |app_dir| {
-        let zed_cli = app_dir.join("bin\\zed.exe");
+        let zed_cli = app_dir.join("bin\\oppla.exe");
         log::info!("Removing old file: {}", zed_cli.display());
         std::fs::remove_file(&zed_cli)
             .context(format!("Failed to remove old file {}", zed_cli.display()))
     },
     // Copy new files
     |app_dir| {
-        let zed_executable_source = app_dir.join("install\\Zed.exe");
-        let zed_executable_dest = app_dir.join("Zed.exe");
+        let zed_executable_source = app_dir.join("install\\Oppla.exe");
+        let zed_executable_dest = app_dir.join("Oppla.exe");
         log::info!(
             "Copying new file {} to {}",
             zed_executable_source.display(),
@@ -145,7 +145,7 @@ pub(crate) fn perform_update(app_dir: &Path, hwnd: Option<isize>) -> Result<()> 
             }
         }
     }
-    let _ = std::process::Command::new(app_dir.join("Zed.exe"))
+    let _ = std::process::Command::new(app_dir.join("Oppla.exe"))
         .creation_flags(CREATE_NEW_PROCESS_GROUP.0)
         .spawn();
     log::info!("Update completed successfully");

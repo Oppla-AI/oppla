@@ -40,7 +40,7 @@ use ui::{
 };
 use util::ResultExt;
 use workspace::{Workspace, notifications::NotifyResultExt};
-use zed_actions::{OpenRecent, OpenRemote};
+use oppla_actions::{OpenRecent, OpenRemote};
 
 pub use onboarding_banner::restore_banner;
 
@@ -280,7 +280,7 @@ impl TitleBar {
                 IconName::Debug,
                 "The Debugger",
                 None,
-                zed_actions::debugger::OpenOnboardingModal.boxed_clone(),
+                oppla_actions::debugger::OpenOnboardingModal.boxed_clone(),
                 cx,
             )
         });
@@ -453,7 +453,7 @@ impl TitleBar {
             .tooltip(move |window, cx| {
                 Tooltip::for_action(
                     "Recent Projects",
-                    &zed_actions::OpenRecent {
+                    &oppla_actions::OpenRecent {
                         create_new_window: false,
                     },
                     window,
@@ -499,7 +499,7 @@ impl TitleBar {
                 .tooltip(move |window, cx| {
                     Tooltip::with_meta(
                         "Recent Branches",
-                        Some(&zed_actions::git::Branch),
+                        Some(&oppla_actions::git::Branch),
                         "Local branches only",
                         window,
                         cx,
@@ -508,7 +508,7 @@ impl TitleBar {
                 .on_click(move |_, window, cx| {
                     let _ = workspace.update(cx, |this, cx| {
                         window.focus(&this.active_pane().focus_handle(cx));
-                        window.dispatch_action(zed_actions::git::Branch.boxed_clone(), cx);
+                        window.dispatch_action(oppla_actions::git::Branch.boxed_clone(), cx);
                     });
                 })
                 .when(
@@ -687,19 +687,19 @@ impl TitleBar {
                             },
                         )
                         .separator()
-                        .action("Settings", zed_actions::OpenSettings.boxed_clone())
+                        .action("Settings", oppla_actions::OpenSettings.boxed_clone())
                         .action("Key Bindings", Box::new(keybindings::OpenKeymapEditor))
                         .action(
                             "Themes…",
-                            zed_actions::theme_selector::Toggle::default().boxed_clone(),
+                            oppla_actions::theme_selector::Toggle::default().boxed_clone(),
                         )
                         .action(
                             "Icon Themes…",
-                            zed_actions::icon_theme_selector::Toggle::default().boxed_clone(),
+                            oppla_actions::icon_theme_selector::Toggle::default().boxed_clone(),
                         )
                         .action(
                             "Extensions",
-                            zed_actions::Extensions::default().boxed_clone(),
+                            oppla_actions::Extensions::default().boxed_clone(),
                         )
                         .separator()
                         .action("Sign Out", client::SignOut.boxed_clone())
@@ -731,19 +731,19 @@ impl TitleBar {
                 .anchor(Corner::TopRight)
                 .menu(|window, cx| {
                     ContextMenu::build(window, cx, |menu, _, _| {
-                        menu.action("Settings", zed_actions::OpenSettings.boxed_clone())
+                        menu.action("Settings", oppla_actions::OpenSettings.boxed_clone())
                             .action("Key Bindings", Box::new(keybindings::OpenKeymapEditor))
                             .action(
                                 "Themes…",
-                                zed_actions::theme_selector::Toggle::default().boxed_clone(),
+                                oppla_actions::theme_selector::Toggle::default().boxed_clone(),
                             )
                             .action(
                                 "Icon Themes…",
-                                zed_actions::icon_theme_selector::Toggle::default().boxed_clone(),
+                                oppla_actions::icon_theme_selector::Toggle::default().boxed_clone(),
                             )
                             .action(
                                 "Extensions",
-                                zed_actions::Extensions::default().boxed_clone(),
+                                oppla_actions::Extensions::default().boxed_clone(),
                             )
                     })
                     .into()

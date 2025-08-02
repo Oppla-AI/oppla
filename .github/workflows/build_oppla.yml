@@ -1,0 +1,117 @@
+name: Build Oppla
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  build-mac:
+    name: Build macOS
+    runs-on: macos-latest
+    env:
+      MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      APPLE_NOTARIZATION_KEY: ${{ secrets.APPLE_NOTARIZATION_KEY }}
+      APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
+      APPLE_NOTARIZATION_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_ISSUER_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          clean: false
+          fetch-depth: 0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Set release channel
+        run: |
+          channel="${{ github.ref == 'refs/heads/main' && 'dev' || 'stable' }}"
+          echo "$channel" > crates/oppla/RELEASE_CHANNEL
+          echo "Building for channel: $channel"
+
+      - name: Generate licenses
+        run: script/generate-licenses
+
+      - name: Build Oppla
+        run: script/bundle-mac
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oppla-macOS
+          path: |
+            target/release/*.dmg
+            target/release/oppla-remote-server-*.gz
+          retention-days: 7
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: |
+          ./script/linux
+          ./script/install-mold 2.34.0
+
+      - name: Set release channel
+        run: |
+          channel="${{ github.ref == 'refs/heads/main' && 'dev' || 'stable' }}"
+          echo "$channel" > crates/oppla/RELEASE_CHANNEL
+
+      - name: Build Oppla
+        run: script/bundle-linux
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oppla-Linux
+          path: target/release/*.tar.gz
+          retention-days: 7
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set release channel
+        run: |
+          $channel = if ("${{ github.ref }}" -eq "refs/heads/main") { "dev" } else { "stable" }
+          Set-Content -Path "crates/oppla/RELEASE_CHANNEL" -Value $channel
+
+      - name: Build Oppla
+        run: ./script/bundle-windows.ps1
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oppla-Windows
+          path: target/release/*.exe
+          retention-days: 7

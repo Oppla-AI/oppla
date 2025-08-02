@@ -44,7 +44,7 @@ use workspace::{
     Item, Pane, Workspace,
     dock::{DockPosition, Panel, PanelEvent},
 };
-use zed_actions::ToggleFocus;
+use oppla_actions::ToggleFocus;
 
 pub enum DebugPanelEvent {
     Exited(SessionId),
@@ -1730,7 +1730,7 @@ impl Render for DebugPanel {
                                 .icon_position(IconPosition::Start)
                                 .on_click(|_, window, cx| {
                                     window.dispatch_action(
-                                        zed_actions::OpenProjectDebugTasks.boxed_clone(),
+                                        oppla_actions::OpenProjectDebugTasks.boxed_clone(),
                                         cx,
                                     );
                                 }),
@@ -1756,9 +1756,9 @@ impl Render for DebugPanel {
                             .icon_position(IconPosition::Start)
                             .on_click(|_, window, cx| {
                                 window.dispatch_action(
-                                    zed_actions::Extensions {
+                                    oppla_actions::Extensions {
                                         category_filter: Some(
-                                            zed_actions::ExtensionCategoryFilter::DebugAdapters,
+                                            oppla_actions::ExtensionCategoryFilter::DebugAdapters,
                                         ),
                                         id: None,
                                     }

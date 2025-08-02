@@ -34,7 +34,7 @@ use theme::ThemeSettings;
 use ui::{Disclosure, Divider, DividerColor, KeyBinding, Tooltip, prelude::*};
 use util::ResultExt;
 use workspace::{CollaboratorId, Workspace};
-use zed_actions::agent::{Chat, NextHistoryMessage, PreviousHistoryMessage};
+use oppla_actions::agent::{Chat, NextHistoryMessage, PreviousHistoryMessage};
 
 use ::acp_thread::{
     AcpThread, AcpThreadEvent, AgentThreadEntry, AssistantMessage, AssistantMessageChunk, Diff,

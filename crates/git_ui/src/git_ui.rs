@@ -15,7 +15,7 @@ use onboarding::GitOnboardingModal;
 use project_diff::ProjectDiff;
 use ui::prelude::*;
 use workspace::Workspace;
-use zed_actions;
+use oppla_actions;
 
 use crate::text_diff_view::TextDiffView;
 
@@ -148,12 +148,12 @@ pub fn init(cx: &mut App) {
         });
         CommandPaletteFilter::update_global(cx, |filter, _cx| {
             filter.hide_action_types(&[
-                zed_actions::OpenGitIntegrationOnboarding.type_id(),
+                oppla_actions::OpenGitIntegrationOnboarding.type_id(),
                 // ResetOnboarding.type_id(),
             ]);
         });
         workspace.register_action(
-            move |workspace, _: &zed_actions::OpenGitIntegrationOnboarding, window, cx| {
+            move |workspace, _: &oppla_actions::OpenGitIntegrationOnboarding, window, cx| {
                 GitOnboardingModal::toggle(workspace, window, cx)
             },
         );

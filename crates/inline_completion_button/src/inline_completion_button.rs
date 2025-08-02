@@ -33,7 +33,7 @@ use workspace::{
     StatusItemView, Toast, Workspace, create_and_open_local_file, item::ItemHandle,
     notifications::NotificationId,
 };
-use zed_actions::OpenBrowser;
+use oppla_actions::OpenBrowser;
 use zed_llm_client::UsageLimit;
 use zeta::RateCompletions;
 
@@ -273,7 +273,7 @@ impl Render for InlineCompletionButton {
                                     source = "Edit Prediction Status Button"
                                 );
                                 window.dispatch_action(
-                                    zed_actions::OpenZedPredictOnboarding.boxed_clone(),
+                                    oppla_actions::OpenZedPredictOnboarding.boxed_clone(),
                                     cx,
                                 );
                             })),

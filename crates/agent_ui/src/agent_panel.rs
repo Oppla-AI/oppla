@@ -75,7 +75,7 @@ use workspace::{
     CollaboratorId, DraggedSelection, DraggedTab, ToggleZoom, ToolbarItemView, Workspace,
     dock::{DockPosition, Panel, PanelEvent},
 };
-use zed_actions::{
+use oppla_actions::{
     DecreaseBufferFontSize, IncreaseBufferFontSize, ResetBufferFontSize,
     agent::{OpenConfiguration, OpenOnboardingModal, ResetOnboarding, ToggleModelSelector},
     assistant::{OpenRulesLibrary, ToggleFocus},
@@ -2062,9 +2062,9 @@ impl AgentPanel {
                             .header("MCP Servers")
                             .action(
                                 "View Server Extensions",
-                                Box::new(zed_actions::Extensions {
+                                Box::new(oppla_actions::Extensions {
                                     category_filter: Some(
-                                        zed_actions::ExtensionCategoryFilter::ContextServers,
+                                        oppla_actions::ExtensionCategoryFilter::ContextServers,
                                     ),
                                     id: None,
                                 }),

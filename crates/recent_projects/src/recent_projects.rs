@@ -29,7 +29,7 @@ use workspace::{
     CloseIntent, HistoryManager, ModalView, OpenOptions, SerializedWorkspaceLocation, WORKSPACE_DB,
     Workspace, WorkspaceId, with_active_or_new_workspace,
 };
-use zed_actions::{OpenRecent, OpenRemote};
+use oppla_actions::{OpenRecent, OpenRemote};
 
 pub fn init(cx: &mut App) {
     SshSettings::register(cx);

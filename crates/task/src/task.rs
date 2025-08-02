@@ -29,7 +29,7 @@ pub use task_template::{
 };
 pub use vscode_debug_format::VsCodeDebugTaskFile;
 pub use vscode_format::VsCodeTaskFile;
-pub use zed_actions::RevealTarget;
+pub use oppla_actions::RevealTarget;
 
 /// Task identifier, unique within the application.
 /// Based on it, task reruns and terminal tabs are managed.

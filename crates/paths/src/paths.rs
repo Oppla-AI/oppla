@@ -70,21 +70,21 @@ pub fn config_dir() -> &'static PathBuf {
         } else if cfg!(target_os = "windows") {
             dirs::config_dir()
                 .expect("failed to determine RoamingAppData directory")
-                .join("Zed")
+                .join("Oppla")
         } else if cfg!(any(target_os = "linux", target_os = "freebsd")) {
             if let Ok(flatpak_xdg_config) = std::env::var("FLATPAK_XDG_CONFIG_HOME") {
                 flatpak_xdg_config.into()
             } else {
                 dirs::config_dir().expect("failed to determine XDG_CONFIG_HOME directory")
             }
-            .join("zed")
+            .join("oppla")
         } else {
-            home_dir().join(".config").join("zed")
+            home_dir().join(".config").join("oppla")
         }
     })
 }
 
-/// Returns the path to the data directory used by Zed.
+/// Returns the path to the data directory used by Oppla.
 pub fn data_dir() -> &'static PathBuf {
     CURRENT_DATA_DIR.get_or_init(|| {
         if let Some(custom_dir) = CUSTOM_DATA_DIR.get() {
@@ -97,31 +97,31 @@ pub fn data_dir() -> &'static PathBuf {
             } else {
                 dirs::data_local_dir().expect("failed to determine XDG_DATA_HOME directory")
             }
-            .join("zed")
+            .join("oppla")
         } else if cfg!(target_os = "windows") {
             dirs::data_local_dir()
                 .expect("failed to determine LocalAppData directory")
-                .join("Zed")
+                .join("Oppla")
         } else {
             config_dir().clone() // Fallback
         }
     })
 }
 
-/// Returns the path to the temp directory used by Zed.
+/// Returns the path to the temp directory used by Oppla.
 pub fn temp_dir() -> &'static PathBuf {
     static TEMP_DIR: OnceLock<PathBuf> = OnceLock::new();
     TEMP_DIR.get_or_init(|| {
         if cfg!(target_os = "macos") {
             return dirs::cache_dir()
                 .expect("failed to determine cachesDirectory directory")
-                .join("Zed");
+                .join("Oppla");
         }
 
         if cfg!(target_os = "windows") {
             return dirs::cache_dir()
                 .expect("failed to determine LocalAppData directory")
-                .join("Zed");
+                .join("Oppla");
         }
 
         if cfg!(any(target_os = "linux", target_os = "freebsd")) {
@@ -130,10 +130,10 @@ pub fn temp_dir() -> &'static PathBuf {
             } else {
                 dirs::cache_dir().expect("failed to determine XDG_CACHE_HOME directory")
             }
-            .join("zed");
+            .join("oppla");
         }
 
-        home_dir().join(".cache").join("zed")
+        home_dir().join(".cache").join("oppla")
     })
 }
 

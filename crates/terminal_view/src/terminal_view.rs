@@ -52,7 +52,7 @@ use anyhow::Context as _;
 use serde::Deserialize;
 use settings::{Settings, SettingsStore};
 use smol::Timer;
-use zed_actions::assistant::InlineAssist;
+use oppla_actions::assistant::InlineAssist;
 
 use std::{
     cmp,
@@ -989,8 +989,8 @@ impl TerminalView {
     }
 }
 
-fn terminal_rerun_override(task: &TaskId) -> zed_actions::Rerun {
-    zed_actions::Rerun {
+fn terminal_rerun_override(task: &TaskId) -> oppla_actions::Rerun {
+    oppla_actions::Rerun {
         task_id: Some(task.0.clone()),
         allow_concurrent_runs: Some(true),
         use_new_terminal: Some(false),

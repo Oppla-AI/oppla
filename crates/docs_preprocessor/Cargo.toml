@@ -15,7 +15,7 @@ settings.workspace = true
 regex.workspace = true
 util.workspace = true
 workspace-hack.workspace = true
-zed.workspace = true
+oppla.workspace = true
 gpui.workspace = true
 command_palette.workspace = true
 

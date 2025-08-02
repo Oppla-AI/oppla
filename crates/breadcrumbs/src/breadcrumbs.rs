@@ -112,7 +112,7 @@ impl Render for Breadcrumbs {
                         move |_, window, cx| {
                             if let Some((editor, callback)) = editor
                                 .upgrade()
-                                .zip(zed_actions::outline::TOGGLE_OUTLINE.get())
+                                .zip(oppla_actions::outline::TOGGLE_OUTLINE.get())
                             {
                                 callback(editor.to_any(), window, cx);
                             }
@@ -123,7 +123,7 @@ impl Render for Breadcrumbs {
                             let focus_handle = editor.read(cx).focus_handle(cx);
                             Tooltip::for_action_in(
                                 "Show Symbol Outline",
-                                &zed_actions::outline::ToggleOutline,
+                                &oppla_actions::outline::ToggleOutline,
                                 &focus_handle,
                                 window,
                                 cx,
@@ -131,7 +131,7 @@ impl Render for Breadcrumbs {
                         } else {
                             Tooltip::for_action(
                                 "Show Symbol Outline",
-                                &zed_actions::outline::ToggleOutline,
+                                &oppla_actions::outline::ToggleOutline,
                                 window,
                                 cx,
                             )

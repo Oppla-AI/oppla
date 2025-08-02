@@ -10,7 +10,7 @@ use picker::popover_menu::PickerPopoverMenu;
 use settings::update_settings_file;
 use std::sync::Arc;
 use ui::{ButtonLike, PopoverMenuHandle, Tooltip, prelude::*};
-use zed_actions::agent::ToggleModelSelector;
+use oppla_actions::agent::ToggleModelSelector;
 
 pub struct AgentModelSelector {
     selector: Entity<LanguageModelSelector>,

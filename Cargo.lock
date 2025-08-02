@@ -253,6 +253,7 @@ dependencies = [
  "menu",
  "multi_buffer",
  "notifications",
+ "oppla_actions",
  "ordered-float 2.10.1",
  "parking_lot",
  "paths",
@@ -292,7 +293,6 @@ dependencies = [
  "watch",
  "workspace",
  "workspace-hack",
- "zed_actions",
  "zed_llm_client",
 ]
 
@@ -357,13 +357,13 @@ dependencies = [
  "component",
  "gpui",
  "language_model",
+ "oppla_actions",
  "proto",
  "serde",
  "smallvec",
  "telemetry",
  "ui",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -2352,12 +2352,12 @@ dependencies = [
  "editor",
  "gpui",
  "itertools 0.14.0",
+ "oppla_actions",
  "settings",
  "theme",
  "ui",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -3351,6 +3351,7 @@ dependencies = [
  "language",
  "log",
  "menu",
+ "oppla_actions",
  "picker",
  "postage",
  "project",
@@ -3364,7 +3365,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -4457,6 +4457,7 @@ dependencies = [
  "log",
  "menu",
  "notifications",
+ "oppla_actions",
  "parking_lot",
  "parse_int",
  "paths",
@@ -4485,7 +4486,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
  "zlog",
 ]
 
@@ -4795,13 +4795,13 @@ dependencies = [
  "command_palette",
  "gpui",
  "mdbook",
+ "oppla",
  "regex",
  "serde",
  "serde_json",
  "settings",
  "util",
  "workspace-hack",
- "zed",
 ]
 
 [[package]]
@@ -4957,6 +4957,7 @@ dependencies = [
  "markdown",
  "menu",
  "multi_buffer",
+ "oppla_actions",
  "ordered-float 2.10.1",
  "parking_lot",
  "pretty_assertions",
@@ -4994,7 +4995,6 @@ dependencies = [
  "uuid",
  "workspace",
  "workspace-hack",
- "zed_actions",
  "zlog",
 ]
 
@@ -5489,6 +5489,7 @@ dependencies = [
  "language",
  "log",
  "num-format",
+ "oppla_actions",
  "picker",
  "project",
  "release_channel",
@@ -5504,7 +5505,6 @@ dependencies = [
  "vim_mode_setting",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -5614,6 +5614,7 @@ dependencies = [
  "gpui",
  "human_bytes",
  "menu",
+ "oppla_actions",
  "release_channel",
  "serde",
  "sysinfo",
@@ -5622,7 +5623,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -6394,6 +6394,7 @@ dependencies = [
  "menu",
  "multi_buffer",
  "notifications",
+ "oppla_actions",
  "panel",
  "picker",
  "postage",
@@ -6416,7 +6417,6 @@ dependencies = [
  "windows 0.61.1",
  "workspace",
  "workspace-hack",
- "zed_actions",
  "zed_llm_client",
  "zlog",
 ]
@@ -8393,6 +8393,7 @@ dependencies = [
  "inline_completion",
  "language",
  "lsp",
+ "oppla_actions",
  "paths",
  "project",
  "regex",
@@ -8404,7 +8405,6 @@ dependencies = [
  "ui",
  "workspace",
  "workspace-hack",
- "zed_actions",
  "zed_llm_client",
  "zeta",
 ]
@@ -8449,6 +8449,7 @@ dependencies = [
  "fuzzy",
  "gpui",
  "language",
+ "oppla_actions",
  "project",
  "serde_json",
  "serde_json_lenient",
@@ -8457,7 +8458,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -8781,12 +8781,12 @@ dependencies = [
  "fuzzy",
  "gpui",
  "jj",
+ "oppla_actions",
  "picker",
  "ui",
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -9198,6 +9198,7 @@ dependencies = [
  "itertools 0.14.0",
  "language",
  "lsp",
+ "oppla_actions",
  "project",
  "release_channel",
  "serde_json",
@@ -9208,7 +9209,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
  "zlog",
 ]
 
@@ -10528,6 +10528,7 @@ dependencies = [
  "component",
  "db",
  "gpui",
+ "oppla_actions",
  "rpc",
  "settings",
  "sum_tree",
@@ -10536,7 +10537,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -11169,6 +11169,167 @@ dependencies = [
 ]
 
 [[package]]
+name = "oppla"
+version = "0.198.0"
+dependencies = [
+ "activity_indicator",
+ "agent",
+ "agent_servers",
+ "agent_settings",
+ "agent_ui",
+ "anyhow",
+ "ashpd",
+ "askpass",
+ "assets",
+ "assistant_tool",
+ "assistant_tools",
+ "audio",
+ "auto_update",
+ "auto_update_ui",
+ "backtrace",
+ "breadcrumbs",
+ "call",
+ "channel",
+ "chrono",
+ "clap",
+ "cli",
+ "client",
+ "collab_ui",
+ "collections",
+ "command_palette",
+ "component",
+ "copilot",
+ "dap",
+ "dap_adapters",
+ "db",
+ "debug_adapter_extension",
+ "debugger_tools",
+ "debugger_ui",
+ "diagnostics",
+ "editor",
+ "env_logger 0.11.8",
+ "extension",
+ "extension_host",
+ "extensions_ui",
+ "feature_flags",
+ "feedback",
+ "file_finder",
+ "fs",
+ "futures 0.3.31",
+ "git",
+ "git_hosting_providers",
+ "git_ui",
+ "go_to_line",
+ "gpui",
+ "gpui_tokio",
+ "http_client",
+ "image_viewer",
+ "indoc",
+ "inline_completion_button",
+ "inspector_ui",
+ "install_cli",
+ "itertools 0.14.0",
+ "jj_ui",
+ "journal",
+ "language",
+ "language_extension",
+ "language_model",
+ "language_models",
+ "language_selector",
+ "language_tools",
+ "languages",
+ "libc",
+ "log",
+ "markdown",
+ "markdown_preview",
+ "menu",
+ "migrator",
+ "mimalloc",
+ "nc",
+ "nix 0.29.0",
+ "node_runtime",
+ "notifications",
+ "onboarding",
+ "oppla_actions",
+ "outline",
+ "outline_panel",
+ "parking_lot",
+ "paths",
+ "picker",
+ "pretty_assertions",
+ "profiling",
+ "project",
+ "project_panel",
+ "project_symbols",
+ "prompt_store",
+ "proto",
+ "recent_projects",
+ "release_channel",
+ "remote",
+ "repl",
+ "reqwest_client",
+ "rope",
+ "search",
+ "serde",
+ "serde_json",
+ "session",
+ "settings",
+ "settings_ui",
+ "shellexpand 2.1.2",
+ "smol",
+ "snippet_provider",
+ "snippets_ui",
+ "supermaven",
+ "svg_preview",
+ "sysinfo",
+ "tab_switcher",
+ "task",
+ "tasks_ui",
+ "telemetry",
+ "telemetry_events",
+ "terminal_view",
+ "theme",
+ "theme_extension",
+ "theme_selector",
+ "time",
+ "title_bar",
+ "toolchain_selector",
+ "tree-sitter-md",
+ "tree-sitter-rust",
+ "ui",
+ "ui_input",
+ "ui_prompt",
+ "url",
+ "urlencoding",
+ "util",
+ "uuid",
+ "vim",
+ "vim_mode_setting",
+ "watch",
+ "web_search",
+ "web_search_providers",
+ "welcome",
+ "windows 0.61.1",
+ "winresource",
+ "workspace",
+ "workspace-hack",
+ "zeta",
+ "zlog",
+ "zlog_settings",
+]
+
+[[package]]
+name = "oppla_actions"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "schemars",
+ "serde",
+ "uuid",
+ "workspace-hack",
+]
+
+[[package]]
 name = "optfield"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11247,6 +11408,7 @@ dependencies = [
  "indoc",
  "language",
  "menu",
+ "oppla_actions",
  "ordered-float 2.10.1",
  "picker",
  "project",
@@ -11261,7 +11423,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -11279,6 +11440,7 @@ dependencies = [
  "language",
  "log",
  "menu",
+ "oppla_actions",
  "outline",
  "pretty_assertions",
  "project",
@@ -11295,7 +11457,6 @@ dependencies = [
  "workspace",
  "workspace-hack",
  "worktree",
- "zed_actions",
 ]
 
 [[package]]
@@ -12529,6 +12690,7 @@ dependencies = [
  "indexmap",
  "language",
  "menu",
+ "oppla_actions",
  "pretty_assertions",
  "project",
  "schemars",
@@ -12544,7 +12706,6 @@ dependencies = [
  "workspace",
  "workspace-hack",
  "worktree",
- "zed_actions",
 ]
 
 [[package]]
@@ -13182,6 +13343,7 @@ dependencies = [
  "log",
  "markdown",
  "menu",
+ "oppla_actions",
  "ordered-float 2.10.1",
  "paths",
  "picker",
@@ -13200,7 +13362,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -13866,6 +14027,7 @@ dependencies = [
  "language_model",
  "log",
  "menu",
+ "oppla_actions",
  "picker",
  "prompt_store",
  "release_channel",
@@ -13878,7 +14040,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -14469,6 +14630,7 @@ dependencies = [
  "gpui",
  "language",
  "menu",
+ "oppla_actions",
  "project",
  "schemars",
  "serde",
@@ -14481,7 +14643,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -16043,6 +16204,7 @@ dependencies = [
  "gpui",
  "hex",
  "log",
+ "oppla_actions",
  "parking_lot",
  "pretty_assertions",
  "proto",
@@ -16054,7 +16216,6 @@ dependencies = [
  "shellexpand 2.1.2",
  "util",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -16070,6 +16231,7 @@ dependencies = [
  "itertools 0.14.0",
  "language",
  "menu",
+ "oppla_actions",
  "picker",
  "project",
  "serde",
@@ -16081,7 +16243,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -16196,6 +16357,7 @@ dependencies = [
  "itertools 0.14.0",
  "language",
  "log",
+ "oppla_actions",
  "project",
  "rand 0.8.5",
  "regex",
@@ -16213,7 +16375,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -16309,6 +16470,7 @@ dependencies = [
  "fuzzy",
  "gpui",
  "log",
+ "oppla_actions",
  "picker",
  "serde",
  "settings",
@@ -16318,7 +16480,6 @@ dependencies = [
  "util",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -16538,6 +16699,7 @@ dependencies = [
  "gpui",
  "http_client",
  "notifications",
+ "oppla_actions",
  "pretty_assertions",
  "project",
  "remote",
@@ -16556,7 +16718,6 @@ dependencies = [
  "windows 0.61.1",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -17732,6 +17893,7 @@ dependencies = [
  "lsp",
  "multi_buffer",
  "nvim-rs",
+ "oppla_actions",
  "parking_lot",
  "picker",
  "project",
@@ -17753,7 +17915,6 @@ dependencies = [
  "vim_mode_setting",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -18591,6 +18752,7 @@ dependencies = [
  "gpui",
  "install_cli",
  "language",
+ "oppla_actions",
  "picker",
  "project",
  "serde",
@@ -18602,7 +18764,6 @@ dependencies = [
  "vim_mode_setting",
  "workspace",
  "workspace-hack",
- "zed_actions",
 ]
 
 [[package]]
@@ -19629,6 +19790,7 @@ dependencies = [
  "log",
  "menu",
  "node_runtime",
+ "oppla_actions",
  "parking_lot",
  "postage",
  "project",
@@ -19650,7 +19812,6 @@ dependencies = [
  "uuid",
  "windows 0.61.1",
  "workspace-hack",
- "zed_actions",
  "zlog",
 ]
 
@@ -20190,167 +20351,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "zed"
-version = "0.198.0"
-dependencies = [
- "activity_indicator",
- "agent",
- "agent_servers",
- "agent_settings",
- "agent_ui",
- "anyhow",
- "ashpd",
- "askpass",
- "assets",
- "assistant_tool",
- "assistant_tools",
- "audio",
- "auto_update",
- "auto_update_ui",
- "backtrace",
- "breadcrumbs",
- "call",
- "channel",
- "chrono",
- "clap",
- "cli",
- "client",
- "collab_ui",
- "collections",
- "command_palette",
- "component",
- "copilot",
- "dap",
- "dap_adapters",
- "db",
- "debug_adapter_extension",
- "debugger_tools",
- "debugger_ui",
- "diagnostics",
- "editor",
- "env_logger 0.11.8",
- "extension",
- "extension_host",
- "extensions_ui",
- "feature_flags",
- "feedback",
- "file_finder",
- "fs",
- "futures 0.3.31",
- "git",
- "git_hosting_providers",
- "git_ui",
- "go_to_line",
- "gpui",
- "gpui_tokio",
- "http_client",
- "image_viewer",
- "indoc",
- "inline_completion_button",
- "inspector_ui",
- "install_cli",
- "itertools 0.14.0",
- "jj_ui",
- "journal",
- "language",
- "language_extension",
- "language_model",
- "language_models",
- "language_selector",
- "language_tools",
- "languages",
- "libc",
- "log",
- "markdown",
- "markdown_preview",
- "menu",
- "migrator",
- "mimalloc",
- "nc",
- "nix 0.29.0",
- "node_runtime",
- "notifications",
- "onboarding",
- "outline",
- "outline_panel",
- "parking_lot",
- "paths",
- "picker",
- "pretty_assertions",
- "profiling",
- "project",
- "project_panel",
- "project_symbols",
- "prompt_store",
- "proto",
- "recent_projects",
- "release_channel",
- "remote",
- "repl",
- "reqwest_client",
- "rope",
- "search",
- "serde",
- "serde_json",
- "session",
- "settings",
- "settings_ui",
- "shellexpand 2.1.2",
- "smol",
- "snippet_provider",
- "snippets_ui",
- "supermaven",
- "svg_preview",
- "sysinfo",
- "tab_switcher",
- "task",
- "tasks_ui",
- "telemetry",
- "telemetry_events",
- "terminal_view",
- "theme",
- "theme_extension",
- "theme_selector",
- "time",
- "title_bar",
- "toolchain_selector",
- "tree-sitter-md",
- "tree-sitter-rust",
- "ui",
- "ui_input",
- "ui_prompt",
- "url",
- "urlencoding",
- "util",
- "uuid",
- "vim",
- "vim_mode_setting",
- "watch",
- "web_search",
- "web_search_providers",
- "welcome",
- "windows 0.61.1",
- "winresource",
- "workspace",
- "workspace-hack",
- "zed_actions",
- "zeta",
- "zlog",
- "zlog_settings",
-]
-
-[[package]]
-name = "zed_actions"
-version = "0.1.0"
-dependencies = [
- "gpui",
- "schemars",
- "serde",
- "uuid",
- "workspace-hack",
-]
-
-[[package]]
 name = "zed_emmet"
 version = "0.0.3"
 dependencies = [
@@ -20600,6 +20600,7 @@ dependencies = [
  "language_model",
  "log",
  "menu",
+ "oppla_actions",
  "postage",
  "project",
  "proto",
@@ -20623,7 +20624,6 @@ dependencies = [
  "workspace",
  "workspace-hack",
  "worktree",
- "zed_actions",
  "zed_llm_client",
  "zlog",
 ]

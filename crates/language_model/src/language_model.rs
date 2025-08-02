@@ -50,7 +50,7 @@ pub const OPEN_AI_PROVIDER_NAME: LanguageModelProviderName =
 
 pub const ZED_CLOUD_PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("zed.dev");
 pub const ZED_CLOUD_PROVIDER_NAME: LanguageModelProviderName =
-    LanguageModelProviderName::new("Zed");
+    LanguageModelProviderName::new("Oppla");
 
 pub fn init(client: Arc<Client>, cx: &mut App) {
     init_settings(cx);

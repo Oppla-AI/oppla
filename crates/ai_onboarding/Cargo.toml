@@ -25,4 +25,4 @@ smallvec.workspace = true
 telemetry.workspace = true
 ui.workspace = true
 workspace-hack.workspace = true
-zed_actions.workspace = true
+oppla_actions.workspace = true

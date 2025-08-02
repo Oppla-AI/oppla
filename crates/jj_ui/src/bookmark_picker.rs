@@ -17,7 +17,7 @@ pub fn register(workspace: &mut Workspace) {
 
 fn open(
     workspace: &mut Workspace,
-    _: &zed_actions::jj::BookmarkList,
+    _: &oppla_actions::jj::BookmarkList,
     window: &mut Window,
     cx: &mut Context<Workspace>,
 ) {

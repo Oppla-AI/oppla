@@ -48,7 +48,7 @@ use text::{OffsetRangeExt, ToPoint as _};
 use ui::prelude::*;
 use util::{RangeExt, ResultExt, maybe};
 use workspace::{ItemHandle, Toast, Workspace, dock::Panel, notifications::NotificationId};
-use zed_actions::agent::OpenConfiguration;
+use oppla_actions::agent::OpenConfiguration;
 
 pub fn init(
     fs: Arc<dyn Fs>,
@@ -252,7 +252,7 @@ impl InlineAssistant {
 
     pub fn inline_assist(
         workspace: &mut Workspace,
-        action: &zed_actions::assistant::InlineAssist,
+        action: &oppla_actions::assistant::InlineAssist,
         window: &mut Window,
         cx: &mut Context<Workspace>,
     ) {

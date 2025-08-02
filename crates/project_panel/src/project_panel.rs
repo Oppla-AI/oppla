@@ -68,7 +68,7 @@ use workspace::{
     notifications::{DetachAndPromptErr, NotifyTaskExt},
 };
 use worktree::CreatedEntry;
-use zed_actions::OpenRecent;
+use oppla_actions::OpenRecent;
 
 const PROJECT_PANEL_KEY: &str = "ProjectPanel";
 const NEW_ENTRY_ID: ProjectEntryId = ProjectEntryId::MAX;
@@ -929,10 +929,10 @@ impl ProjectPanel {
                                 Box::new(Paste),
                             )
                             .separator()
-                            .action("Copy Path", Box::new(zed_actions::workspace::CopyPath))
+                            .action("Copy Path", Box::new(oppla_actions::workspace::CopyPath))
                             .action(
                                 "Copy Relative Path",
-                                Box::new(zed_actions::workspace::CopyRelativePath),
+                                Box::new(oppla_actions::workspace::CopyRelativePath),
                             )
                             .separator()
                             .when(!should_hide_rename, |menu| {
@@ -2495,7 +2495,7 @@ impl ProjectPanel {
 
     fn copy_path(
         &mut self,
-        _: &zed_actions::workspace::CopyPath,
+        _: &oppla_actions::workspace::CopyPath,
         _: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -2524,7 +2524,7 @@ impl ProjectPanel {
 
     fn copy_relative_path(
         &mut self,
-        _: &zed_actions::workspace::CopyRelativePath,
+        _: &oppla_actions::workspace::CopyRelativePath,
         _: &mut Window,
         cx: &mut Context<Self>,
     ) {

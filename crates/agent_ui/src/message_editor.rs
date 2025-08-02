@@ -51,8 +51,8 @@ use ui::{
 };
 use util::ResultExt as _;
 use workspace::{CollaboratorId, Workspace};
-use zed_actions::agent::Chat;
-use zed_actions::agent::ToggleModelSelector;
+use oppla_actions::agent::Chat;
+use oppla_actions::agent::ToggleModelSelector;
 use zed_llm_client::CompletionIntent;
 
 use crate::context_picker::{ContextPicker, ContextPickerCompletionProvider, crease_for_mention};

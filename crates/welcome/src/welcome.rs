@@ -150,7 +150,7 @@ impl Render for WelcomePage {
                                                 telemetry::event!("Welcome Theme Changed");
                                                 this.workspace
                                                     .update(cx, |_workspace, cx| {
-                                                        window.dispatch_action(zed_actions::theme_selector::Toggle::default().boxed_clone(), cx);
+                                                        window.dispatch_action(oppla_actions::theme_selector::Toggle::default().boxed_clone(), cx);
                                                     })
                                                     .ok();
                                             })),
@@ -188,7 +188,7 @@ impl Render for WelcomePage {
                                             .on_click(
                                                 cx.listener(|_, _, window, cx| {
                                                     telemetry::event!("Welcome Screen Try Edit Prediction clicked");
-                                                    window.dispatch_action(zed_actions::OpenZedPredictOnboarding.boxed_clone(), cx);
+                                                    window.dispatch_action(oppla_actions::OpenZedPredictOnboarding.boxed_clone(), cx);
                                                 }),
                                             ),
                                         )
@@ -202,7 +202,7 @@ impl Render for WelcomePage {
                                             .on_click(cx.listener(|_, _, window, cx| {
                                                 telemetry::event!("Welcome Settings Edited");
                                                 window.dispatch_action(Box::new(
-                                                    zed_actions::OpenSettings,
+                                                    oppla_actions::OpenSettings,
                                                 ), cx);
                                             })),
                                     )
@@ -253,7 +253,7 @@ impl Render for WelcomePage {
                                             .on_click(cx.listener(|_, _, window, cx| {
                                                 telemetry::event!("Welcome Extensions Page Opened");
                                                 window.dispatch_action(Box::new(
-                                                    zed_actions::Extensions::default(),
+                                                    oppla_actions::Extensions::default(),
                                                 ), cx);
                                             })),
                                     )

@@ -42,7 +42,7 @@ use workspace::{
 };
 
 use anyhow::{Context as _, Result, anyhow};
-use zed_actions::assistant::InlineAssist;
+use oppla_actions::assistant::InlineAssist;
 
 const TERMINAL_PANEL_KEY: &str = "TerminalPanel";
 
@@ -163,7 +163,7 @@ impl TerminalPanel {
                                         // context menu will be gone the moment we spawn the modal.
                                         .action(
                                             "Spawn task",
-                                            zed_actions::Spawn::modal().boxed_clone(),
+                                            oppla_actions::Spawn::modal().boxed_clone(),
                                         )
                                 });
 

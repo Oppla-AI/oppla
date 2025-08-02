@@ -183,8 +183,8 @@ members = [
     "crates/workspace",
     "crates/worktree",
     "crates/x_ai",
-    "crates/zed",
-    "crates/zed_actions",
+    "crates/oppla",
+    "crates/oppla_actions",
     "crates/zeta",
     "crates/zlog",
     "crates/zlog_settings",
@@ -210,7 +210,7 @@ members = [
     "tooling/workspace-hack",
     "tooling/xtask",
 ]
-default-members = ["crates/zed"]
+default-members = ["crates/oppla"]
 
 [workspace.package]
 publish = false
@@ -402,8 +402,8 @@ welcome = { path = "crates/welcome" }
 workspace = { path = "crates/workspace" }
 worktree = { path = "crates/worktree" }
 x_ai = { path = "crates/x_ai" }
-zed = { path = "crates/zed" }
-zed_actions = { path = "crates/zed_actions" }
+oppla = { path = "crates/oppla" }
+oppla_actions = { path = "crates/oppla_actions" }
 zeta = { path = "crates/zeta" }
 zlog = { path = "crates/zlog" }
 zlog_settings = { path = "crates/zlog_settings" }
@@ -773,7 +773,7 @@ telemetry_events = { codegen-units = 1 }
 theme_selector = { codegen-units = 1 }
 time_format = { codegen-units = 1 }
 ui_input = { codegen-units = 1 }
-zed_actions = { codegen-units = 1 }
+oppla_actions = { codegen-units = 1 }
 
 [profile.release]
 debug = "limited"
@@ -781,7 +781,7 @@ lto = "thin"
 codegen-units = 1
 
 [profile.release.package]
-zed = { codegen-units = 16 }
+oppla = { codegen-units = 16 }
 
 [profile.release-fast]
 inherits = "release"

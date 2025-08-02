@@ -71,7 +71,7 @@ use workspace::{
     pane,
     searchable::{SearchEvent, SearchableItem},
 };
-use zed_actions::agent::ToggleModelSelector;
+use oppla_actions::agent::ToggleModelSelector;
 
 use crate::{slash_command::SlashCommandCompletionProvider, slash_command_picker};
 use assistant_context::{

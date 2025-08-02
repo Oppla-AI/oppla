@@ -51,7 +51,7 @@ use ui::{
 use util::ResultExt as _;
 use util::markdown::MarkdownCodeBlock;
 use workspace::{CollaboratorId, Workspace};
-use zed_actions::assistant::OpenRulesLibrary;
+use oppla_actions::assistant::OpenRulesLibrary;
 use zed_llm_client::CompletionIntent;
 
 const CODEBLOCK_CONTAINER_GROUP: &str = "codeblock_container";

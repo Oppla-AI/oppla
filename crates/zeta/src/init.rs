@@ -32,7 +32,7 @@ pub fn init(cx: &mut App) {
         });
 
         workspace.register_action(
-            move |workspace, _: &zed_actions::OpenZedPredictOnboarding, window, cx| {
+            move |workspace, _: &oppla_actions::OpenZedPredictOnboarding, window, cx| {
                 ZedPredictModal::toggle(
                     workspace,
                     workspace.user_store().clone(),
@@ -64,7 +64,7 @@ fn feature_gate_predict_edits_actions(cx: &mut App) {
     let zeta_all_action_types = [
         TypeId::of::<RateCompletions>(),
         TypeId::of::<ResetOnboarding>(),
-        zed_actions::OpenZedPredictOnboarding.type_id(),
+        oppla_actions::OpenZedPredictOnboarding.type_id(),
         TypeId::of::<crate::ClearHistory>(),
         TypeId::of::<crate::ThumbsUpActiveCompletion>(),
         TypeId::of::<crate::ThumbsDownActiveCompletion>(),
@@ -75,7 +75,7 @@ fn feature_gate_predict_edits_actions(cx: &mut App) {
     CommandPaletteFilter::update_global(cx, |filter, _cx| {
         filter.hide_action_types(&rate_completion_action_types);
         filter.hide_action_types(&reset_onboarding_action_types);
-        filter.hide_action_types(&[zed_actions::OpenZedPredictOnboarding.type_id()]);
+        filter.hide_action_types(&[oppla_actions::OpenZedPredictOnboarding.type_id()]);
     });
 
     cx.observe_global::<SettingsStore>(move |cx| {

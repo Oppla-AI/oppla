@@ -33,7 +33,7 @@ use ui::{
 };
 use util::ResultExt as _;
 use workspace::Workspace;
-use zed_actions::ExtensionCategoryFilter;
+use oppla_actions::ExtensionCategoryFilter;
 
 pub(crate) use configure_context_server_modal::ConfigureContextServerModal;
 pub(crate) use manage_profiles_modal::ManageProfilesModal;
@@ -572,7 +572,7 @@ impl AgentConfiguration {
                             .icon_position(IconPosition::Start)
                             .on_click(|_event, window, cx| {
                                 window.dispatch_action(
-                                    zed_actions::Extensions {
+                                    oppla_actions::Extensions {
                                         category_filter: Some(
                                             ExtensionCategoryFilter::ContextServers,
                                         ),

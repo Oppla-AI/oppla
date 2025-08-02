@@ -54,7 +54,7 @@ use crate::slash_command_settings::SlashCommandSettings;
 pub use agent_diff::{AgentDiffPane, AgentDiffToolbar};
 pub use text_thread_editor::{AgentPanelDelegate, TextThreadEditor};
 pub use ui::preview::{all_agent_previews, get_agent_preview};
-use zed_actions;
+use oppla_actions;
 
 actions!(
     agent,
@@ -280,7 +280,7 @@ fn update_command_palette_filter(cx: &mut App) {
                 TypeId::of::<ToggleEditPrediction>(),
             ];
             filter.hide_action_types(&edit_prediction_actions);
-            filter.hide_action_types(&[TypeId::of::<zed_actions::OpenZedPredictOnboarding>()]);
+            filter.hide_action_types(&[TypeId::of::<oppla_actions::OpenZedPredictOnboarding>()]);
         } else {
             filter.show_namespace("agent");
             filter.show_namespace("assistant");
@@ -304,7 +304,7 @@ fn update_command_palette_filter(cx: &mut App) {
             filter.show_action_types(edit_prediction_actions.iter());
 
             filter
-                .show_action_types([TypeId::of::<zed_actions::OpenZedPredictOnboarding>()].iter());
+                .show_action_types([TypeId::of::<oppla_actions::OpenZedPredictOnboarding>()].iter());
         }
     });
 }

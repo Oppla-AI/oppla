@@ -214,20 +214,20 @@ impl Render for KeyContextView {
                         Button::new("view_default_keymap", "View default keymap")
                             .style(ButtonStyle::Filled)
                             .key_binding(ui::KeyBinding::for_action(
-                                &zed_actions::OpenDefaultKeymap,
+                                &oppla_actions::OpenDefaultKeymap,
                                 window,
                                 cx
                             ))
                             .on_click(|_, window, cx| {
-                                window.dispatch_action(zed_actions::OpenDefaultKeymap.boxed_clone(), cx);
+                                window.dispatch_action(oppla_actions::OpenDefaultKeymap.boxed_clone(), cx);
                             }),
                     )
                     .child(
                         Button::new("edit_your_keymap", "Edit your keymap")
                             .style(ButtonStyle::Filled)
-                            .key_binding(ui::KeyBinding::for_action(&zed_actions::OpenKeymap, window, cx))
+                            .key_binding(ui::KeyBinding::for_action(&oppla_actions::OpenKeymap, window, cx))
                             .on_click(|_, window, cx| {
-                                window.dispatch_action(zed_actions::OpenKeymap.boxed_clone(), cx);
+                                window.dispatch_action(oppla_actions::OpenKeymap.boxed_clone(), cx);
                             }),
                     ),
             )

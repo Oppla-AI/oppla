@@ -4767,17 +4767,17 @@ impl RenderOnce for PanelRepoFooter {
             .truncate(true)
             .tooltip(Tooltip::for_action_title(
                 "Switch Branch",
-                &zed_actions::git::Switch,
+                &oppla_actions::git::Switch,
             ))
             .on_click(|_, window, cx| {
-                window.dispatch_action(zed_actions::git::Switch.boxed_clone(), cx);
+                window.dispatch_action(oppla_actions::git::Switch.boxed_clone(), cx);
             });
 
         let branch_selector = PopoverMenu::new("popover-button")
             .menu(move |window, cx| Some(branch_picker::popover(repo.clone(), window, cx)))
             .trigger_with_tooltip(
                 branch_selector_button,
-                Tooltip::for_action_title("Switch Branch", &zed_actions::git::Switch),
+                Tooltip::for_action_title("Switch Branch", &oppla_actions::git::Switch),
             )
             .anchor(Corner::BottomLeft)
             .offset(gpui::Point {

@@ -11,7 +11,7 @@ use theme::{Appearance, IconTheme, ThemeMeta, ThemeRegistry, ThemeSettings};
 use ui::{ListItem, ListItemSpacing, prelude::*, v_flex};
 use util::ResultExt;
 use workspace::{ModalView, ui::HighlightedLabel};
-use zed_actions::{ExtensionCategoryFilter, Extensions};
+use oppla_actions::{ExtensionCategoryFilter, Extensions};
 
 pub(crate) struct IconThemeSelector {
     picker: Entity<Picker<IconThemeSelectorDelegate>>,

@@ -27,7 +27,7 @@ use ui::{
 };
 use util::{ResultExt, TryFutureExt};
 use workspace::{Workspace, client_side_decorations};
-use zed_actions::assistant::InlineAssist;
+use oppla_actions::assistant::InlineAssist;
 
 use prompt_store::*;
 

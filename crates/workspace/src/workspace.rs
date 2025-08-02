@@ -106,7 +106,7 @@ use uuid::Uuid;
 pub use workspace_settings::{
     AutosaveSetting, BottomDockLayout, RestoreOnStartupBehavior, TabBarSettings, WorkspaceSettings,
 };
-use zed_actions::{Spawn, feedback::FileBugReport};
+use oppla_actions::{Spawn, feedback::FileBugReport};
 
 use crate::notifications::NotificationId;
 use crate::persistence::{

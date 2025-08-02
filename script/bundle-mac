@@ -13,8 +13,8 @@ bundle_name=""
 can_code_sign=false
 
 # This must match the team in the provisioning profile.
-IDENTITY="Zed Industries, Inc."
-APPLE_NOTARIZATION_TEAM="MQ55VZLNZQ"
+IDENTITY="Developer ID Application: Insihts, Corp. (RVPAX6PXC6)"
+APPLE_NOTARIZATION_TEAM="RVPAX6PXC6"
 
 # Function for displaying help info
 help_info() {
