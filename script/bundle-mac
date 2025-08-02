@@ -88,10 +88,10 @@ script/generate-licenses
 
 if [ "$local_arch" = true ]; then
     echo "Building for local target only."
-    cargo build ${build_flag} --package zed --package cli --package remote_server
+    cargo build ${build_flag} --package oppla --package cli --package remote_server
 else
-    echo "Compiling zed binaries"
-    cargo build ${build_flag} --package zed --package cli --target aarch64-apple-darwin --target x86_64-apple-darwin
+    echo "Compiling oppla binaries"
+    cargo build ${build_flag} --package oppla --package cli --target aarch64-apple-darwin --target x86_64-apple-darwin
     # Build remote_server in separate invocation to prevent feature unification from other crates
     # from influencing dynamic libraries required by it.
     cargo build ${build_flag} --package remote_server     --target aarch64-apple-darwin --target x86_64-apple-darwin
@@ -191,7 +191,7 @@ function prepare_binaries() {
     local app_path=$2
 
     echo "Unpacking dSYMs for $architecture"
-    exe_path="target/${architecture}/${target_dir}/Zed"
+    exe_path="target/${architecture}/${target_dir}/oppla"
     if ! dsymutil --flat "${exe_path}" 2> target/dsymutil.log; then
         echo "dsymutil failed"
         cat target/dsymutil.log
@@ -204,18 +204,18 @@ function prepare_binaries() {
     fi
 
     echo "Removing existing gzipped dSYMs for $architecture"
-    rm -f target/${architecture}/${target_dir}/Zed.dwarf.gz
+    rm -f target/${architecture}/${target_dir}/oppla.dwarf.gz
 
     echo "Gzipping dSYMs for $architecture"
-    gzip -f target/${architecture}/${target_dir}/Zed.dwarf
+    gzip -f target/${architecture}/${target_dir}/oppla.dwarf
 
     echo "Uploading dSYMs${architecture} for $architecture to by-uuid/${uuid}.dwarf.gz"
     upload_to_blob_store_public \
         "zed-debug-symbols" \
-        target/${architecture}/${target_dir}/Zed.dwarf.gz \
+        target/${architecture}/${target_dir}/oppla.dwarf.gz \
         "by-uuid/${uuid}.dwarf.gz"
 
-    cp target/${architecture}/${target_dir}/zed "${app_path}/Contents/MacOS/zed"
+    cp target/${architecture}/${target_dir}/oppla "${app_path}/Contents/MacOS/oppla"
     cp target/${architecture}/${target_dir}/cli "${app_path}/Contents/MacOS/cli"
 }
 
@@ -240,7 +240,7 @@ function sign_app_binaries() {
         # sequence of codesign commands modeled after this example: https://developer.apple.com/forums/thread/701514
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/zed.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/zed" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/zed.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v
         /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/zed.entitlements --sign "$IDENTITY" "${app_path}" -v
     else
         echo "One or more of the following variables are missing: MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, APPLE_NOTARIZATION_KEY, APPLE_NOTARIZATION_KEY_ID, APPLE_NOTARIZATION_ISSUER_ID"
@@ -301,7 +301,7 @@ function sign_app_binaries() {
     else
         dmg_target_directory="target/${architecture_dir}/${target_dir}"
         dmg_source_directory="${dmg_target_directory}/dmg"
-        dmg_file_path="${dmg_target_directory}/Zed.dmg"
+        dmg_file_path="${dmg_target_directory}/Oppla.dmg"
         xcode_bin_dir_path="$(xcode-select -p)/usr/bin"
 
         rm -rf ${dmg_source_directory}
@@ -313,7 +313,7 @@ function sign_app_binaries() {
         ln -s /Applications ${dmg_source_directory}
 
         echo "Creating final DMG at ${dmg_file_path} using ${dmg_source_directory}"
-        hdiutil create -volname Zed -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
+        hdiutil create -volname Oppla -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
 
         # If someone runs this bundle script locally, a symlink will be placed in `dmg_source_directory`.
         # This symlink causes CPU issues with Zed if the Zed codebase is the project being worked on, so we simply remove it for now.
@@ -363,6 +363,6 @@ else
 
     sign_binary "target/x86_64-apple-darwin/release/remote_server"
     sign_binary "target/aarch64-apple-darwin/release/remote_server"
-    gzip -f --stdout --best target/x86_64-apple-darwin/release/remote_server > target/zed-remote-server-macos-x86_64.gz
-    gzip -f --stdout --best target/aarch64-apple-darwin/release/remote_server > target/zed-remote-server-macos-aarch64.gz
+    gzip -f --stdout --best target/x86_64-apple-darwin/release/remote_server > target/oppla-remote-server-macos-x86_64.gz
+    gzip -f --stdout --best target/aarch64-apple-darwin/release/remote_server > target/oppla-remote-server-macos-aarch64.gz
 fi
