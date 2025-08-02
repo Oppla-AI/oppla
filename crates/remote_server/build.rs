@@ -1,6 +1,6 @@
 use std::process::Command;
 
-const ZED_MANIFEST: &str = include_str!("../zed/Cargo.toml");
+const ZED_MANIFEST: &str = include_str!("../oppla/Cargo.toml");
 
 fn main() {
     let zed_cargo_toml: cargo_toml::Manifest =

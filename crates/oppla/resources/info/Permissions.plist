@@ -1,5 +1,5 @@
 <key>NSSystemAdministrationUsageDescription</key>
-<string>The operation being performed by a program in Zed requires elevated permission.</string>
+<string>The operation being performed by a program in Oppla requires elevated permission.</string>
 <key>NSAppleEventsUsageDescription</key>
 <string>An application in Zed wants to use AppleScript.</string>
 <key>NSBluetoothAlwaysUsageDescription</key>

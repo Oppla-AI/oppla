@@ -299,7 +299,7 @@ pub fn main() {
             }
         };
     if failed_single_instance_check {
-        println!("zed is already running");
+        println!("oppla is already running");
         return;
     }
 

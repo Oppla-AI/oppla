@@ -9,6 +9,7 @@
 .blob_store
 .build
 .envrc
+.env.local
 .flatpak-builder
 .idea
 .netrc

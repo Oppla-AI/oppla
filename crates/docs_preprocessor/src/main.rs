@@ -34,7 +34,7 @@ fn main() -> Result<()> {
     let matches = make_app().get_matches();
     // call a zed:: function so everything in `zed` crate is linked and
     // all actions in the actual app are registered
-    zed::stdout_is_a_pty();
+    oppla::stdout_is_a_pty();
 
     if let Some(sub_args) = matches.subcommand_matches("supports") {
         handle_supports(sub_args);

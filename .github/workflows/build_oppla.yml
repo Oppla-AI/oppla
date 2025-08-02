@@ -33,7 +33,7 @@ jobs:
 
       - name: Setup Xcode
         run: |
-          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
           sudo xcodebuild -license accept
 
       - name: Install dependencies
@@ -64,7 +64,32 @@ jobs:
       - name: Generate licenses
         run: script/generate-licenses
 
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Cache target directory
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-target-
+          
+      - name: Pre-download webrtc binaries
+        run: |
+          # Create the directories where webrtc-sys expects the binaries
+          mkdir -p ~/.cache/livekit-webrtc
+          
       - name: Build Oppla
+        env:
+          RUST_BACKTRACE: full
+          CARGO_NET_OFFLINE: false
         run: script/bundle-mac
 
       - name: Prepare macOS artifacts
