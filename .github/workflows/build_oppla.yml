@@ -25,14 +25,21 @@ jobs:
       APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
       APPLE_NOTARIZATION_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_ISSUER_ID }}
     steps:
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app
       - name: Checkout
         uses: actions/checkout@v4
         with:
           clean: false
           fetch-depth: 0
 
+      - name: Setup Xcode
+        run: |
+          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+          sudo xcodebuild -license accept
+
+      - name: Install dependencies
+        run: |
+          brew install cmake
+          
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -42,6 +49,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
+          
+      - name: Set build environment
+        run: |
+          echo "BINDGEN_EXTRA_CLANG_ARGS=--sysroot=$(xcrun --show-sdk-path)" >> $GITHUB_ENV
+          echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
       - name: Set release channel
         run: |
