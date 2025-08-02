@@ -52,13 +52,23 @@ jobs:
       - name: Build Oppla
         run: script/bundle-mac
 
+      - name: Prepare macOS artifacts
+        run: |
+          mkdir -p artifacts/macos
+          # Rename DMG files to include architecture info
+          if [ -f "target/release/Oppla.dmg" ]; then
+            cp target/release/Oppla.dmg artifacts/macos/Oppla-universal.dmg
+          fi
+          # Copy remote server binaries with architecture
+          cp target/release/oppla-remote-server-macos-x86_64.gz artifacts/macos/ || true
+          cp target/release/oppla-remote-server-macos-aarch64.gz artifacts/macos/ || true
+          ls -la artifacts/macos/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Oppla-macOS
-          path: |
-            target/release/*.dmg
-            target/release/oppla-remote-server-*.gz
+          path: artifacts/macos/*
           retention-days: 7
 
   build-linux:
@@ -84,11 +94,17 @@ jobs:
       - name: Build Oppla
         run: script/bundle-linux
 
+      - name: Prepare Linux artifacts
+        run: |
+          mkdir -p artifacts/linux
+          cp target/release/*.tar.gz artifacts/linux/
+          ls -la artifacts/linux/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Oppla-Linux
-          path: target/release/*.tar.gz
+          path: artifacts/linux/*
           retention-days: 7
 
   build-windows:
@@ -109,9 +125,132 @@ jobs:
       - name: Build Oppla
         run: ./script/bundle-windows.ps1
 
+      - name: Prepare Windows artifacts
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts/windows
+          Copy-Item target/release/*.exe artifacts/windows/
+          Get-ChildItem artifacts/windows/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Oppla-Windows
-          path: target/release/*.exe
+          path: artifacts/windows/*
           retention-days: 7
+
+  publish-release:
+    name: Publish to oppla_releases
+    runs-on: ubuntu-latest
+    needs: [build-mac, build-linux, build-windows]
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Checkout releases repo
+        uses: actions/checkout@v4
+        with:
+          repository: Oppla-AI/oppla_releases
+          token: ${{ secrets.RELEASES_TOKEN }}
+          path: oppla_releases
+
+      - name: Prepare release structure
+        run: |
+          # Determine version/channel
+          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            VERSION="${{ github.ref_name }}"
+            CHANNEL="stable"
+          else
+            VERSION="nightly-$(date +%Y%m%d-%H%M%S)"
+            CHANNEL="nightly"
+          fi
+          
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "CHANNEL=$CHANNEL" >> $GITHUB_ENV
+          
+          # Create directory structure
+          mkdir -p oppla_releases/$CHANNEL/$VERSION/{macos,linux,windows}
+          
+          # Copy macOS artifacts
+          cp -r artifacts/Oppla-macOS/* oppla_releases/$CHANNEL/$VERSION/macos/
+          
+          # Copy Linux artifacts
+          cp -r artifacts/Oppla-Linux/* oppla_releases/$CHANNEL/$VERSION/linux/
+          
+          # Copy Windows artifacts
+          cp -r artifacts/Oppla-Windows/* oppla_releases/$CHANNEL/$VERSION/windows/
+          
+          # Create/update latest symlink for the channel
+          cd oppla_releases/$CHANNEL
+          rm -f latest
+          ln -s $VERSION latest
+          cd ../..
+          
+          # Create a README for this release
+          cat > oppla_releases/$CHANNEL/$VERSION/README.md << EOF
+          # Oppla $VERSION
+          
+          Built on: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          Channel: $CHANNEL
+          Commit: ${{ github.sha }}
+          
+          ## Downloads
+          
+          ### macOS
+          - Universal DMG: [Oppla-universal.dmg](macos/Oppla-universal.dmg)
+          - Remote Server (Intel): [oppla-remote-server-macos-x86_64.gz](macos/oppla-remote-server-macos-x86_64.gz)
+          - Remote Server (Apple Silicon): [oppla-remote-server-macos-aarch64.gz](macos/oppla-remote-server-macos-aarch64.gz)
+          
+          ### Linux
+          - [Download Linux builds](linux/)
+          
+          ### Windows
+          - [Download Windows installer](windows/)
+          EOF
+
+      - name: Update root README
+        run: |
+          cd oppla_releases
+          cat > README.md << 'EOF'
+          # Oppla Releases
+          
+          This repository contains official releases of Oppla IDE.
+          
+          ## Latest Releases
+          
+          - [Stable](stable/latest/) - Latest stable release
+          - [Nightly](nightly/latest/) - Latest nightly build
+          
+          ## All Releases
+          
+          - [Stable Releases](stable/)
+          - [Nightly Builds](nightly/)
+          
+          ## Installation
+          
+          ### macOS
+          1. Download the .dmg file for your platform
+          2. Open the DMG and drag Oppla to your Applications folder
+          
+          ### Linux
+          1. Download the .tar.gz file
+          2. Extract: `tar -xzf oppla-*.tar.gz`
+          3. Run: `./oppla`
+          
+          ### Windows
+          1. Download the .exe installer
+          2. Run the installer
+          
+          ---
+          Built with ❤️ by Oppla AI
+          EOF
+
+      - name: Commit and push
+        run: |
+          cd oppla_releases
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Release ${{ env.VERSION }}" || echo "No changes to commit"
+          git push
