@@ -30,7 +30,10 @@ Pop-Location
 
 function CheckEnvironmentVariables {
     $requiredVars = @(
-        'ZED_WORKSPACE', 'RELEASE_VERSION', 'ZED_RELEASE_CHANNEL',
+        'ZED_WORKSPACE', 'RELEASE_VERSION', 'ZED_RELEASE_CHANNEL'
+    )
+    
+    $optionalVars = @(
         'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_CLIENT_SECRET',
         'ACCOUNT_NAME', 'CERT_PROFILE_NAME', 'ENDPOINT',
         'FILE_DIGEST', 'TIMESTAMP_DIGEST', 'TIMESTAMP_SERVER'
@@ -42,6 +45,24 @@ function CheckEnvironmentVariables {
             exit 1
         }
     }
+    
+    # Check if any Azure signing variables are set
+    $azureVarsSet = $false
+    foreach ($var in $optionalVars) {
+        if (Test-Path "env:$var") {
+            $azureVarsSet = $true
+            break
+        }
+    }
+    
+    # If any Azure vars are set, ensure all are set
+    if ($azureVarsSet) {
+        foreach ($var in $optionalVars) {
+            if (-not (Test-Path "env:$var")) {
+                Write-Warning "$var is not set - code signing will be skipped"
+            }
+        }
+    }
 }
 
 function PrepareForBundle {
@@ -49,7 +70,7 @@ function PrepareForBundle {
         Remove-Item -Path "$innoDir" -Recurse -Force
     }
     New-Item -Path "$innoDir" -ItemType Directory -Force
-    Copy-Item -Path "$env:ZED_WORKSPACE\crates\zed\resources\windows\*" -Destination "$innoDir" -Recurse -Force
+    Copy-Item -Path "$env:ZED_WORKSPACE\crates\oppla\resources\windows\*" -Destination "$innoDir" -Recurse -Force
     New-Item -Path "$innoDir\make_appx" -ItemType Directory -Force
     New-Item -Path "$innoDir\appx" -ItemType Directory -Force
     New-Item -Path "$innoDir\bin" -ItemType Directory -Force
@@ -242,6 +263,10 @@ function BuildInstaller {
 
 ParseZedWorkspace
 $innoDir = "$env:ZED_WORKSPACE\inno"
+
+# Get the version from cargo metadata
+$version = & "$env:ZED_WORKSPACE\script\get-crate-version.ps1" oppla
+$env:RELEASE_VERSION = $version
 
 CheckEnvironmentVariables
 PrepareForBundle
