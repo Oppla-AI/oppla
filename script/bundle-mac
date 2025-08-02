@@ -64,7 +64,7 @@ if [[ $# -gt 0 ]]; then
 fi
 
 # Get release channel
-pushd crates/zed
+pushd crates/oppla
 channel=$(<RELEASE_CHANNEL)
 export ZED_RELEASE_CHANNEL="${channel}"
 popd
@@ -98,7 +98,7 @@ else
 fi
 
 echo "Creating application bundle"
-pushd crates/zed
+pushd crates/oppla
 cp Cargo.toml Cargo.toml.backup
 sed \
     -i.backup \
@@ -198,7 +198,7 @@ function prepare_binaries() {
         exit 1
     fi
     uuid=$(dwarfdump --uuid "${exe_path}" | cut -d ' ' -f 2 | tr 'A-F' 'a-f')
-    version="$(cargo metadata --no-deps --manifest-path crates/zed/Cargo.toml --offline --format-version=1 | jq -r '.packages | map(select(.name == "zed"))[0].version')"
+    version="$(cargo metadata --no-deps --manifest-path crates/oppla/Cargo.toml --offline --format-version=1 | jq -r '.packages | map(select(.name == "oppla"))[0].version')"
     if [ "$channel" == "nightly" ]; then
         version="$version-$(git rev-parse --short HEAD)"
     fi
@@ -233,15 +233,15 @@ function sign_app_binaries() {
     download_git "${architecture}" "${app_path}/Contents/MacOS/git"
 
     # Note: The app identifier for our development builds is the same as the app identifier for nightly.
-    cp crates/zed/contents/$channel/embedded.provisionprofile "${app_path}/Contents/"
+    cp crates/oppla/contents/$channel/embedded.provisionprofile "${app_path}/Contents/"
 
     if [[ $can_code_sign = true ]]; then
         echo "Code signing binaries"
         # sequence of codesign commands modeled after this example: https://developer.apple.com/forums/thread/701514
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/zed.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/zed" -v
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/zed/resources/zed.entitlements --sign "$IDENTITY" "${app_path}" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/zed.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/zed" -v
+        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/zed.entitlements --sign "$IDENTITY" "${app_path}" -v
     else
         echo "One or more of the following variables are missing: MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, APPLE_NOTARIZATION_KEY, APPLE_NOTARIZATION_KEY_ID, APPLE_NOTARIZATION_ISSUER_ID"
         if [[ "$local_only" = false ]]; then
@@ -258,7 +258,7 @@ function sign_app_binaries() {
         # - get a signing key for the MQ55VZLNZQ team from Nathan.
         # - create your own signing key, and update references to MQ55VZLNZQ to your own team ID
         # then comment out this line.
-        cat crates/zed/resources/zed.entitlements | sed '/com.apple.developer.associated-domains/,+1d' > "${app_path}/Contents/Resources/zed.entitlements"
+        cat crates/oppla/resources/zed.entitlements | sed '/com.apple.developer.associated-domains/,+1d' > "${app_path}/Contents/Resources/zed.entitlements"
 
         codesign --force --deep --entitlements "${app_path}/Contents/Resources/zed.entitlements" --sign ${MACOS_SIGNING_KEY:- -} "${app_path}" -v
     fi
@@ -344,7 +344,7 @@ function sign_binary() {
 
     if [[ $can_code_sign = true ]]; then
         echo "Code signing executable $binary_path"
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/zed.entitlements --sign "$IDENTITY" "${binary_path}" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/zed.entitlements --sign "$IDENTITY" "${binary_path}" -v
     fi
 }
 
