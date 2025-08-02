@@ -12,6 +12,7 @@ env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
   RUST_BACKTRACE: 1
+  MACOSX_DEPLOYMENT_TARGET: "10.15.7"
 
 jobs:
   build-mac:
@@ -24,6 +25,8 @@ jobs:
       APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
       APPLE_NOTARIZATION_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_ISSUER_ID }}
     steps:
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
       - name: Checkout
         uses: actions/checkout@v4
         with:
