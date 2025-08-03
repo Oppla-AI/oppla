@@ -28,7 +28,7 @@ jobs:
   macos_bundle:
     timeout-minutes: 120
     name: macOS Build and Bundle
-    runs-on: macos-latest
+    runs-on: [self-hosted, macOS, ARM64]  # Your local Mac with Xcode 26
     if: |
       startsWith(github.ref, 'refs/tags/v') ||
       contains(github.event.pull_request.labels.*.name, 'run-bundling') ||
@@ -47,11 +47,12 @@ jobs:
           clean: false
           ref: ${{ github.ref }}
 
-      - name: Select Xcode
+      - name: Check Xcode version
         run: |
-          sudo xcode-select -s /Applications/Xcode_15.2.app
-          echo "Selected Xcode version:"
+          echo "Current Xcode version:"
           xcodebuild -version
+          echo "Xcode path:"
+          xcode-select -p
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -92,6 +93,9 @@ jobs:
           else
             echo "RELEASE_CHANNEL=stable" >> $GITHUB_ENV
           fi
+
+      - name: Install cargo-about
+        run: cargo install cargo-about@^0.7
 
       - name: Generate licenses
         run: script/generate-licenses
