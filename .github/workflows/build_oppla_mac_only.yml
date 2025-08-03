@@ -25,15 +25,33 @@ env:
   ZED_CLIENT_CHECKSUM_SEED: ${{ secrets.ZED_CLIENT_CHECKSUM_SEED }}
 
 jobs:
-  macos_build_and_test:
-    timeout-minutes: 60
-    name: macOS Build and Test
-    runs-on: macos-latest  # Using GitHub-hosted runner instead of self-hosted
+  macos_bundle:
+    timeout-minutes: 120
+    name: macOS Build and Bundle
+    runs-on: macos-latest
+    if: |
+      startsWith(github.ref, 'refs/tags/v') ||
+      contains(github.event.pull_request.labels.*.name, 'run-bundling') ||
+      github.event_name == 'push'
+    env:
+      MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      APPLE_NOTARIZATION_KEY: ${{ secrets.APPLE_NOTARIZATION_KEY }}
+      APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
+      APPLE_NOTARIZATION_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_ISSUER_ID }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          fetch-depth: 25
           clean: false
+          ref: ${{ github.ref }}
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.2.app
+          echo "Selected Xcode version:"
+          xcodebuild -version
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -65,40 +83,6 @@ jobs:
       - name: Run tests
         run: cargo test --workspace
 
-      - name: Build Oppla
-        run: cargo build --release
-
-      - name: Build with macOS features
-        run: |
-          cargo check -p gpui --features "macos-blade" || true
-          cargo build -p remote_server || true
-
-      - name: Clean CI config
-        if: always()
-        run: rm -rf ./../.cargo
-
-  bundle_mac:
-    timeout-minutes: 120
-    name: Create macOS Bundle
-    runs-on: macos-latest
-    needs: macos_build_and_test
-    if: |
-      startsWith(github.ref, 'refs/tags/v') ||
-      contains(github.event.pull_request.labels.*.name, 'run-bundling')
-    env:
-      MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-      MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-      APPLE_NOTARIZATION_KEY: ${{ secrets.APPLE_NOTARIZATION_KEY }}
-      APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
-      APPLE_NOTARIZATION_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_ISSUER_ID }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-          clean: false
-          ref: ${{ github.ref }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -115,10 +99,19 @@ jobs:
             echo "RELEASE_CHANNEL=stable" >> $GITHUB_ENV
           fi
 
+      - name: Generate licenses
+        run: script/generate-licenses
+
       - name: Create macOS app bundle
         run: |
           if [ -f "script/bundle-mac" ]; then
-            script/bundle-mac
+            # Run with -l flag for local build to skip dSYM uploads if no DigitalOcean credentials
+            if [[ -z "$DIGITALOCEAN_SPACES_ACCESS_KEY" || -z "$DIGITALOCEAN_SPACES_SECRET_KEY" ]]; then
+              echo "No DigitalOcean credentials found, running local build"
+              script/bundle-mac -l
+            else
+              script/bundle-mac
+            fi
           else
             echo "Bundle script not found, running basic build"
             cargo build --release
@@ -152,3 +145,7 @@ jobs:
             target/*/release/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean CI config
+        if: always()
+        run: rm -rf ./../.cargo
