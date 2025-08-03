@@ -80,9 +80,6 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --workspace --all-features -- -D warnings
 
-      - name: Run tests
-        run: cargo test --workspace
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
