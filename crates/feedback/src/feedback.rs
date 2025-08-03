@@ -1,8 +1,8 @@
 use gpui::{App, ClipboardItem, PromptLevel, actions};
+use oppla_actions::feedback::FileBugReport;
 use system_specs::SystemSpecs;
 use util::ResultExt;
 use workspace::Workspace;
-use oppla_actions::feedback::FileBugReport;
 
 pub mod feedback_modal;
 

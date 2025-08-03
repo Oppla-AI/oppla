@@ -22,6 +22,7 @@ pub use debug_format::{
     AttachRequest, BuildTaskDefinition, DebugRequest, DebugScenario, DebugTaskFile, LaunchRequest,
     Request, TcpArgumentsTemplate, ZedDebugConfig,
 };
+pub use oppla_actions::RevealTarget;
 pub use shell_builder::{DEFAULT_REMOTE_SHELL, ShellBuilder};
 pub use task_template::{
     DebugArgsRequest, HideStrategy, RevealStrategy, TaskTemplate, TaskTemplates,
@@ -29,7 +30,6 @@ pub use task_template::{
 };
 pub use vscode_debug_format::VsCodeDebugTaskFile;
 pub use vscode_format::VsCodeTaskFile;
-pub use oppla_actions::RevealTarget;
 
 /// Task identifier, unique within the application.
 /// Based on it, task reruns and terminal tabs are managed.

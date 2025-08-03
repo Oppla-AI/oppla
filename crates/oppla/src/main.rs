@@ -1,5 +1,5 @@
-mod reliability;
 mod oppla;
+mod reliability;
 
 use agent_ui::AgentPanel;
 use anyhow::{Context as _, Result};
@@ -25,6 +25,12 @@ use reqwest_client::ReqwestClient;
 
 use assets::Assets;
 use node_runtime::{NodeBinaryOptions, NodeRuntime};
+use oppla::{
+    OpenListener, OpenRequest, RawOpenRequest, app_menus, build_window_options,
+    derive_paths_with_position, handle_cli_connection, handle_keymap_file_changes,
+    handle_settings_changed, handle_settings_file_changes, initialize_workspace,
+    inline_completion_registry, open_paths_with_positions,
+};
 use parking_lot::Mutex;
 use project::project_settings::ProjectSettings;
 use recent_projects::{SshSettings, open_ssh_project};
@@ -48,12 +54,6 @@ use welcome::{FIRST_OPEN, show_welcome_view};
 use workspace::{
     AppState, SerializedWorkspaceLocation, Toast, Workspace, WorkspaceSettings, WorkspaceStore,
     notifications::NotificationId,
-};
-use oppla::{
-    OpenListener, OpenRequest, RawOpenRequest, app_menus, build_window_options,
-    derive_paths_with_position, handle_cli_connection, handle_keymap_file_changes,
-    handle_settings_changed, handle_settings_file_changes, initialize_workspace,
-    inline_completion_registry, open_paths_with_positions,
 };
 
 use crate::oppla::OpenRequestKind;

@@ -19,6 +19,7 @@ use gpui::{
     Styled, Subscription, Task, TextStyle, Window, actions, div,
 };
 use language::{Language, LanguageRegistry};
+use oppla_actions::outline::ToggleOutline;
 use project::{
     search::SearchQuery,
     search_history::{SearchHistory, SearchHistoryCursor},
@@ -28,7 +29,6 @@ use serde::Deserialize;
 use settings::Settings;
 use std::sync::Arc;
 use theme::ThemeSettings;
-use oppla_actions::outline::ToggleOutline;
 
 use ui::{
     BASE_REM_SIZE_IN_PX, IconButton, IconButtonShape, IconName, Tooltip, h_flex, prelude::*,

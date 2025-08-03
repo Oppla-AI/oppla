@@ -21,6 +21,7 @@ use language_model::{
     LanguageModelProvider, LanguageModelProviderId, LanguageModelRegistry, ZED_CLOUD_PROVIDER_ID,
 };
 use notifications::status_toast::{StatusToast, ToastIcon};
+use oppla_actions::ExtensionCategoryFilter;
 use project::{
     context_server_store::{ContextServerConfiguration, ContextServerStatus, ContextServerStore},
     project_settings::{ContextServerSettings, ProjectSettings},
@@ -33,7 +34,6 @@ use ui::{
 };
 use util::ResultExt as _;
 use workspace::Workspace;
-use oppla_actions::ExtensionCategoryFilter;
 
 pub(crate) use configure_context_server_modal::ConfigureContextServerModal;
 pub(crate) use manage_profiles_modal::ManageProfilesModal;

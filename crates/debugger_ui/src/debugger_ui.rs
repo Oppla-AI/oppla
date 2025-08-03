@@ -6,6 +6,8 @@ use editor::Editor;
 use gpui::{Action, App, DispatchPhase, EntityInputHandler, actions};
 use new_process_modal::{NewProcessModal, NewProcessMode};
 use onboarding_modal::DebuggerOnboardingModal;
+use oppla_actions::ToggleFocus;
+use oppla_actions::debugger::OpenOnboardingModal;
 use project::debugger::{self, breakpoint_store::SourceBreakpoint, session::ThreadStatus};
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -16,8 +18,6 @@ use tasks_ui::{Spawn, TaskOverrides};
 use ui::{FluentBuilder, InteractiveElement};
 use util::maybe;
 use workspace::{ItemHandle, ShutdownDebugAdapters, Workspace};
-use oppla_actions::ToggleFocus;
-use oppla_actions::debugger::OpenOnboardingModal;
 
 pub mod attach_modal;
 pub mod debugger_panel;

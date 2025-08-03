@@ -10,6 +10,7 @@ use gpui::{Action, App, AppContext as _, Context, Global, Keystroke, Window, act
 use itertools::Itertools;
 use language::Point;
 use multi_buffer::MultiBufferRow;
+use oppla_actions::{OpenDocs, RevealTarget};
 use project::ProjectPath;
 use regex::Regex;
 use schemars::JsonSchema;
@@ -30,7 +31,6 @@ use ui::ActiveTheme;
 use util::ResultExt;
 use workspace::{Item, SaveIntent, notifications::NotifyResultExt};
 use workspace::{SplitDirection, notifications::DetachAndPromptErr};
-use oppla_actions::{OpenDocs, RevealTarget};
 
 use crate::{
     ToggleMarksView, ToggleRegistersView, Vim,

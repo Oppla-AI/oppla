@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
 use gpui::{DismissEvent, Entity, EventEmitter, FocusHandle, Focusable, IntoElement};
+use oppla_actions::toast;
 use ui::{Tooltip, prelude::*};
 use workspace::{ToastAction, ToastView};
-use oppla_actions::toast;
 
 #[derive(Clone, Copy)]
 pub struct ToastIcon {

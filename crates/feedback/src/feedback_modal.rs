@@ -1,7 +1,7 @@
 use gpui::{App, Context, DismissEvent, EventEmitter, FocusHandle, Focusable, Render, Window};
+use oppla_actions::feedback::GiveFeedback;
 use ui::{IconPosition, prelude::*};
 use workspace::{ModalView, Workspace};
-use oppla_actions::feedback::GiveFeedback;
 
 use crate::{EmailZed, FileBugReport, OpenZedRepo, RequestFeature};
 

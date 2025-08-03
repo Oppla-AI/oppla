@@ -26,6 +26,7 @@ use gpui::{
     Focusable, FontWeight, Subscription, TextStyle, WeakEntity, Window, anchored, deferred, point,
 };
 use language_model::{LanguageModel, LanguageModelRegistry};
+use oppla_actions::agent::ToggleModelSelector;
 use parking_lot::Mutex;
 use settings::Settings;
 use std::cmp;
@@ -37,7 +38,6 @@ use ui::{
     CheckboxWithLabel, IconButtonShape, KeyBinding, Popover, PopoverMenuHandle, Tooltip, prelude::*,
 };
 use workspace::Workspace;
-use oppla_actions::agent::ToggleModelSelector;
 
 pub struct PromptEditor<T> {
     pub editor: Entity<Editor>,

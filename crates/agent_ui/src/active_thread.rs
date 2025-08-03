@@ -34,6 +34,7 @@ use markdown::parser::{CodeBlockKind, CodeBlockMetadata};
 use markdown::{
     HeadingLevelStyles, Markdown, MarkdownElement, MarkdownStyle, ParsedMarkdown, PathWithRange,
 };
+use oppla_actions::assistant::OpenRulesLibrary;
 use project::{ProjectEntryId, ProjectItem as _};
 use rope::Point;
 use settings::{Settings as _, SettingsStore, update_settings_file};
@@ -51,7 +52,6 @@ use ui::{
 use util::ResultExt as _;
 use util::markdown::MarkdownCodeBlock;
 use workspace::{CollaboratorId, Workspace};
-use oppla_actions::assistant::OpenRulesLibrary;
 use zed_llm_client::CompletionIntent;
 
 const CODEBLOCK_CONTAINER_GROUP: &str = "codeblock_container";

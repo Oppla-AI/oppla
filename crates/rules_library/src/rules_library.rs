@@ -11,6 +11,7 @@ use language::{Buffer, LanguageRegistry, language_settings::SoftWrap};
 use language_model::{
     ConfiguredModel, LanguageModelRegistry, LanguageModelRequest, LanguageModelRequestMessage, Role,
 };
+use oppla_actions::assistant::InlineAssist;
 use picker::{Picker, PickerDelegate};
 use release_channel::ReleaseChannel;
 use rope::Rope;
@@ -27,7 +28,6 @@ use ui::{
 };
 use util::{ResultExt, TryFutureExt};
 use workspace::{Workspace, client_side_decorations};
-use oppla_actions::assistant::InlineAssist;
 
 use prompt_store::*;
 

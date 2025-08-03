@@ -11,6 +11,7 @@ use gpui::{
     Action, AnyElement, App, Context, DismissEvent, Entity, EventEmitter, FocusHandle, Focusable,
     Subscription, Task, WeakEntity, Window,
 };
+use oppla_actions::{OpenRecent, OpenRemote};
 use ordered_float::OrderedFloat;
 use picker::{
     Picker, PickerDelegate,
@@ -29,7 +30,6 @@ use workspace::{
     CloseIntent, HistoryManager, ModalView, OpenOptions, SerializedWorkspaceLocation, WORKSPACE_DB,
     Workspace, WorkspaceId, with_active_or_new_workspace,
 };
-use oppla_actions::{OpenRecent, OpenRemote};
 
 pub fn init(cx: &mut App) {
     SshSettings::register(cx);

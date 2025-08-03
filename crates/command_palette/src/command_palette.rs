@@ -17,6 +17,7 @@ use gpui::{
     Action, App, Context, DismissEvent, Entity, EventEmitter, FocusHandle, Focusable,
     ParentElement, Render, Styled, Task, WeakEntity, Window,
 };
+use oppla_actions::{OpenZedUrl, command_palette::Toggle};
 use persistence::COMMAND_PALETTE_HISTORY;
 use picker::{Picker, PickerDelegate};
 use postage::{sink::Sink, stream::Stream};
@@ -24,7 +25,6 @@ use settings::Settings;
 use ui::{HighlightedLabel, KeyBinding, ListItem, ListItemSpacing, h_flex, prelude::*, v_flex};
 use util::ResultExt;
 use workspace::{ModalView, Workspace, WorkspaceSettings};
-use oppla_actions::{OpenZedUrl, command_palette::Toggle};
 
 pub fn init(cx: &mut App) {
     client::init_settings(cx);

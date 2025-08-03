@@ -21,6 +21,7 @@ use gpui::{
 use language::{Buffer, Capability, DiskState, OffsetRangeExt, Point};
 use language_model::StopReason;
 use multi_buffer::PathKey;
+use oppla_actions::assistant::ToggleFocus;
 use project::{Project, ProjectItem, ProjectPath};
 use settings::{Settings, SettingsStore};
 use std::{
@@ -38,7 +39,6 @@ use workspace::{
     item::{BreadcrumbText, ItemEvent, SaveOptions, TabContentParams},
     searchable::SearchableItemHandle,
 };
-use oppla_actions::assistant::ToggleFocus;
 
 pub struct AgentDiffPane {
     multibuffer: Entity<MultiBuffer>,

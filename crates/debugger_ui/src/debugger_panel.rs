@@ -28,6 +28,7 @@ use text::ToPoint as _;
 
 use itertools::Itertools as _;
 use language::Buffer;
+use oppla_actions::ToggleFocus;
 use project::debugger::session::{Session, SessionQuirks, SessionState, SessionStateEvent};
 use project::{DebugScenarioContext, Fs, ProjectPath, TaskSourceKind, WorktreeId};
 use project::{Project, debugger::session::ThreadStatus};
@@ -44,7 +45,6 @@ use workspace::{
     Item, Pane, Workspace,
     dock::{DockPosition, Panel, PanelEvent},
 };
-use oppla_actions::ToggleFocus;
 
 pub enum DebugPanelEvent {
     Exited(SessionId),

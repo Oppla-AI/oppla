@@ -9,10 +9,15 @@ use gpui::{App, Global, SemanticVersion};
 /// stable | dev | nightly | preview
 pub static RELEASE_CHANNEL_NAME: LazyLock<String> = LazyLock::new(|| {
     if cfg!(debug_assertions) {
-        env::var("ZED_RELEASE_CHANNEL")
-            .unwrap_or_else(|_| include_str!("../../oppla/RELEASE_CHANNEL").trim().to_string())
+        env::var("ZED_RELEASE_CHANNEL").unwrap_or_else(|_| {
+            include_str!("../../oppla/RELEASE_CHANNEL")
+                .trim()
+                .to_string()
+        })
     } else {
-        include_str!("../../oppla/RELEASE_CHANNEL").trim().to_string()
+        include_str!("../../oppla/RELEASE_CHANNEL")
+            .trim()
+            .to_string()
     }
 });
 

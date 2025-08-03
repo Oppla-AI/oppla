@@ -12,10 +12,10 @@ use git::{
 use git_panel_settings::GitPanelSettings;
 use gpui::{Action, App, Context, FocusHandle, Window, actions};
 use onboarding::GitOnboardingModal;
+use oppla_actions;
 use project_diff::ProjectDiff;
 use ui::prelude::*;
 use workspace::Workspace;
-use oppla_actions;
 
 use crate::text_diff_view::TextDiffView;
 

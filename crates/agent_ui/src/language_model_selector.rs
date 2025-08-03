@@ -554,8 +554,10 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                             .icon_color(Color::Muted)
                             .icon_position(IconPosition::Start)
                             .on_click(|_, window, cx| {
-                                window
-                                    .dispatch_action(Box::new(oppla_actions::OpenAccountSettings), cx)
+                                window.dispatch_action(
+                                    Box::new(oppla_actions::OpenAccountSettings),
+                                    cx,
+                                )
                             }),
                         Plan::Free | Plan::ZedProTrial => Button::new(
                             "try-pro",

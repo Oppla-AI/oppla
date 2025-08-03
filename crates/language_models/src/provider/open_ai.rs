@@ -587,7 +587,7 @@ impl OpenAiEventMapper {
                     } else {
                         serde_json::Value::from_str(&tool_call.arguments)
                     };
-                    
+
                     match arguments {
                         Ok(input) => Ok(LanguageModelCompletionEvent::ToolUse(
                             LanguageModelToolUse {

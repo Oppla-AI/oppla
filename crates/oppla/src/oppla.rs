@@ -35,6 +35,9 @@ use language_tools::lsp_tool::{self, LspTool};
 use migrate::{MigrationBanner, MigrationEvent, MigrationNotification, MigrationType};
 use migrator::{migrate_keymap, migrate_settings};
 pub use open_listener::*;
+use oppla_actions::{
+    OpenAccountSettings, OpenBrowser, OpenDocs, OpenServerSettings, OpenSettings, OpenZedUrl, Quit,
+};
 use outline_panel::OutlinePanel;
 use paths::{
     local_debug_file_relative_path, local_settings_file_relative_path,
@@ -76,9 +79,6 @@ use workspace::{
 };
 use workspace::{CloseIntent, CloseWindow, RestoreBanner, with_active_or_new_workspace};
 use workspace::{Pane, notifications::DetachAndPromptErr};
-use oppla_actions::{
-    OpenAccountSettings, OpenBrowser, OpenDocs, OpenServerSettings, OpenSettings, OpenZedUrl, Quit,
-};
 
 actions!(
     zed,
@@ -644,41 +644,43 @@ fn register_actions(
             })
             .detach()
         })
-        .register_action(|workspace, action: &oppla_actions::OpenRemote, window, cx| {
-            if !action.from_existing_connection {
-                cx.propagate();
-                return;
-            }
-            // You need existing remote connection to open it this way
-            if workspace.project().read(cx).is_local() {
-                return;
-            }
-            telemetry::event!("Project Opened");
-            let paths = workspace.prompt_for_open_path(
-                PathPromptOptions {
-                    files: true,
-                    directories: true,
-                    multiple: true,
-                },
-                DirectoryLister::Project(workspace.project().clone()),
-                window,
-                cx,
-            );
-            cx.spawn_in(window, async move |this, cx| {
-                let Some(paths) = paths.await.log_err().flatten() else {
+        .register_action(
+            |workspace, action: &oppla_actions::OpenRemote, window, cx| {
+                if !action.from_existing_connection {
+                    cx.propagate();
                     return;
-                };
-                if let Some(task) = this
-                    .update_in(cx, |this, window, cx| {
-                        open_new_ssh_project_from_project(this, paths, window, cx)
-                    })
-                    .log_err()
-                {
-                    task.await.log_err();
                 }
-            })
-            .detach()
-        })
+                // You need existing remote connection to open it this way
+                if workspace.project().read(cx).is_local() {
+                    return;
+                }
+                telemetry::event!("Project Opened");
+                let paths = workspace.prompt_for_open_path(
+                    PathPromptOptions {
+                        files: true,
+                        directories: true,
+                        multiple: true,
+                    },
+                    DirectoryLister::Project(workspace.project().clone()),
+                    window,
+                    cx,
+                );
+                cx.spawn_in(window, async move |this, cx| {
+                    let Some(paths) = paths.await.log_err().flatten() else {
+                        return;
+                    };
+                    if let Some(task) = this
+                        .update_in(cx, |this, window, cx| {
+                            open_new_ssh_project_from_project(this, paths, window, cx)
+                        })
+                        .log_err()
+                    {
+                        task.await.log_err();
+                    }
+                })
+                .detach()
+            },
+        )
         .register_action({
             let fs = app_state.fs.clone();
             move |_, action: &oppla_actions::IncreaseUiFontSize, _window, cx| {

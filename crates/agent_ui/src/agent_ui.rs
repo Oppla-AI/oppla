@@ -52,9 +52,9 @@ pub use crate::agent_panel::{AgentPanel, ConcreteAssistantPanelDelegate};
 pub use crate::inline_assistant::InlineAssistant;
 use crate::slash_command_settings::SlashCommandSettings;
 pub use agent_diff::{AgentDiffPane, AgentDiffToolbar};
+use oppla_actions;
 pub use text_thread_editor::{AgentPanelDelegate, TextThreadEditor};
 pub use ui::preview::{all_agent_previews, get_agent_preview};
-use oppla_actions;
 
 actions!(
     agent,
@@ -303,8 +303,9 @@ fn update_command_palette_filter(cx: &mut App) {
             ];
             filter.show_action_types(edit_prediction_actions.iter());
 
-            filter
-                .show_action_types([TypeId::of::<oppla_actions::OpenZedPredictOnboarding>()].iter());
+            filter.show_action_types(
+                [TypeId::of::<oppla_actions::OpenZedPredictOnboarding>()].iter(),
+            );
         }
     });
 }

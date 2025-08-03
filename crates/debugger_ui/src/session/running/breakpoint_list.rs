@@ -13,6 +13,7 @@ use gpui::{
     Stateful, Task, UniformListScrollHandle, WeakEntity, actions, uniform_list,
 };
 use language::Point;
+use oppla_actions::{ToggleEnableBreakpoint, UnsetBreakpoint};
 use project::{
     Project,
     debugger::{
@@ -31,7 +32,6 @@ use ui::{
 };
 use util::ResultExt;
 use workspace::Workspace;
-use oppla_actions::{ToggleEnableBreakpoint, UnsetBreakpoint};
 
 actions!(
     debugger,

@@ -49,10 +49,10 @@ use workspace::{
 };
 
 use anyhow::Context as _;
+use oppla_actions::assistant::InlineAssist;
 use serde::Deserialize;
 use settings::{Settings, SettingsStore};
 use smol::Timer;
-use oppla_actions::assistant::InlineAssist;
 
 use std::{
     cmp,

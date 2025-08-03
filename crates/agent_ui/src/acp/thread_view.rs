@@ -26,6 +26,7 @@ use gpui::{
 use language::language_settings::SoftWrap;
 use language::{Buffer, Language};
 use markdown::{HeadingLevelStyles, Markdown, MarkdownElement, MarkdownStyle};
+use oppla_actions::agent::{Chat, NextHistoryMessage, PreviousHistoryMessage};
 use parking_lot::Mutex;
 use project::Project;
 use settings::Settings as _;
@@ -34,7 +35,6 @@ use theme::ThemeSettings;
 use ui::{Disclosure, Divider, DividerColor, KeyBinding, Tooltip, prelude::*};
 use util::ResultExt;
 use workspace::{CollaboratorId, Workspace};
-use oppla_actions::agent::{Chat, NextHistoryMessage, PreviousHistoryMessage};
 
 use ::acp_thread::{
     AcpThread, AcpThreadEvent, AgentThreadEntry, AssistantMessage, AssistantMessageChunk, Diff,

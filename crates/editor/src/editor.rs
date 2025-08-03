@@ -161,6 +161,7 @@ use multi_buffer::{
     ExcerptInfo, ExpandExcerptDirection, MultiBufferDiffHunk, MultiBufferPoint, MultiBufferRow,
     MultiOrSingleBufferOffsetRange, ToOffsetUtf16,
 };
+use oppla_actions;
 use parking_lot::Mutex;
 use project::{
     CodeAction, Completion, CompletionIntent, CompletionSource, DocumentHighlight, InlayHint,
@@ -213,7 +214,6 @@ use workspace::{
     notifications::{DetachAndPromptErr, NotificationId, NotifyTaskExt},
     searchable::SearchEvent,
 };
-use oppla_actions;
 
 use crate::{
     code_context_menus::CompletionsMenuSource,

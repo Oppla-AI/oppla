@@ -27,6 +27,7 @@ use gpui::{
     Subscription, WeakEntity, Window, actions, div,
 };
 use onboarding_banner::OnboardingBanner;
+use oppla_actions::{OpenRecent, OpenRemote};
 use project::Project;
 use rpc::proto;
 use settings::Settings as _;
@@ -40,7 +41,6 @@ use ui::{
 };
 use util::ResultExt;
 use workspace::{Workspace, notifications::NotifyResultExt};
-use oppla_actions::{OpenRecent, OpenRemote};
 
 pub use onboarding_banner::restore_banner;
 

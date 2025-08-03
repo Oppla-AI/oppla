@@ -18,6 +18,7 @@ use language::{
     EditPredictionsMode, File, Language,
     language_settings::{self, AllLanguageSettings, EditPredictionProvider, all_language_settings},
 };
+use oppla_actions::OpenBrowser;
 use regex::Regex;
 use settings::{Settings, SettingsStore, update_settings_file};
 use std::{
@@ -33,7 +34,6 @@ use workspace::{
     StatusItemView, Toast, Workspace, create_and_open_local_file, item::ItemHandle,
     notifications::NotificationId,
 };
-use oppla_actions::OpenBrowser;
 use zed_llm_client::UsageLimit;
 use zeta::RateCompletions;
 

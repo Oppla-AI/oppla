@@ -57,6 +57,11 @@ use language::LanguageRegistry;
 use language_model::{
     ConfigurationError, ConfiguredModel, LanguageModelProviderTosView, LanguageModelRegistry,
 };
+use oppla_actions::{
+    DecreaseBufferFontSize, IncreaseBufferFontSize, ResetBufferFontSize,
+    agent::{OpenConfiguration, OpenOnboardingModal, ResetOnboarding, ToggleModelSelector},
+    assistant::{OpenRulesLibrary, ToggleFocus},
+};
 use project::{Project, ProjectPath, Worktree};
 use prompt_store::{PromptBuilder, PromptStore, UserPromptId};
 use proto::Plan;
@@ -74,11 +79,6 @@ use util::ResultExt as _;
 use workspace::{
     CollaboratorId, DraggedSelection, DraggedTab, ToggleZoom, ToolbarItemView, Workspace,
     dock::{DockPosition, Panel, PanelEvent},
-};
-use oppla_actions::{
-    DecreaseBufferFontSize, IncreaseBufferFontSize, ResetBufferFontSize,
-    agent::{OpenConfiguration, OpenOnboardingModal, ResetOnboarding, ToggleModelSelector},
-    assistant::{OpenRulesLibrary, ToggleFocus},
 };
 use zed_llm_client::{CompletionIntent, UsageLimit};
 

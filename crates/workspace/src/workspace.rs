@@ -55,6 +55,7 @@ use notifications::{
     DetachAndPromptErr, Notifications, dismiss_app_notification,
     simple_message_notification::MessageNotification,
 };
+use oppla_actions::{Spawn, feedback::FileBugReport};
 pub use pane::*;
 pub use pane_group::*;
 use persistence::{
@@ -106,7 +107,6 @@ use uuid::Uuid;
 pub use workspace_settings::{
     AutosaveSetting, BottomDockLayout, RestoreOnStartupBehavior, TabBarSettings, WorkspaceSettings,
 };
-use oppla_actions::{Spawn, feedback::FileBugReport};
 
 use crate::notifications::NotificationId;
 use crate::persistence::{

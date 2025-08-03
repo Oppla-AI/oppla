@@ -39,6 +39,7 @@ use language_model::{
     ConfigurationError, LanguageModelExt, LanguageModelImage, LanguageModelRegistry, Role,
 };
 use multi_buffer::MultiBufferRow;
+use oppla_actions::agent::ToggleModelSelector;
 use picker::{Picker, popover_menu::PickerPopoverMenu};
 use project::{Project, Worktree};
 use project::{ProjectPath, lsp_store::LocalLspAdapterDelegate};
@@ -71,7 +72,6 @@ use workspace::{
     pane,
     searchable::{SearchEvent, SearchableItem},
 };
-use oppla_actions::agent::ToggleModelSelector;
 
 use crate::{slash_command::SlashCommandCompletionProvider, slash_command_picker};
 use assistant_context::{

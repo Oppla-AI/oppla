@@ -38,6 +38,7 @@ use language_model::{
     ConfigurationError, ConfiguredModel, LanguageModelRegistry, report_assistant_event,
 };
 use multi_buffer::MultiBufferRow;
+use oppla_actions::agent::OpenConfiguration;
 use parking_lot::Mutex;
 use project::{CodeAction, LspAction, Project, ProjectTransaction};
 use prompt_store::{PromptBuilder, PromptStore};
@@ -48,7 +49,6 @@ use text::{OffsetRangeExt, ToPoint as _};
 use ui::prelude::*;
 use util::{RangeExt, ResultExt, maybe};
 use workspace::{ItemHandle, Toast, Workspace, dock::Panel, notifications::NotificationId};
-use oppla_actions::agent::OpenConfiguration;
 
 pub fn init(
     fs: Arc<dyn Fs>,

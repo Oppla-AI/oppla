@@ -18,6 +18,7 @@ use gpui::{
     UniformListScrollHandle, WeakEntity, Window, actions, point, uniform_list,
 };
 use num_format::{Locale, ToFormattedString};
+use oppla_actions::ExtensionCategoryFilter;
 use project::DirectoryLister;
 use release_channel::ReleaseChannel;
 use settings::Settings;
@@ -32,7 +33,6 @@ use workspace::{
     Workspace, WorkspaceId,
     item::{Item, ItemEvent},
 };
-use oppla_actions::ExtensionCategoryFilter;
 
 use crate::components::{ExtensionCard, FeatureUpsell};
 use crate::extension_version_selector::{

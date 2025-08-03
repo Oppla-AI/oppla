@@ -16,6 +16,7 @@ use gpui::{
     FocusHandle, Focusable, InteractiveElement, ParentElement, Render, Styled, Subscription,
     WeakEntity, Window, anchored, deferred, point,
 };
+use oppla_actions::{assistant::InlineAssist, outline::ToggleOutline};
 use project::project_settings::DiagnosticSeverity;
 use search::{BufferSearchBar, buffer_search};
 use settings::{Settings, SettingsStore};
@@ -27,7 +28,6 @@ use vim_mode_setting::VimModeSetting;
 use workspace::{
     ToolbarItemEvent, ToolbarItemLocation, ToolbarItemView, Workspace, item::ItemHandle,
 };
-use oppla_actions::{assistant::InlineAssist, outline::ToggleOutline};
 
 const MAX_CODE_ACTION_MENU_LINES: u32 = 16;
 

@@ -6,6 +6,7 @@ use gpui::{
     App, Context, DismissEvent, Entity, EventEmitter, Focusable, Render, UpdateGlobal, WeakEntity,
     Window, actions,
 };
+use oppla_actions::{ExtensionCategoryFilter, Extensions};
 use picker::{Picker, PickerDelegate};
 use settings::{SettingsStore, update_settings_file};
 use std::sync::Arc;
@@ -13,7 +14,6 @@ use theme::{Appearance, Theme, ThemeMeta, ThemeRegistry, ThemeSettings};
 use ui::{ListItem, ListItemSpacing, prelude::*, v_flex};
 use util::ResultExt;
 use workspace::{ModalView, Workspace, ui::HighlightedLabel, with_active_or_new_workspace};
-use oppla_actions::{ExtensionCategoryFilter, Extensions};
 
 use crate::icon_theme_selector::{IconThemeSelector, IconThemeSelectorDelegate};
 
