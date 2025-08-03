@@ -1,4 +1,4 @@
-name: macOS Build
+name: Oppla Build MacOS
 
 on:
   push:
@@ -27,7 +27,7 @@ env:
 jobs:
   macos_bundle:
     timeout-minutes: 120
-    name: macOS Build and Bundle
+    name: Oppla MacOS Build and Bundle
     runs-on: [self-hosted, macOS, ARM64]  # Your local Mac with Xcode 26
     if: |
       startsWith(github.ref, 'refs/tags/v') ||
