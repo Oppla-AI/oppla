@@ -12,13 +12,13 @@ function upload_to_blob_store_with_acl
     signature=$(echo -en "${string}" | openssl sha1 -hmac "${DIGITALOCEAN_SPACES_SECRET_KEY}" -binary | base64)
 
     curl --fail -vv -s -X PUT -T "$file_to_upload" \
-        -H "Host: ${bucket_name}.nyc3.digitaloceanspaces.com" \
+        -H "Host: ${bucket_name}.sfo3.digitaloceanspaces.com" \
         -H "Date: $date" \
         -H "Content-Type: $content_type" \
         -H "$storage_type" \
         -H "$acl" \
         -H "Authorization: AWS ${DIGITALOCEAN_SPACES_ACCESS_KEY}:$signature" \
-        "https://${bucket_name}.nyc3.digitaloceanspaces.com/${blob_store_key}"
+        "https://${bucket_name}.sfo3.digitaloceanspaces.com/${blob_store_key}"
 }
 
 function upload_to_blob_store_public
