@@ -1,0 +1,154 @@
+name: macOS Build
+
+on:
+  push:
+    branches:
+      - main
+      - "v[0-9]+.[0-9]+.x"
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - "**"
+
+concurrency:
+  # Allow only one workflow per any non-`main` branch.
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.ref_name == 'main' && github.sha || 'anysha' }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+  DIGITALOCEAN_SPACES_ACCESS_KEY: ${{ secrets.DIGITALOCEAN_SPACES_ACCESS_KEY }}
+  DIGITALOCEAN_SPACES_SECRET_KEY: ${{ secrets.DIGITALOCEAN_SPACES_SECRET_KEY }}
+  ZED_CLIENT_CHECKSUM_SEED: ${{ secrets.ZED_CLIENT_CHECKSUM_SEED }}
+
+jobs:
+  macos_build_and_test:
+    timeout-minutes: 60
+    name: macOS Build and Test
+    runs-on: macos-latest  # Using GitHub-hosted runner instead of self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Configure CI
+        run: |
+          mkdir -p ./../.cargo
+          cp ./.cargo/ci-config.toml ./../.cargo/config.toml || echo "No CI config found"
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-features -- -D warnings
+
+      - name: Run tests
+        run: cargo test --workspace
+
+      - name: Build Oppla
+        run: cargo build --release
+
+      - name: Build with macOS features
+        run: |
+          cargo check -p gpui --features "macos-blade" || true
+          cargo build -p remote_server || true
+
+      - name: Clean CI config
+        if: always()
+        run: rm -rf ./../.cargo
+
+  bundle_mac:
+    timeout-minutes: 120
+    name: Create macOS Bundle
+    runs-on: macos-latest
+    needs: macos_build_and_test
+    if: |
+      startsWith(github.ref, 'refs/tags/v') ||
+      contains(github.event.pull_request.labels.*.name, 'run-bundling')
+    env:
+      MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      APPLE_NOTARIZATION_KEY: ${{ secrets.APPLE_NOTARIZATION_KEY }}
+      APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
+      APPLE_NOTARIZATION_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_ISSUER_ID }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+          clean: false
+          ref: ${{ github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Determine version and release channel
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          if [[ "$VERSION" == *"-pre" ]]; then
+            echo "RELEASE_CHANNEL=preview" >> $GITHUB_ENV
+          else
+            echo "RELEASE_CHANNEL=stable" >> $GITHUB_ENV
+          fi
+
+      - name: Create macOS app bundle
+        run: |
+          if [ -f "script/bundle-mac" ]; then
+            script/bundle-mac
+          else
+            echo "Bundle script not found, running basic build"
+            cargo build --release
+          fi
+
+      - name: Create DMG (if no bundle script)
+        if: ${{ !contains(github.event.repository.name, 'zed') }}
+        run: |
+          # Basic DMG creation if bundle-mac script doesn't exist
+          mkdir -p target/release
+          # Add your DMG creation commands here if needed
+
+      - name: Upload macOS Bundle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Oppla-macOS-${{ github.sha }}
+          path: |
+            target/*/release/*.dmg
+            target/release/oppla
+            target/release/zed
+          retention-days: 7
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          draft: true
+          prerelease: ${{ env.RELEASE_CHANNEL == 'preview' }}
+          files: |
+            target/*/release/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

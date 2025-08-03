@@ -2,15 +2,15 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - "v[0-9]+.[0-9]+.x"
-    tags:
-      - "v*"
+    # branches:
+    #   - main
+    #   - "v[0-9]+.[0-9]+.x"
+    # tags:
+    #   - "v*"
 
   pull_request:
-    branches:
-      - "**"
+    # branches:
+    #   - "**"
 
 concurrency:
   # Allow only one workflow per any non-`main` branch.
@@ -28,7 +28,7 @@ env:
 jobs:
   job_spec:
     name: Decide which jobs to run
-    if: github.repository_owner == 'zed-industries'
+    if: github.repository_owner == 'Oppla-AI'
     outputs:
       run_tests: ${{ steps.filter.outputs.run_tests }}
       run_license: ${{ steps.filter.outputs.run_license }}
@@ -87,7 +87,7 @@ jobs:
     name: Check Postgres and Protobuf migrations, mergability
     needs: [job_spec]
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       needs.job_spec.outputs.run_tests == 'true'
     timeout-minutes: 60
     runs-on:
@@ -133,7 +133,7 @@ jobs:
     name: Check workspace-hack crate
     needs: [job_spec]
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       needs.job_spec.outputs.run_tests == 'true'
     runs-on:
       - buildjet-8vcpu-ubuntu-2204
@@ -165,7 +165,7 @@ jobs:
     timeout-minutes: 60
     name: Check formatting and spelling
     needs: [job_spec]
-    if: github.repository_owner == 'zed-industries'
+    if: github.repository_owner == 'Oppla-AI'
     runs-on:
       - buildjet-8vcpu-ubuntu-2204
     steps:
@@ -217,7 +217,7 @@ jobs:
     name: Check docs
     needs: [job_spec]
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       (needs.job_spec.outputs.run_tests == 'true' || needs.job_spec.outputs.run_docs == 'true')
     runs-on:
       - buildjet-8vcpu-ubuntu-2204
@@ -237,7 +237,7 @@ jobs:
 
   actionlint:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'zed-industries' && needs.job_spec.outputs.run_actionlint == 'true'
+    if: github.repository_owner == 'Oppla-AI' && needs.job_spec.outputs.run_actionlint == 'true'
     needs: [job_spec]
     steps:
       - uses: actions/checkout@v4
@@ -254,7 +254,7 @@ jobs:
     name: (macOS) Run Clippy and tests
     needs: [job_spec]
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       needs.job_spec.outputs.run_tests == 'true'
     runs-on:
       - self-mini-macos
@@ -324,7 +324,7 @@ jobs:
     name: (Linux) Run Clippy and tests
     needs: [job_spec]
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       needs.job_spec.outputs.run_tests == 'true'
     runs-on:
       - buildjet-16vcpu-ubuntu-2204
@@ -376,7 +376,7 @@ jobs:
     name: (Linux) Build Remote Server
     needs: [job_spec]
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       needs.job_spec.outputs.run_tests == 'true'
     runs-on:
       - buildjet-8vcpu-ubuntu-2204
@@ -415,7 +415,7 @@ jobs:
     name: (Windows) Run Clippy and tests
     needs: [job_spec]
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       needs.job_spec.outputs.run_tests == 'true'
     runs-on: [self-hosted, Windows, X64]
     steps:
@@ -471,7 +471,7 @@ jobs:
       - macos_tests
       - windows_tests
     if: |
-      github.repository_owner == 'zed-industries' &&
+      github.repository_owner == 'Oppla-AI' &&
       always()
     steps:
       - name: Check all tests passed
@@ -758,7 +758,7 @@ jobs:
     name: Build with Nix
     uses: ./.github/workflows/nix.yml
     needs: [job_spec]
-    if: github.repository_owner == 'zed-industries' &&
+    if: github.repository_owner == 'Oppla-AI' &&
       (contains(github.event.pull_request.labels.*.name, 'run-nix') ||
       needs.job_spec.outputs.run_nix == 'true')
     secrets: inherit
