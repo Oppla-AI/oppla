@@ -142,7 +142,7 @@ jobs:
           files: |
             target/*/release/*.dmg
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Clean CI config
         if: always()
