@@ -21,7 +21,7 @@ pub fn account_url(cx: &App) -> String {
 /// Returns the URL to the start trial page on zed.dev.
 pub fn start_trial_url(cx: &App) -> String {
     format!(
-        "{server_url}/account/start-trial",
+        "{server_url}?tab=subscription/start-trial",
         server_url = server_url(cx)
     )
 }
