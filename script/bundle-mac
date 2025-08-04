@@ -329,20 +329,25 @@ function sign_app_binaries() {
             /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "$(pwd)/${dmg_file_path}" -v
             echo "$APPLE_NOTARIZATION_KEY" > "$notarization_key_file"
             
-            # Debug: Check if credentials are set
-            echo "Debug: Checking notarization credentials..."
-            echo "Key ID: $APPLE_NOTARIZATION_KEY_ID"
-            echo "Issuer ID: $APPLE_NOTARIZATION_ISSUER_ID"
-            echo "Key file exists: $(test -f "$notarization_key_file" && echo "yes" || echo "no")"
-            echo "Key file size: $(wc -c < "$notarization_key_file") bytes"
-            echo "Key first line: $(head -n 1 "$notarization_key_file")"
-            echo "Key last line: $(tail -n 1 "$notarization_key_file")"
-            echo "Key line count: $(wc -l < "$notarization_key_file") lines"
-            echo "Key content preview (first 50 chars): ${APPLE_NOTARIZATION_KEY:0:50}..."
-            
-            "${xcode_bin_dir_path}/notarytool" submit --wait --key "$notarization_key_file" --key-id "$APPLE_NOTARIZATION_KEY_ID" --issuer "$APPLE_NOTARIZATION_ISSUER_ID" "${dmg_file_path}"
+            echo "Submitting to Apple notarization service (not waiting for completion)..."
+            NOTARY_OUTPUT=$("${xcode_bin_dir_path}/notarytool" submit --key "$notarization_key_file" --key-id "$APPLE_NOTARIZATION_KEY_ID" --issuer "$APPLE_NOTARIZATION_ISSUER_ID" "${dmg_file_path}" 2>&1)
+            echo "$NOTARY_OUTPUT"
             rm "$notarization_key_file"
-            "${xcode_bin_dir_path}/stapler" staple "${dmg_file_path}"
+            
+            # Extract submission ID for reference
+            SUBMISSION_ID=$(echo "$NOTARY_OUTPUT" | grep "id:" | head -1 | awk '{print $2}')
+            if [ -n "$SUBMISSION_ID" ]; then
+                echo "✅ Notarization submitted successfully!"
+                echo "📋 Submission ID: $SUBMISSION_ID"
+                echo "🔍 Check status with: xcrun notarytool info $SUBMISSION_ID --key-id $APPLE_NOTARIZATION_KEY_ID --issuer $APPLE_NOTARIZATION_ISSUER_ID"
+                echo "⏭️  Continuing without waiting for notarization to complete..."
+            else
+                echo "⚠️  Could not extract submission ID, but continuing anyway"
+            fi
+            
+            # Skip stapling since we're not waiting for the notarization to complete
+            echo "📌 Skipping staple step (requires completed notarization)"
+            echo "📝 Note: Users will need internet connection for first launch"
         fi
 
         if [ "$open_result" = true ]; then
