@@ -53,6 +53,11 @@ jobs:
           xcodebuild -version
           echo "Xcode path:"
           xcode-select -p
+      
+      - name: Sync system time
+        run: |
+          echo "Syncing system time..."
+          sudo sntp -sS time.apple.com || true
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable

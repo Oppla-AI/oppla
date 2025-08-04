@@ -46,7 +46,7 @@ actions!(
 );
 
 const COPILOT_SETTINGS_URL: &str = "https://github.com/settings/copilot";
-const PRIVACY_DOCS: &str = "https://zed.dev/docs/ai/privacy-and-security";
+const PRIVACY_DOCS: &str = "https://oppla.ai/legal/privacy-policy";
 
 struct CopilotErrorToast;
 
@@ -789,7 +789,7 @@ impl InlineCompletionButton {
                         },
                     )
                     .entry(
-                        "Check your payment status or contact us at billing-support@zed.dev to continue using this feature.",
+                        "Check your payment status or contact us at billing-support@oppla.ai to continue using this feature.",
                         None,
                         |_window, cx| {
                             cx.open_url(&zed_urls::account_url(cx))

@@ -1030,7 +1030,7 @@ impl SettingsStore {
 
         json!({
             "$schema": meta_schema,
-            "title": "Zed Settings",
+            "title": "Oppla Settings",
             "unevaluatedProperties": false,
             // ZedSettings + settings overrides for each release stage
             "allOf": [

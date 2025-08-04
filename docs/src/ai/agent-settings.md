@@ -14,7 +14,7 @@ But if you're not subscribed to the hosted service or simply just want to change
   "agent": {
     "version": "2",
     "default_model": {
-      "provider": "zed.dev",
+      "provider": "oppla.ai",
       "model": "gpt-4o"
     }
   }
@@ -34,7 +34,7 @@ Assign distinct and specific models for the following AI-powered features in Zed
   "agent": {
     "version": "2",
     "default_model": {
-      "provider": "zed.dev",
+      "provider": "oppla.ai",
       "model": "claude-sonnet-4"
     },
     "inline_assistant_model": {
@@ -71,12 +71,12 @@ One with Claude Sonnet 4 (the default model), and one with GPT-4o.
 {
   "agent": {
     "default_model": {
-      "provider": "zed.dev",
+      "provider": "oppla.ai",
       "model": "claude-sonnet-4"
     },
     "inline_alternatives": [
       {
-        "provider": "zed.dev",
+        "provider": "oppla.ai",
         "model": "gpt-4o"
       }
     ]

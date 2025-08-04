@@ -1913,7 +1913,7 @@ impl AgentPanel {
                         menu = menu
                             .context(focus_handle.clone())
                             .when(cx.has_flag::<feature_flags::AcpFeatureFlag>(), |this| {
-                                this.header("Zed Agent")
+                                this.header("Oppla Agent")
                             })
                             .item(
                                 ContextMenuEntry::new("New Thread")
@@ -2853,7 +2853,7 @@ impl AgentPanel {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         const ERROR_MESSAGE: &str =
-            "You reached your free usage limit. Upgrade to Zed Pro for more prompts.";
+            "You reached your free usage limit. Upgrade to Oppla Pro for more prompts.";
 
         let icon = Icon::new(IconName::XCircle)
             .size(IconSize::Small)
@@ -2883,7 +2883,7 @@ impl AgentPanel {
     ) -> AnyElement {
         let error_message = match plan {
             Plan::ZedPro => "Upgrade to usage-based billing for more prompts.",
-            Plan::ZedProTrial | Plan::Free => "Upgrade to Zed Pro for more prompts.",
+            Plan::ZedProTrial | Plan::Free => "Upgrade to Oppla Pro for more prompts.",
         };
 
         let icon = Icon::new(IconName::XCircle)

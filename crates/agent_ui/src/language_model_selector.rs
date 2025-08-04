@@ -13,7 +13,7 @@ use picker::{Picker, PickerDelegate};
 use proto::Plan;
 use ui::{ListItem, ListItemSpacing, prelude::*};
 
-const TRY_ZED_PRO_URL: &str = "https://zed.dev/pro";
+const TRY_ZED_PRO_URL: &str = "https://oppla.ai/pricing";
 
 type OnModelChanged = Arc<dyn Fn(Arc<dyn LanguageModel>, &mut App) + 'static>;
 type GetActiveModel = Arc<dyn Fn(&App) -> Option<ConfiguredModel> + 'static>;
@@ -548,7 +548,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                 .justify_between()
                 .when(cx.has_flag::<ZedProFeatureFlag>(), |this| {
                     this.child(match plan {
-                        Plan::ZedPro => Button::new("zed-pro", "Zed Pro")
+                        Plan::ZedPro => Button::new("zed-pro", "Oppla Pro")
                             .icon(IconName::ZedAssistant)
                             .icon_size(IconSize::Small)
                             .icon_color(Color::Muted)

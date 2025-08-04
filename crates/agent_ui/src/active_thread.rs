@@ -1295,7 +1295,7 @@ impl ActiveThread {
 
                                 let workspace_handle = this.workspace.clone();
 
-                                // If there are multiple Zed windows, activate the correct one.
+                                // If there are multiple Oppla windows, activate the correct one.
                                 cx.defer(move |cx| {
                                     handle
                                         .update(cx, |_view, window, _cx| {
@@ -1994,7 +1994,7 @@ impl ActiveThread {
                 .child(
                     div().visible_on_hover("feedback_container").child(
                         Label::new(
-                            "Rating the thread sends all of your current conversation to the Zed team.",
+                            "Rating the thread sends all of your current conversation to the Oppla team.",
                         )
                         .color(Color::Muted)
                     .size(LabelSize::XSmall)

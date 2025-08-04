@@ -425,8 +425,8 @@ pub async fn complete(
         .uri(uri)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", api_key))
-        .header("HTTP-Referer", "https://zed.dev")
-        .header("X-Title", "Zed Editor");
+        .header("HTTP-Referer", "https://oppla.ai")
+        .header("X-Title", "Oppla");
 
     let mut request_body = request;
     request_body.stream = false;
@@ -489,8 +489,8 @@ pub async fn stream_completion(
         .uri(uri)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", api_key))
-        .header("HTTP-Referer", "https://zed.dev")
-        .header("X-Title", "Zed Editor");
+        .header("HTTP-Referer", "https://oppla.ai")
+        .header("X-Title", "Oppla");
 
     let request = request_builder.body(AsyncBody::from(serde_json::to_string(&request)?))?;
     let mut response = client.send(request).await?;

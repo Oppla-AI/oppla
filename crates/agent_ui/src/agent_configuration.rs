@@ -533,7 +533,7 @@ impl AgentConfiguration {
                 v_flex()
                     .gap_0p5()
                     .child(Headline::new("Model Context Protocol (MCP) Servers"))
-                    .child(Label::new("Connect to context servers via the Model Context Protocol either via Zed extensions or directly.").color(Color::Muted)),
+                    .child(Label::new("Connect to context servers via the Model Context Protocol either via Oppla extensions or directly.").color(Color::Muted)),
             )
             .children(
                 context_server_ids.into_iter().map(|context_server_id| {

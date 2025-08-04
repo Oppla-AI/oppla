@@ -277,7 +277,7 @@ impl Render for Onboarding {
                                 v_flex()
                                     .left_1()
                                     .items_center()
-                                    .child(Headline::new("Welcome to Zed"))
+                                    .child(Headline::new("Welcome to Oppla"))
                                     .child(
                                         Label::new("The editor for what's next")
                                             .color(Color::Muted)

@@ -15,7 +15,7 @@ fn server_url(cx: &App) -> &str {
 
 /// Returns the URL to the account page on zed.dev.
 pub fn account_url(cx: &App) -> String {
-    format!("{server_url}/account", server_url = server_url(cx))
+    format!("{server_url}?tab=subscription", server_url = server_url(cx))
 }
 
 /// Returns the URL to the start trial page on zed.dev.
@@ -28,7 +28,7 @@ pub fn start_trial_url(cx: &App) -> String {
 
 /// Returns the URL to the upgrade page on zed.dev.
 pub fn upgrade_to_zed_pro_url(cx: &App) -> String {
-    format!("{server_url}/account/upgrade", server_url = server_url(cx))
+    format!("{server_url}", server_url = server_url(cx))
 }
 
 /// Returns the URL to Zed's terms of service.

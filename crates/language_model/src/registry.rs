@@ -166,7 +166,7 @@ impl LanguageModelRegistry {
     }
 
     pub fn providers(&self) -> Vec<Arc<dyn LanguageModelProvider>> {
-        let zed_provider_id = LanguageModelProviderId("zed.dev".into());
+        let zed_provider_id = LanguageModelProviderId("oppla.ai".into());
         let mut providers = Vec::with_capacity(self.providers.len());
         if let Some(provider) = self.providers.get(&zed_provider_id) {
             providers.push(provider.clone());

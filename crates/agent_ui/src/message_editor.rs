@@ -917,7 +917,7 @@ impl MessageEditor {
                                                             move |_event, window, cx| {
                                                                 telemetry::event!(
                                                                     "Agent Message Sent",
-                                                                    agent = "zed",
+                                                                    agent = "oppla",
                                                                 );
                                                                 focus_handle.dispatch_action(
                                                                     &Chat, window, cx,

@@ -775,7 +775,7 @@
     // The default model to use when creating new threads.
     "default_model": {
       // The provider to use.
-      "provider": "oppla.dev",
+      "provider": "oppla.ai",
       // The model to use.
       "model": "claude-sonnet-4"
     },
@@ -796,7 +796,7 @@
       //
       // To set parameters for a specific provider and model:
       // {
-      //   "provider": "zed.dev",
+      //   "provider": "oppla.ai",
       //   "model": "claude-sonnet-4",
       //   "temperature": 1.0
       // }

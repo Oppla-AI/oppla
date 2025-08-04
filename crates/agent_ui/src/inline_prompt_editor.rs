@@ -718,7 +718,7 @@ impl<T: 'static> PromptEditor<T> {
                         .weight(FontWeight::BOLD),
                 )
                 .child(Label::new(
-                    "Try Zed Pro for higher limits, a wider range of models, and more.",
+                    "Try Oppla Pro for higher limits, a wider range of models, and more.",
                 ))
                 .child(
                     h_flex()

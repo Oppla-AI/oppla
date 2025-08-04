@@ -136,7 +136,7 @@ impl Render for AgentOnboardingModal {
                             .size(LabelSize::Small)
                             .color(Color::Muted),
                     )
-                    .child(Headline::new("Agentic Editing in Zed").size(HeadlineSize::Large)),
+                    .child(Headline::new("Agentic Editing in Oppla").size(HeadlineSize::Large)),
             )
             .child(h_flex().absolute().top_2().right_2().child(
                 IconButton::new("cancel", IconName::X).on_click(cx.listener(
@@ -160,7 +160,7 @@ impl Render for AgentOnboardingModal {
             .full_width()
             .on_click(cx.listener(Self::view_blog));
 
-        let copy = "Zed now natively supports agentic editing, enabling fluid collaboration between humans and AI.";
+        let copy = "Oppla now natively supports agentic editing, enabling fluid collaboration between humans and AI.";
 
         base.child(Label::new(copy).color(Color::Muted)).child(
             v_flex()

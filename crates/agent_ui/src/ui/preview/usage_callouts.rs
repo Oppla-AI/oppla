@@ -47,7 +47,7 @@ impl RenderOnce for UsageCallout {
                 ),
                 Plan::ZedProTrial => (
                     "Out of trial prompts",
-                    "Upgrade to Zed Pro to continue, or switch to API key.".to_string(),
+                    "Upgrade to Oppla Pro to continue, or switch to API key.".to_string(),
                     "Upgrade",
                     zed_urls::account_url(cx),
                 ),
@@ -149,7 +149,7 @@ impl Component for UsageCallout {
         );
 
         let trial_examples = example_group_with_title(
-            "Zed Pro Trial",
+            "Oppla Pro Trial",
             vec![
                 single_example(
                     "Approaching limit (90%)",
@@ -177,7 +177,7 @@ impl Component for UsageCallout {
         );
 
         let pro_examples = example_group_with_title(
-            "Zed Pro",
+            "Oppla Pro",
             vec![
                 single_example(
                     "Limit reached (100%)",

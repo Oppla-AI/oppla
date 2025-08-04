@@ -456,7 +456,7 @@ fn render_accept_terms(
         .icon_color(Color::Muted)
         .icon_size(IconSize::XSmall)
         .when(thread_empty_state, |this| this.label_size(LabelSize::Small))
-        .on_click(move |_, _window, cx| cx.open_url("https://zed.dev/terms-of-service"));
+        .on_click(move |_, _window, cx| cx.open_url("https://oppla.ai/legal/terms-of-service"));
 
     let button_container = h_flex().child(
         Button::new("accept_terms", "I accept the Terms of Service")
@@ -770,7 +770,7 @@ impl LanguageModel for CloudLanguageModel {
     }
 
     fn telemetry_id(&self) -> String {
-        format!("zed.dev/{}", self.model.id)
+        format!("oppla.ai/{}", self.model.id)
     }
 
     fn tool_input_format(&self) -> LanguageModelToolSchemaFormat {

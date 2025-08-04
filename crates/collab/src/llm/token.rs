@@ -66,7 +66,7 @@ impl LlmTokenClaims {
         let subscription_period =
             billing_subscription::Model::current_period(Some(subscription), is_staff)
                 .map(|(start, end)| (start.naive_utc(), end.naive_utc()))
-                .context("A plan is required to use Zed's hosted models or edit predictions. Visit https://zed.dev/account to get started.")?;
+                .context("A plan is required to use Oppla's hosted models or edit predictions. Visit https://app.oppla.ai/home to get started.")?;
 
         let now = Utc::now();
         let claims = Self {
