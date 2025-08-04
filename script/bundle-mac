@@ -328,6 +328,18 @@ function sign_app_binaries() {
             echo "Notarizing DMG with Apple"
             /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "$(pwd)/${dmg_file_path}" -v
             echo "$APPLE_NOTARIZATION_KEY" > "$notarization_key_file"
+            
+            # Debug: Check if credentials are set
+            echo "Debug: Checking notarization credentials..."
+            echo "Key ID: $APPLE_NOTARIZATION_KEY_ID"
+            echo "Issuer ID: $APPLE_NOTARIZATION_ISSUER_ID"
+            echo "Key file exists: $(test -f "$notarization_key_file" && echo "yes" || echo "no")"
+            echo "Key file size: $(wc -c < "$notarization_key_file") bytes"
+            echo "Key first line: $(head -n 1 "$notarization_key_file")"
+            echo "Key last line: $(tail -n 1 "$notarization_key_file")"
+            echo "Key line count: $(wc -l < "$notarization_key_file") lines"
+            echo "Key content preview (first 50 chars): ${APPLE_NOTARIZATION_KEY:0:50}..."
+            
             "${xcode_bin_dir_path}/notarytool" submit --wait --key "$notarization_key_file" --key-id "$APPLE_NOTARIZATION_KEY_ID" --issuer "$APPLE_NOTARIZATION_ISSUER_ID" "${dmg_file_path}"
             rm "$notarization_key_file"
             "${xcode_bin_dir_path}/stapler" staple "${dmg_file_path}"
