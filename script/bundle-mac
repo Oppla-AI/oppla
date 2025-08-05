@@ -219,7 +219,7 @@ function prepare_binaries() {
     cp target/${architecture}/${target_dir}/cli "${app_path}/Contents/MacOS/cli"
 }
 
-function sign_app_binaries() {
+function prepare_app_bundle() {
     local app_path=$1
     local architecture=$2
     local architecture_dir=$3
@@ -234,14 +234,31 @@ function sign_app_binaries() {
 
     # Note: The app identifier for our development builds is the same as the app identifier for nightly.
     cp crates/oppla/contents/$channel/embedded.provisionprofile "${app_path}/Contents/"
+}
 
+function sign_app_bundle() {
+    local app_path=$1
+    
     if [[ $can_code_sign = true ]]; then
-        echo "Code signing binaries"
+        echo "Code signing binaries in ${app_path}"
         # sequence of codesign commands modeled after this example: https://developer.apple.com/forums/thread/701514
-        /usr/bin/codesign --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
-        /usr/bin/codesign --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v
+        /usr/bin/codesign --force --deep --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}" -v
+        
+        echo "Verifying code signature..."
+        /usr/bin/codesign --verify --deep --strict --verbose=2 "${app_path}"
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Code signature verification failed!"
+            exit 1
+        fi
+        
+        echo "Verifying with spctl..."
+        spctl --assess --type execute --verbose=4 "${app_path}" 2>&1
+        if [ $? -ne 0 ]; then
+            echo "WARNING: spctl verification failed (this may be normal for unsigned builds)"
+        fi
     else
         echo "One or more of the following variables are missing: MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, APPLE_NOTARIZATION_KEY, APPLE_NOTARIZATION_KEY_ID, APPLE_NOTARIZATION_ISSUER_ID"
         if [[ "$local_only" = false ]]; then
@@ -306,7 +323,15 @@ function sign_app_binaries() {
 
         rm -rf ${dmg_source_directory}
         mkdir -p ${dmg_source_directory}
-        mv "${app_path}" "${dmg_source_directory}"
+        
+        # Move the app to DMG directory before signing
+        echo "Moving app to DMG directory..."
+        mv "${app_path}" "${dmg_source_directory}/"
+        app_path="${dmg_source_directory}/$(basename "${app_path}")"
+        
+        # Sign the app in its final location
+        sign_app_bundle "${app_path}"
+        
         notarization_key_file=$(mktemp)
 
         echo "Adding symlink to /Applications to ${dmg_source_directory}"
@@ -325,29 +350,30 @@ function sign_app_binaries() {
         dmg-license script/terms/terms.json "${dmg_file_path}"
 
         if [[ $can_code_sign = true ]]; then
-            echo "Notarizing DMG with Apple"
-            /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "$(pwd)/${dmg_file_path}" -v
-            echo "$APPLE_NOTARIZATION_KEY" > "$notarization_key_file"
+            echo "Signing DMG after license addition..."
+            /usr/bin/codesign --force --timestamp --sign "$IDENTITY" "${dmg_file_path}" -v
             
-            echo "Submitting to Apple notarization service (not waiting for completion)..."
-            NOTARY_OUTPUT=$("${xcode_bin_dir_path}/notarytool" submit --key "$notarization_key_file" --key-id "$APPLE_NOTARIZATION_KEY_ID" --issuer "$APPLE_NOTARIZATION_ISSUER_ID" "${dmg_file_path}" 2>&1)
-            echo "$NOTARY_OUTPUT"
-            rm "$notarization_key_file"
-            
-            # Extract submission ID for reference
-            SUBMISSION_ID=$(echo "$NOTARY_OUTPUT" | grep "id:" | head -1 | awk '{print $2}')
-            if [ -n "$SUBMISSION_ID" ]; then
-                echo "✅ Notarization submitted successfully!"
-                echo "📋 Submission ID: $SUBMISSION_ID"
-                echo "🔍 Check status with: xcrun notarytool info $SUBMISSION_ID --key-id $APPLE_NOTARIZATION_KEY_ID --issuer $APPLE_NOTARIZATION_ISSUER_ID"
-                echo "⏭️  Continuing without waiting for notarization to complete..."
-            else
-                echo "⚠️  Could not extract submission ID, but continuing anyway"
+            echo "Verifying DMG signature..."
+            /usr/bin/codesign --verify --verbose=2 "${dmg_file_path}"
+            if [ $? -ne 0 ]; then
+                echo "ERROR: DMG signature verification failed!"
+                exit 1
             fi
             
-            # Skip stapling since we're not waiting for the notarization to complete
-            echo "📌 Skipping staple step (requires completed notarization)"
-            echo "📝 Note: Users will need internet connection for first launch"
+            echo "Notarizing DMG with Apple"
+            echo "$APPLE_NOTARIZATION_KEY" > "$notarization_key_file"
+            
+            echo "Submitting to Apple notarization service and waiting for completion..."
+            "${xcode_bin_dir_path}/notarytool" submit --wait --key "$notarization_key_file" --key-id "$APPLE_NOTARIZATION_KEY_ID" --issuer "$APPLE_NOTARIZATION_ISSUER_ID" "${dmg_file_path}"
+            rm "$notarization_key_file"
+            
+            echo "Stapling notarization ticket to DMG..."
+            "${xcode_bin_dir_path}/stapler" staple "${dmg_file_path}"
+            if [ $? -eq 0 ]; then
+                echo "✅ Successfully stapled notarization ticket!"
+            else
+                echo "⚠️  Failed to staple notarization ticket"
+            fi
         fi
 
         if [ "$open_result" = true ]; then
@@ -366,7 +392,8 @@ function sign_binary() {
 }
 
 if [ "$local_arch" = true ]; then
-    sign_app_binaries "$app_path" "$local_target_triple" "$local_target_triple"
+    prepare_app_bundle "$app_path" "$local_target_triple" "$local_target_triple"
+    sign_app_bundle "$app_path"
 
     sign_binary "target/release/remote_server"
 else
@@ -374,9 +401,14 @@ else
     prepare_binaries "aarch64-apple-darwin" "$app_path_aarch64"
     prepare_binaries "x86_64-apple-darwin" "$app_path_x64"
 
-
-    sign_app_binaries "$app_path_x64" "x86_64-apple-darwin" "x86_64-apple-darwin"
-    sign_app_binaries "$app_path_aarch64" "aarch64-apple-darwin" "aarch64-apple-darwin"
+    prepare_app_bundle "$app_path_x64" "x86_64-apple-darwin" "x86_64-apple-darwin"
+    prepare_app_bundle "$app_path_aarch64" "aarch64-apple-darwin" "aarch64-apple-darwin"
+    
+    # Sign the apps only if not creating DMG (for local builds)
+    if [ "$local_only" = true ]; then
+        sign_app_bundle "$app_path_x64"
+        sign_app_bundle "$app_path_aarch64"
+    fi
 
     sign_binary "target/x86_64-apple-darwin/release/remote_server"
     sign_binary "target/aarch64-apple-darwin/release/remote_server"
