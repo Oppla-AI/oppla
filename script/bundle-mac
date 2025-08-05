@@ -240,8 +240,8 @@ function sign_app_binaries() {
         # sequence of codesign commands modeled after this example: https://developer.apple.com/forums/thread/701514
         /usr/bin/codesign --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
         /usr/bin/codesign --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla-simple.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla-simple.entitlements --sign "$IDENTITY" "${app_path}" -v
+        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v
+        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}" -v
     else
         echo "One or more of the following variables are missing: MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, APPLE_NOTARIZATION_KEY, APPLE_NOTARIZATION_KEY_ID, APPLE_NOTARIZATION_ISSUER_ID"
         if [[ "$local_only" = false ]]; then
