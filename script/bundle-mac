@@ -129,12 +129,24 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     echo "Importing Apple intermediate certificate..."
     curl -s -o /tmp/DeveloperIDG2CA.cer https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
     security import /tmp/DeveloperIDG2CA.cer -k oppla.keychain -T /usr/bin/codesign
-    rm /tmp/DeveloperIDG2CA.cer
+    
+    # Also import Apple Root certificate
+    echo "Importing Apple Root certificate..."
+    curl -s -o /tmp/AppleRootCA.cer https://www.apple.com/appleca/AppleIncRootCertificate.cer
+    security import /tmp/AppleRootCA.cer -k oppla.keychain -T /usr/bin/codesign
+    
+    rm /tmp/DeveloperIDG2CA.cer /tmp/AppleRootCA.cer
     
     echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
-    security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+    security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/codesign_allocate -A
     rm /tmp/oppla-certificate.p12
+    
+    # Set key partition list with explicit permissions
     security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
+    
+    # Verify certificate was imported
+    echo "Verifying certificate import..."
+    security find-identity -v -p codesigning oppla.keychain
 
     function cleanup() {
         echo "Cleaning up keychain"
