@@ -13,8 +13,7 @@ bundle_name=""
 can_code_sign=false
 
 # This must match the team in the provisioning profile.
-# Using just the company name like Zed does
-IDENTITY="Insihts, Corp."
+IDENTITY="Developer ID Application: Insihts, Corp. (RVPAX6PXC6)"
 APPLE_NOTARIZATION_TEAM="RVPAX6PXC6"
 
 # Function for displaying help info
@@ -122,31 +121,43 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     can_code_sign=true
 
     echo "Setting up keychain for code signing..."
-    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain || echo ""
+    
+    # Create and configure temporary keychain
+    security delete-keychain oppla.keychain 2>/dev/null || true
+    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
+    security set-keychain-settings -t 3600 -u oppla.keychain
     security default-keychain -s oppla.keychain
     security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
     
-    # Import Apple root and intermediate certificates first
+    # Import Apple root and intermediate certificates
     echo "Importing Apple certificates for trust chain..."
+    
+    # Download all necessary certificates
     curl -s -o /tmp/AppleRootCA-G2.cer https://www.apple.com/certificateauthority/AppleRootCA-G2.cer
     curl -s -o /tmp/DeveloperIDG2CA.cer https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
     
-    # Import the root certificate with trust settings
-    security import /tmp/AppleRootCA-G2.cer -k oppla.keychain -T /usr/bin/codesign -T /usr/bin/security
-    security add-trusted-cert -d -r trustRoot -k oppla.keychain -p codeSign -p basic /tmp/AppleRootCA-G2.cer 2>/dev/null || true
+    # Import certificates in the correct order
+    security import /tmp/AppleRootCA-G2.cer -k oppla.keychain -T /usr/bin/codesign
+    security import /tmp/DeveloperIDG2CA.cer -k oppla.keychain -T /usr/bin/codesign
     
-    # Import the intermediate certificate
-    security import /tmp/DeveloperIDG2CA.cer -k oppla.keychain -T /usr/bin/codesign -T /usr/bin/security
+    # Import the Developer ID certificate with private key
+    echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
+    security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
     
     # Clean up certificate files
-    rm /tmp/AppleRootCA-G2.cer /tmp/DeveloperIDG2CA.cer
+    rm -f /tmp/AppleRootCA-G2.cer /tmp/DeveloperIDG2CA.cer /tmp/oppla-certificate.p12
     
-    echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
-    security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-    rm /tmp/oppla-certificate.p12
-    
-    # Set access control for the private key
+    # Allow codesign to access all certificates and keys without prompting
     security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
+    
+    # Verify the certificate can be found
+    echo "Verifying certificate installation..."
+    if security find-identity -v -p codesigning oppla.keychain | grep -q "Insihts"; then
+        echo "✅ Certificate found in keychain"
+    else
+        echo "❌ Certificate not found in keychain!"
+        exit 1
+    fi
 
     function cleanup() {
         echo "Cleaning up keychain"
