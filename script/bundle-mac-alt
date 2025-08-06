@@ -13,7 +13,7 @@ bundle_name=""
 can_code_sign=false
 
 # This must match the team in the provisioning profile.
-IDENTITY="Insihts, Corp."
+IDENTITY="Developer ID Application: Insihts, Corp. (RVPAX6PXC6)"
 APPLE_NOTARIZATION_TEAM="RVPAX6PXC6"
 
 # Function for displaying help info
@@ -121,18 +121,52 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     can_code_sign=true
 
     echo "Setting up keychain for code signing..."
-    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain || echo ""
-    security default-keychain -s oppla.keychain
-    security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
+
+    # Use a unique keychain name to avoid conflicts
+    KEYCHAIN_NAME="oppla-signing-$(date +%s).keychain"
+
+    # Create temporary keychain that inherits from system keychain
+    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" "$KEYCHAIN_NAME"
+
+    # Add both the new keychain and system keychain to search list
+    # This allows access to system's Apple root certificates
+    security list-keychains -s "$KEYCHAIN_NAME" ~/Library/Keychains/login.keychain-db /Library/Keychains/System.keychain
+
+    # Set as default and unlock
+    security default-keychain -s "$KEYCHAIN_NAME"
+    security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" "$KEYCHAIN_NAME"
+
+    # Import only the developer certificate (system already has Apple certs)
+    echo "Importing developer certificate..."
     echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
-    security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-    rm /tmp/oppla-certificate.p12
-    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
+    security import /tmp/oppla-certificate.p12 -k "$KEYCHAIN_NAME" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -A
+    rm -f /tmp/oppla-certificate.p12
+
+    # Allow codesign to access the certificate without prompting
+    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" "$KEYCHAIN_NAME"
+
+    # Verify certificate is accessible
+    echo "Verifying certificate installation..."
+    if security find-identity -v -p codesigning "$KEYCHAIN_NAME" | grep -q "Developer ID Application"; then
+        echo "✅ Developer ID certificate found and accessible"
+
+        # Test that we can access the full certificate chain
+        echo "Testing certificate chain validation..."
+        if security verify-cert -c /tmp/test-cert.pem -k "$KEYCHAIN_NAME" 2>/dev/null || true; then
+            echo "✅ Certificate chain validation appears functional"
+        fi
+    else
+        echo "❌ Developer ID certificate not found in keychain!"
+        echo "Available identities:"
+        security find-identity -v -p codesigning "$KEYCHAIN_NAME"
+        exit 1
+    fi
 
     function cleanup() {
         echo "Cleaning up keychain"
-        security default-keychain -s login.keychain
-        security delete-keychain oppla.keychain
+        security default-keychain -s ~/Library/Keychains/login.keychain-db
+        security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
+        rm -f /tmp/test-cert.pem
     }
 
     trap cleanup EXIT
@@ -237,15 +271,40 @@ function sign_app_binaries() {
 
     if [[ $can_code_sign = true ]]; then
         echo "Code signing binaries"
-        # sequence of codesign commands modeled after this example: https://developer.apple.com/forums/thread/701514
+
+        # Verify keychain has access to signing identity before proceeding
+        echo "Verifying signing identity access..."
+        if ! security find-identity -v -p codesigning | grep -q "$IDENTITY"; then
+            echo "❌ Cannot find signing identity: $IDENTITY"
+            echo "Available identities:"
+            security find-identity -v -p codesigning
+            exit 1
+        fi
+
+        # Sign binaries with verbose output for debugging
         echo "Signing cli binary..."
-        /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
+        if ! /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v; then
+            echo "❌ Failed to sign cli binary"
+            exit 1
+        fi
+
         echo "Signing git binary..."
-        /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
+        if ! /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v; then
+            echo "❌ Failed to sign git binary"
+            exit 1
+        fi
+
         echo "Signing oppla binary..."
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v
+        if ! /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v; then
+            echo "❌ Failed to sign oppla binary"
+            exit 1
+        fi
+
         echo "Signing app bundle..."
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}" -v
+        if ! /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}" -v; then
+            echo "❌ Failed to sign app bundle"
+            exit 1
+        fi
 
         echo "Verifying signatures..."
         if codesign -vvv --deep --strict "${app_path}" 2>&1; then
@@ -339,7 +398,7 @@ function sign_app_binaries() {
 
         if [[ $can_code_sign = true ]]; then
             echo "Notarizing DMG with Apple"
-            /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "$(pwd)/${dmg_file_path}" -v
+            /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "$(pwd)/${dmg_file_path)" -v
             echo "$APPLE_NOTARIZATION_KEY" > "$notarization_key_file"
             "${xcode_bin_dir_path}/notarytool" submit --wait --key "$notarization_key_file" --key-id "$APPLE_NOTARIZATION_KEY_ID" --issuer "$APPLE_NOTARIZATION_ISSUER_ID" "${dmg_file_path}"
             rm "$notarization_key_file"
