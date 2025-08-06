@@ -249,7 +249,7 @@ function sign_app_binaries() {
         
         echo "Verifying signatures..."
         if codesign -vvv --deep --strict "${app_path}" 2>&1; then
-            echo "✅ Code signature verification passed! This is in local"
+            echo "✅ Code signature verification passed!"
         else
             echo "⚠️  WARNING: Code signature verification failed locally"
             echo "This might be due to macOS beta version. Proceeding anyway..."
