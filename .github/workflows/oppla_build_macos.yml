@@ -72,6 +72,8 @@ jobs:
 
       - name: Configure CI
         run: |
+          # Add Homebrew to PATH for cmake and other tools
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
           mkdir -p ./../.cargo
           cp ./.cargo/ci-config.toml ./../.cargo/config.toml || echo "No CI config found"
 
