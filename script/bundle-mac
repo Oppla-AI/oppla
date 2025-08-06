@@ -121,43 +121,13 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     can_code_sign=true
 
     echo "Setting up keychain for code signing..."
-    
-    # Create and configure temporary keychain
-    security delete-keychain oppla.keychain 2>/dev/null || true
-    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
-    security set-keychain-settings -t 3600 -u oppla.keychain
+    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain || echo ""
     security default-keychain -s oppla.keychain
     security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
-    
-    # Import Apple root and intermediate certificates
-    echo "Importing Apple certificates for trust chain..."
-    
-    # Download all necessary certificates
-    curl -s -o /tmp/AppleRootCA-G2.cer https://www.apple.com/certificateauthority/AppleRootCA-G2.cer
-    curl -s -o /tmp/DeveloperIDG2CA.cer https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
-    
-    # Import certificates in the correct order
-    security import /tmp/AppleRootCA-G2.cer -k oppla.keychain -T /usr/bin/codesign
-    security import /tmp/DeveloperIDG2CA.cer -k oppla.keychain -T /usr/bin/codesign
-    
-    # Import the Developer ID certificate with private key
     echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
     security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-    
-    # Clean up certificate files
-    rm -f /tmp/AppleRootCA-G2.cer /tmp/DeveloperIDG2CA.cer /tmp/oppla-certificate.p12
-    
-    # Allow codesign to access all certificates and keys without prompting
+    rm /tmp/oppla-certificate.p12
     security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
-    
-    # Verify the certificate can be found
-    echo "Verifying certificate installation..."
-    if security find-identity -v -p codesigning oppla.keychain | grep -q "Insihts"; then
-        echo "✅ Certificate found in keychain"
-    else
-        echo "❌ Certificate not found in keychain!"
-        exit 1
-    fi
 
     function cleanup() {
         echo "Cleaning up keychain"
@@ -247,13 +217,13 @@ function prepare_binaries() {
 
     cp target/${architecture}/${target_dir}/oppla "${app_path}/Contents/MacOS/oppla"
     cp target/${architecture}/${target_dir}/cli "${app_path}/Contents/MacOS/cli"
-    
+
     echo "Downloading git binary for $architecture"
     download_git "${architecture}" "${app_path}/Contents/MacOS/git"
-    
+
     echo "Copying provisioning profile"
     cp crates/oppla/contents/$channel/embedded.provisionprofile "${app_path}/Contents/"
-    
+
     echo "Creating Frameworks directory"
     rm -rf "${app_path}/Contents/Frameworks"
     mkdir -p "${app_path}/Contents/Frameworks"
@@ -276,7 +246,7 @@ function sign_app_binaries() {
         /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/oppla" -v
         echo "Signing app bundle..."
         /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" "${app_path}" -v
-        
+
         echo "Verifying signatures..."
         if codesign -vvv --deep --strict "${app_path}" 2>&1; then
             echo "✅ Code signature verification passed!"
