@@ -124,6 +124,13 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain || echo ""
     security default-keychain -s oppla.keychain
     security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
+    
+    # Import Apple intermediate certificate for better chain support
+    echo "Importing Apple intermediate certificate..."
+    curl -s -o /tmp/DeveloperIDG2CA.cer https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+    security import /tmp/DeveloperIDG2CA.cer -k oppla.keychain -T /usr/bin/codesign
+    rm /tmp/DeveloperIDG2CA.cer
+    
     echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
     security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
     rm /tmp/oppla-certificate.p12
