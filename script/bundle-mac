@@ -121,39 +121,100 @@ echo "Bundled ${app_path}"
 if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n "${APPLE_NOTARIZATION_KEY:-}" && -n "${APPLE_NOTARIZATION_KEY_ID:-}" && -n "${APPLE_NOTARIZATION_ISSUER_ID:-}" ]]; then
     can_code_sign=true
 
+    echo "====== Certificate Setup ======"
     echo "Setting up keychain for code signing..."
+    
     # Delete existing keychain if it exists to avoid password conflicts
     security delete-keychain oppla.keychain 2>/dev/null || true
+    
+    # Create new keychain
     security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
     security default-keychain -s oppla.keychain
     security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
     
-    # Import Apple intermediate certificate for better chain support
-    echo "Importing Apple intermediate certificate..."
+    # Import Apple certificates for proper chain
+    echo "Importing Apple certificate chain..."
     curl -s -o /tmp/DeveloperIDG2CA.cer https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
-    security import /tmp/DeveloperIDG2CA.cer -k oppla.keychain -T /usr/bin/codesign
-    
-    # Also import Apple Root certificate
-    echo "Importing Apple Root certificate..."
+    curl -s -o /tmp/AppleWWDRCAG2.cer https://www.apple.com/certificateauthority/AppleWWDRCAG2.cer
     curl -s -o /tmp/AppleRootCA.cer https://www.apple.com/appleca/AppleIncRootCertificate.cer
+    
+    security import /tmp/DeveloperIDG2CA.cer -k oppla.keychain -T /usr/bin/codesign
+    security import /tmp/AppleWWDRCAG2.cer -k oppla.keychain -T /usr/bin/codesign
     security import /tmp/AppleRootCA.cer -k oppla.keychain -T /usr/bin/codesign
     
-    rm /tmp/DeveloperIDG2CA.cer /tmp/AppleRootCA.cer
+    rm /tmp/DeveloperIDG2CA.cer /tmp/AppleWWDRCAG2.cer /tmp/AppleRootCA.cer
     
+    # Import our certificate
+    echo "Importing Developer ID certificate..."
     echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
     security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/codesign_allocate -T /usr/bin/security -A
     rm /tmp/oppla-certificate.p12
     
-    # Make keychain searchable
+    # Configure keychain
     security list-keychains -d user -s oppla.keychain $(security list-keychains -d user | sed 's/\"//g')
     security set-keychain-settings -lut 21600 oppla.keychain
-    
-    # Set key partition list
     security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
     
     # Verify certificate was imported
     echo "Verifying certificate import..."
-    security find-identity -v -p codesigning oppla.keychain
+    CERT_INFO=$(security find-identity -v -p codesigning oppla.keychain | grep "$IDENTITY" || true)
+    if [[ -z "$CERT_INFO" ]]; then
+        echo "ERROR: Certificate '$IDENTITY' not found in keychain!"
+        security find-identity -v -p codesigning oppla.keychain
+        exit 1
+    fi
+    echo "Certificate found: $CERT_INFO"
+    
+    # CRITICAL: Verify TeamIdentifier is set
+    echo "Verifying TeamIdentifier..."
+    echo "int main(){return 0;}" > /tmp/test.c
+    clang /tmp/test.c -o /tmp/test
+    
+    if ! codesign -s "$IDENTITY" --keychain oppla.keychain -f /tmp/test 2>/dev/null; then
+        echo "ERROR: Failed to sign test binary!"
+        exit 1
+    fi
+    
+    TEAM_ID=$(codesign -dvv /tmp/test 2>&1 | grep TeamIdentifier | cut -d '=' -f2)
+    rm -f /tmp/test.c /tmp/test
+    
+    if [[ -z "$TEAM_ID" ]]; then
+        echo "ERROR: TeamIdentifier is not set in certificate!"
+        echo "This certificate cannot be used for notarization."
+        echo "Please create a new certificate via Xcode (not the web portal)."
+        exit 1
+    fi
+    
+    if [[ "$TEAM_ID" != "$APPLE_NOTARIZATION_TEAM" ]]; then
+        echo "ERROR: TeamIdentifier mismatch!"
+        echo "Expected: $APPLE_NOTARIZATION_TEAM"
+        echo "Got: $TEAM_ID"
+        exit 1
+    fi
+    
+    echo "✅ TeamIdentifier verified: $TEAM_ID"
+    
+    # Verify designated requirements format
+    echo "Verifying certificate requirements format..."
+    echo "int main(){return 0;}" > /tmp/test2.c
+    clang /tmp/test2.c -o /tmp/test2
+    codesign -s "$IDENTITY" --keychain oppla.keychain -f /tmp/test2 2>/dev/null
+    
+    REQUIREMENTS=$(codesign -d -r- /tmp/test2 2>&1)
+    rm -f /tmp/test2.c /tmp/test2
+    
+    if [[ "$REQUIREMENTS" == *"certificate root = H"* ]]; then
+        echo "ERROR: Certificate generates incorrect designated requirements!"
+        echo "This certificate was likely created via the web portal."
+        echo "Please create a new certificate via Xcode."
+        exit 1
+    fi
+    
+    if [[ "$REQUIREMENTS" != *"anchor apple generic"* ]]; then
+        echo "WARNING: Certificate may not have proper Apple anchor"
+    else
+        echo "✅ Certificate has proper designated requirements"
+    fi
 
     function cleanup() {
         echo "Cleaning up keychain"
@@ -262,52 +323,74 @@ function sign_app_binaries() {
     echo "====== Signing app binaries for $architecture ======"
 
     if [[ $can_code_sign = true ]]; then
-        echo "Code signing binaries"
+        echo "Signing app with deep signing approach (proven to work)..."
         
-        # Sign binaries individually with --deep flag (following Zed's approach)
-        echo "Signing cli binary..."
-        /usr/bin/codesign --deep --force --timestamp --options runtime \
-            --sign "$IDENTITY" --keychain oppla.keychain \
-            "${app_path}/Contents/MacOS/cli" -v
+        # Remove any existing signatures first
+        echo "Removing existing signatures..."
+        codesign --remove-signature "${app_path}/Contents/MacOS/cli" 2>/dev/null || true
+        codesign --remove-signature "${app_path}/Contents/MacOS/git" 2>/dev/null || true
+        codesign --remove-signature "${app_path}/Contents/MacOS/oppla" 2>/dev/null || true
+        rm -rf "${app_path}/Contents/_CodeSignature"
         
-        echo "Signing git binary..."
-        /usr/bin/codesign --deep --force --timestamp --options runtime \
-            --sign "$IDENTITY" --keychain oppla.keychain \
-            "${app_path}/Contents/MacOS/git" -v
-        
-        echo "Signing oppla binary..."
-        /usr/bin/codesign --deep --force --timestamp --options runtime \
-            --entitlements crates/oppla/resources/oppla.entitlements \
-            --sign "$IDENTITY" --keychain oppla.keychain \
-            "${app_path}/Contents/MacOS/oppla" -v
-        
-        # Sign any frameworks or nested bundles if they exist
+        # Sign any frameworks first if they exist
         if [ -d "${app_path}/Contents/Frameworks" ]; then
             find "${app_path}/Contents/Frameworks" -name "*.framework" -o -name "*.dylib" | while read -r framework; do
                 echo "Signing framework: $framework"
-                /usr/bin/codesign --deep --force --timestamp --options runtime \
-                    --sign "$IDENTITY" --keychain oppla.keychain "$framework" -v
+                /usr/bin/codesign --force --deep \
+                    --sign "$IDENTITY" \
+                    --keychain oppla.keychain \
+                    --options runtime \
+                    --timestamp \
+                    "$framework" -v
             done
         fi
         
-        # Finally sign the app bundle with --force but WITHOUT --deep to preserve nested signatures
-        # Get the bundle ID from Info.plist
-        BUNDLE_ID=$(defaults read "${app_path}/Contents/Info.plist" CFBundleIdentifier 2>/dev/null || echo "ai.oppla.Oppla")
-        
-        echo "Signing app bundle with bundle ID: $BUNDLE_ID"
-        /usr/bin/codesign --force --timestamp --options runtime \
+        # Deep sign the entire app bundle with entitlements
+        # This approach signs all nested binaries correctly
+        echo "Deep signing app bundle..."
+        /usr/bin/codesign --force --deep \
+            --sign "$IDENTITY" \
+            --keychain oppla.keychain \
+            --options runtime \
+            --timestamp \
             --entitlements crates/oppla/resources/oppla.entitlements \
-            --sign "$IDENTITY" --keychain oppla.keychain \
             "${app_path}" -v
-
+        
+        # Verify the signature
         echo "Verifying signatures..."
-        if codesign -vvv --deep --strict "${app_path}" 2>&1; then
-            echo "✅ Code signature verification passed!"
-        else
-            echo "⚠️  WARNING: Code signature verification failed locally"
-            echo "This might be due to certificate chain issues. Proceeding anyway..."
-            echo "Notarization will provide the final verdict"
+        if ! codesign --verify --deep --strict "${app_path}" 2>&1; then
+            echo "ERROR: Code signature verification failed!"
+            echo "Attempting to diagnose..."
+            codesign --verify --deep --strict --verbose=4 "${app_path}" 2>&1
+            exit 1
         fi
+        
+        echo "✅ Code signature verification passed!"
+        
+        # Verify TeamIdentifier is set on all binaries
+        echo "Verifying TeamIdentifier on all binaries..."
+        for binary in oppla cli git; do
+            TEAM_ID=$(codesign -dvv "${app_path}/Contents/MacOS/$binary" 2>&1 | grep TeamIdentifier | cut -d '=' -f2)
+            if [[ "$TEAM_ID" != "RVPAX6PXC6" ]]; then
+                echo "ERROR: TeamIdentifier not set on $binary! Got: '$TEAM_ID'"
+                exit 1
+            fi
+        done
+        echo "✅ All binaries have correct TeamIdentifier"
+        
+        # Verify designated requirements
+        echo "Verifying designated requirements..."
+        REQUIREMENTS=$(codesign -d -r- "${app_path}" 2>&1)
+        if [[ "$REQUIREMENTS" == *"certificate root = H"* ]]; then
+            echo "ERROR: Certificate has incorrect designated requirements!"
+            echo "This usually means the certificate was created via web portal instead of Xcode"
+            exit 1
+        fi
+        if [[ "$REQUIREMENTS" != *"anchor apple generic"* ]]; then
+            echo "ERROR: Missing 'anchor apple generic' in requirements!"
+            exit 1
+        fi
+        echo "✅ Designated requirements are correct"
         
     else
         echo "One or more of the following variables are missing: MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, APPLE_NOTARIZATION_KEY, APPLE_NOTARIZATION_KEY_ID, APPLE_NOTARIZATION_ISSUER_ID"
@@ -392,12 +475,90 @@ function sign_app_binaries() {
         dmg-license script/terms/terms.json "${dmg_file_path}"
 
         if [[ $can_code_sign = true ]]; then
-            echo "Notarizing DMG with Apple"
-            /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" --keychain oppla.keychain "$(pwd)/${dmg_file_path}" -v
-            echo "$APPLE_NOTARIZATION_KEY" > "$notarization_key_file"
-            "${xcode_bin_dir_path}/notarytool" submit --wait --key "$notarization_key_file" --key-id "$APPLE_NOTARIZATION_KEY_ID" --issuer "$APPLE_NOTARIZATION_ISSUER_ID" "${dmg_file_path}"
-            rm "$notarization_key_file"
-            "${xcode_bin_dir_path}/stapler" staple "${dmg_file_path}"
+            echo "Signing DMG..."
+            /usr/bin/codesign --force --deep \
+                --sign "$IDENTITY" \
+                --keychain oppla.keychain \
+                --timestamp \
+                --options runtime \
+                "$(pwd)/${dmg_file_path}" -v
+            
+            echo "Notarizing DMG with Apple..."
+            
+            # Save API key to file if it's provided as content
+            if [[ "$APPLE_NOTARIZATION_KEY" == *"BEGIN PRIVATE KEY"* ]]; then
+                echo "API key appears to be content, saving to file..."
+                echo "$APPLE_NOTARIZATION_KEY" > "$notarization_key_file"
+            else
+                # Assume it's a file path
+                notarization_key_file="$APPLE_NOTARIZATION_KEY"
+            fi
+            
+            # Submit for notarization with proper error handling
+            echo "Submitting for notarization (this may take 5-10 minutes)..."
+            SUBMISSION_OUTPUT=$("${xcode_bin_dir_path}/notarytool" submit \
+                --key "$notarization_key_file" \
+                --key-id "$APPLE_NOTARIZATION_KEY_ID" \
+                --issuer "$APPLE_NOTARIZATION_ISSUER_ID" \
+                --wait \
+                "${dmg_file_path}" 2>&1)
+            
+            SUBMISSION_STATUS=$?
+            echo "$SUBMISSION_OUTPUT"
+            
+            if [ $SUBMISSION_STATUS -ne 0 ]; then
+                echo "ERROR: Notarization submission failed!"
+                
+                # Try to extract submission ID and get log
+                SUBMISSION_ID=$(echo "$SUBMISSION_OUTPUT" | grep -oE '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}' | head -1)
+                if [[ -n "$SUBMISSION_ID" ]]; then
+                    echo "Attempting to get notarization log for submission ID: $SUBMISSION_ID"
+                    "${xcode_bin_dir_path}/notarytool" log \
+                        --key "$notarization_key_file" \
+                        --key-id "$APPLE_NOTARIZATION_KEY_ID" \
+                        --issuer "$APPLE_NOTARIZATION_ISSUER_ID" \
+                        "$SUBMISSION_ID"
+                fi
+                
+                # Clean up key file if we created it
+                if [[ "$APPLE_NOTARIZATION_KEY" == *"BEGIN PRIVATE KEY"* ]]; then
+                    rm "$notarization_key_file"
+                fi
+                exit 1
+            fi
+            
+            # Check if notarization was accepted
+            if [[ "$SUBMISSION_OUTPUT" == *"Accepted"* ]]; then
+                echo "✅ Notarization accepted!"
+            else
+                echo "WARNING: Notarization status unclear. Output:"
+                echo "$SUBMISSION_OUTPUT"
+            fi
+            
+            # Clean up key file if we created it
+            if [[ "$APPLE_NOTARIZATION_KEY" == *"BEGIN PRIVATE KEY"* ]]; then
+                rm "$notarization_key_file"
+            fi
+            
+            echo "Stapling notarization ticket..."
+            if ! "${xcode_bin_dir_path}/stapler" staple "${dmg_file_path}"; then
+                echo "ERROR: Stapling failed!"
+                echo "Attempting to diagnose..."
+                # Try to check if the DMG is actually notarized
+                spctl -a -vv -t install "${dmg_file_path}" 2>&1
+                exit 1
+            fi
+            
+            echo "✅ DMG successfully notarized and stapled!"
+            
+            # Final verification
+            echo "Final verification of notarized DMG..."
+            if spctl -a -vv -t install "${dmg_file_path}" 2>&1 | grep -q "accepted"; then
+                echo "✅ DMG passes Gatekeeper verification!"
+            else
+                echo "WARNING: DMG may not pass Gatekeeper. Output:"
+                spctl -a -vv -t install "${dmg_file_path}" 2>&1
+            fi
         fi
 
         if [ "$open_result" = true ]; then
@@ -411,7 +572,22 @@ function sign_binary() {
 
     if [[ $can_code_sign = true ]]; then
         echo "Code signing executable $binary_path"
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/oppla/resources/oppla.entitlements --sign "$IDENTITY" --keychain oppla.keychain "${binary_path}" -v
+        
+        /usr/bin/codesign --force --deep \
+            --sign "$IDENTITY" \
+            --keychain oppla.keychain \
+            --timestamp \
+            --options runtime \
+            --entitlements crates/oppla/resources/oppla.entitlements \
+            "${binary_path}" -v
+        
+        # Verify TeamIdentifier was applied
+        TEAM_ID=$(codesign -dvv "${binary_path}" 2>&1 | grep TeamIdentifier | cut -d '=' -f2)
+        if [[ "$TEAM_ID" != "RVPAX6PXC6" ]]; then
+            echo "ERROR: TeamIdentifier not set on $binary_path! Got: '$TEAM_ID'"
+            exit 1
+        fi
+        echo "✅ Binary signed with TeamIdentifier: $TEAM_ID"
     fi
 }
 
