@@ -411,8 +411,11 @@ mod linux {
 
     use crate::{Detect, InstalledApp};
 
-    static RELEASE_CHANNEL: LazyLock<String> =
-        LazyLock::new(|| include_str!("../../oppla/RELEASE_CHANNEL").trim().to_string());
+    static RELEASE_CHANNEL: LazyLock<String> = LazyLock::new(|| {
+        include_str!("../../oppla/RELEASE_CHANNEL")
+            .trim()
+            .to_string()
+    });
 
     struct App(PathBuf);
 
