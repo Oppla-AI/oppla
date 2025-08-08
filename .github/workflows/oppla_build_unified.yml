@@ -1,0 +1,334 @@
+name: Oppla Build (macOS & Linux)
+
+on:
+  push:
+    branches:
+      - main
+      - "v[0-9]+.[0-9]+.x"
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - macos-only
+          - linux-only
+          - linux-x86_64-only
+          - linux-aarch64-only
+
+concurrency:
+  # Allow only one workflow per any non-`main` branch.
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.ref_name == 'main' && github.sha || 'anysha' }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+  DIGITALOCEAN_SPACES_ACCESS_KEY: ${{ secrets.DIGITALOCEAN_SPACES_ACCESS_KEY }}
+  DIGITALOCEAN_SPACES_SECRET_KEY: ${{ secrets.DIGITALOCEAN_SPACES_SECRET_KEY }}
+  ZED_CLIENT_CHECKSUM_SEED: ${{ secrets.ZED_CLIENT_CHECKSUM_SEED }}
+
+jobs:
+  # ============================================
+  # macOS Build Job
+  # ============================================
+  macos_bundle:
+    timeout-minutes: 120
+    name: macOS Build and Bundle
+    runs-on: [self-hosted, macOS, ARM64]  # Your local Mac with Xcode
+    if: |
+      (github.event_name == 'workflow_dispatch' && contains('all macos-only', github.event.inputs.platforms)) ||
+      github.event_name == 'push' ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      contains(github.event.pull_request.labels.*.name, 'run-bundling')
+    env:
+      MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      APPLE_NOTARIZATION_KEY: ${{ secrets.APPLE_NOTARIZATION_KEY }}
+      APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
+      APPLE_NOTARIZATION_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_ISSUER_ID }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+          clean: false
+          ref: ${{ github.ref }}
+
+      - name: Check Xcode version
+        run: |
+          echo "Current Xcode version:"
+          xcodebuild -version
+          echo "Xcode path:"
+          xcode-select -p
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Configure CI
+        run: |
+          # Add Homebrew to PATH for cmake and other tools
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          mkdir -p ./../.cargo
+          cp ./.cargo/ci-config.toml ./../.cargo/config.toml || echo "No CI config found"
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Determine version and release channel
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          if [[ "$VERSION" == *"-pre" ]]; then
+            echo "RELEASE_CHANNEL=preview" >> $GITHUB_ENV
+          else
+            echo "RELEASE_CHANNEL=stable" >> $GITHUB_ENV
+          fi
+
+      - name: Install cargo-about
+        run: cargo install cargo-about@^0.7
+
+      - name: Generate licenses
+        run: script/generate-licenses
+
+      - name: Create macOS app bundle
+        run: |
+          if [ -f "script/bundle-mac" ]; then
+            # Run with -l flag for local build to skip dSYM uploads if no DigitalOcean credentials
+            if [[ -z "$DIGITALOCEAN_SPACES_ACCESS_KEY" || -z "$DIGITALOCEAN_SPACES_SECRET_KEY" ]]; then
+              echo "No DigitalOcean credentials found, running local build"
+              script/bundle-mac -l
+            else
+              script/bundle-mac
+            fi
+          else
+            echo "Bundle script not found, running basic build"
+            cargo build --release
+          fi
+
+      - name: Upload macOS Bundle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Oppla-macOS-${{ github.sha }}
+          path: |
+            target/*/release/*.dmg
+            target/release/oppla
+            target/release/zed
+          retention-days: 7
+
+      - name: Rename DMG files with architecture
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "Looking for DMG files..."
+          find target -name "*.dmg" -type f || echo "No DMG files found"
+          
+          # Rename DMG files to include architecture
+          if [ -f "target/x86_64-apple-darwin/release/Oppla.dmg" ]; then
+            mv "target/x86_64-apple-darwin/release/Oppla.dmg" "target/x86_64-apple-darwin/release/Oppla-x86_64.dmg"
+            echo "Renamed x86_64 DMG to Oppla-x86_64.dmg"
+          fi
+          if [ -f "target/aarch64-apple-darwin/release/Oppla.dmg" ]; then
+            mv "target/aarch64-apple-darwin/release/Oppla.dmg" "target/aarch64-apple-darwin/release/Oppla-aarch64.dmg"
+            echo "Renamed aarch64 DMG to Oppla-aarch64.dmg"
+          fi
+
+      - name: Upload macOS artifacts to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          draft: true
+          prerelease: ${{ env.RELEASE_CHANNEL == 'preview' }}
+          files: |
+            target/x86_64-apple-darwin/release/Oppla-x86_64.dmg
+            target/aarch64-apple-darwin/release/Oppla-aarch64.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Linux x86_64 Build Job
+  # ============================================
+  linux_x86_64_bundle:
+    timeout-minutes: 60
+    name: Linux x86_64 Build
+    runs-on: buildjet-16vcpu-ubuntu-2004  # ubuntu 20.04 for minimal glibc
+    if: |
+      (github.event_name == 'workflow_dispatch' && contains('all linux-only linux-x86_64-only', github.event.inputs.platforms)) ||
+      github.event_name == 'push' ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      contains(github.event.pull_request.labels.*.name, 'build-linux')
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Install Linux dependencies
+        run: ./script/linux && ./script/install-mold 2.34.0
+
+      - name: Determine version and release channel
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # This exports RELEASE_CHANNEL into env (GITHUB_ENV)
+          script/determine-release-channel
+
+      - name: Create Linux .tar.gz bundle
+        run: script/bundle-linux
+
+      - name: Upload Linux x86_64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oppla-${{ github.sha }}-x86_64-unknown-linux-gnu.tar.gz
+          path: target/release/oppla-*.tar.gz
+
+      - name: Upload Remote Server artifact
+        uses: actions/upload-artifact@v4
+        if: hashFiles('target/oppla-remote-server-linux-x86_64.gz') != ''
+        with:
+          name: oppla-remote-server-${{ github.sha }}-x86_64-unknown-linux-gnu.gz
+          path: target/oppla-remote-server-linux-x86_64.gz
+
+      - name: Upload Linux x86_64 artifacts to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          draft: true
+          prerelease: ${{ env.RELEASE_CHANNEL == 'preview' }}
+          files: |
+            target/oppla-remote-server-linux-x86_64.gz
+            target/release/oppla-linux-x86_64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Linux aarch64 Build Job
+  # ============================================
+  linux_aarch64_bundle:
+    timeout-minutes: 60
+    name: Linux arm64 Build
+    runs-on: buildjet-32vcpu-ubuntu-2204-arm
+    if: |
+      (github.event_name == 'workflow_dispatch' && contains('all linux-only linux-aarch64-only', github.event.inputs.platforms)) ||
+      github.event_name == 'push' ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      contains(github.event.pull_request.labels.*.name, 'build-linux')
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Install Linux dependencies
+        run: ./script/linux && ./script/install-mold 2.34.0
+
+      - name: Determine version and release channel
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # This exports RELEASE_CHANNEL into env (GITHUB_ENV)
+          script/determine-release-channel
+
+      - name: Create Linux .tar.gz bundle
+        run: script/bundle-linux
+
+      - name: Upload Linux aarch64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oppla-${{ github.sha }}-aarch64-unknown-linux-gnu.tar.gz
+          path: target/release/oppla-*.tar.gz
+
+      - name: Upload Remote Server artifact
+        uses: actions/upload-artifact@v4
+        if: hashFiles('target/oppla-remote-server-linux-aarch64.gz') != ''
+        with:
+          name: oppla-remote-server-${{ github.sha }}-aarch64-unknown-linux-gnu.gz
+          path: target/oppla-remote-server-linux-aarch64.gz
+
+      - name: Upload Linux aarch64 artifacts to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          draft: true
+          prerelease: ${{ env.RELEASE_CHANNEL == 'preview' }}
+          files: |
+            target/oppla-remote-server-linux-aarch64.gz
+            target/release/oppla-linux-aarch64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Summary Job (runs after all builds complete)
+  # ============================================
+  build_summary:
+    name: Build Summary
+    needs: [macos_bundle, linux_x86_64_bundle, linux_aarch64_bundle]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check build results
+        run: |
+          echo "Build Summary:"
+          echo "=============="
+          
+          if [[ "${{ needs.macos_bundle.result }}" == "success" ]]; then
+            echo "✅ macOS build: SUCCESS"
+          elif [[ "${{ needs.macos_bundle.result }}" == "skipped" ]]; then
+            echo "⏭️  macOS build: SKIPPED"
+          else
+            echo "❌ macOS build: FAILED"
+          fi
+          
+          if [[ "${{ needs.linux_x86_64_bundle.result }}" == "success" ]]; then
+            echo "✅ Linux x86_64 build: SUCCESS"
+          elif [[ "${{ needs.linux_x86_64_bundle.result }}" == "skipped" ]]; then
+            echo "⏭️  Linux x86_64 build: SKIPPED"
+          else
+            echo "❌ Linux x86_64 build: FAILED"
+          fi
+          
+          if [[ "${{ needs.linux_aarch64_bundle.result }}" == "success" ]]; then
+            echo "✅ Linux aarch64 build: SUCCESS"
+          elif [[ "${{ needs.linux_aarch64_bundle.result }}" == "skipped" ]]; then
+            echo "⏭️  Linux aarch64 build: SKIPPED"
+          else
+            echo "❌ Linux aarch64 build: FAILED"
+          fi
+          
+          # Fail if any required job failed
+          if [[ "${{ needs.macos_bundle.result }}" == "failure" ]] || \
+             [[ "${{ needs.linux_x86_64_bundle.result }}" == "failure" ]] || \
+             [[ "${{ needs.linux_aarch64_bundle.result }}" == "failure" ]]; then
+            echo ""
+            echo "❌ One or more builds failed!"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ All requested builds completed successfully!"
