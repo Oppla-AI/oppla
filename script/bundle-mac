@@ -122,7 +122,9 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     can_code_sign=true
 
     echo "Setting up keychain for code signing..."
-    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain || echo ""
+    # Delete existing keychain if it exists to avoid password conflicts
+    security delete-keychain oppla.keychain 2>/dev/null || true
+    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
     security default-keychain -s oppla.keychain
     security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
     
