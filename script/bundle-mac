@@ -264,43 +264,40 @@ function sign_app_binaries() {
     if [[ $can_code_sign = true ]]; then
         echo "Code signing binaries"
         
-        # IMPORTANT: Sign from innermost to outermost, WITHOUT --deep flag
-        
-        # 1. Sign individual binaries first (no --deep needed for single binaries)
+        # Sign binaries individually with --deep flag (following Zed's approach)
         echo "Signing cli binary..."
-        /usr/bin/codesign --force --timestamp --options runtime \
+        /usr/bin/codesign --deep --force --timestamp --options runtime \
             --sign "$IDENTITY" \
             "${app_path}/Contents/MacOS/cli" -v
         
         echo "Signing git binary..."
-        /usr/bin/codesign --force --timestamp --options runtime \
+        /usr/bin/codesign --deep --force --timestamp --options runtime \
             --sign "$IDENTITY" \
             "${app_path}/Contents/MacOS/git" -v
         
         echo "Signing oppla binary..."
-        /usr/bin/codesign --force --timestamp --options runtime \
+        /usr/bin/codesign --deep --force --timestamp --options runtime \
             --entitlements crates/oppla/resources/oppla.entitlements \
             --sign "$IDENTITY" \
             "${app_path}/Contents/MacOS/oppla" -v
         
-        # 2. Sign any frameworks or nested bundles if they exist
+        # Sign any frameworks or nested bundles if they exist
         if [ -d "${app_path}/Contents/Frameworks" ]; then
             find "${app_path}/Contents/Frameworks" -name "*.framework" -o -name "*.dylib" | while read -r framework; do
                 echo "Signing framework: $framework"
-                /usr/bin/codesign --force --timestamp --options runtime \
+                /usr/bin/codesign --deep --force --timestamp --options runtime \
                     --sign "$IDENTITY" "$framework" -v
             done
         fi
         
-        # 3. Finally sign the app bundle with explicit designated requirement
+        # Finally sign the app bundle WITHOUT --force to preserve nested signatures
         # Get the bundle ID from Info.plist
         BUNDLE_ID=$(defaults read "${app_path}/Contents/Info.plist" CFBundleIdentifier 2>/dev/null || echo "ai.oppla.Oppla")
         
         echo "Signing app bundle with bundle ID: $BUNDLE_ID"
-        /usr/bin/codesign --force --timestamp --options runtime \
+        /usr/bin/codesign --timestamp --options runtime \
             --entitlements crates/oppla/resources/oppla.entitlements \
             --sign "$IDENTITY" \
-            -r="designated => identifier \"$BUNDLE_ID\" and anchor apple generic" \
             "${app_path}" -v
 
         # 4. Comprehensive verification
