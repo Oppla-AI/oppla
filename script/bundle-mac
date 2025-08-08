@@ -141,11 +141,15 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     rm /tmp/DeveloperIDG2CA.cer /tmp/AppleRootCA.cer
     
     echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/oppla-certificate.p12
-    security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/codesign_allocate -A
+    security import /tmp/oppla-certificate.p12 -k oppla.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/codesign_allocate -T /usr/bin/security -A
     rm /tmp/oppla-certificate.p12
     
-    # Set key partition list with explicit permissions
-    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain
+    # Make keychain searchable
+    security list-keychains -d user -s oppla.keychain $(security list-keychains -d user | sed 's/\"//g')
+    security set-keychain-settings oppla.keychain
+    
+    # Set key partition list (allow it to fail)
+    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" oppla.keychain || true
     
     # Verify certificate was imported
     echo "Verifying certificate import..."
