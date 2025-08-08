@@ -290,12 +290,12 @@ function sign_app_binaries() {
             done
         fi
         
-        # Finally sign the app bundle WITHOUT --force to preserve nested signatures
+        # Finally sign the app bundle with --force but WITHOUT --deep to preserve nested signatures
         # Get the bundle ID from Info.plist
         BUNDLE_ID=$(defaults read "${app_path}/Contents/Info.plist" CFBundleIdentifier 2>/dev/null || echo "ai.oppla.Oppla")
         
         echo "Signing app bundle with bundle ID: $BUNDLE_ID"
-        /usr/bin/codesign --timestamp --options runtime \
+        /usr/bin/codesign --force --timestamp --options runtime \
             --entitlements crates/oppla/resources/oppla.entitlements \
             --sign "$IDENTITY" \
             "${app_path}" -v
