@@ -199,7 +199,7 @@ pub fn main() {
     // If there is, run the installer and exit
     // And we don't want to run the installer if we are not the first instance
     #[cfg(target_os = "windows")]
-    let is_first_instance = crate::zed::windows_only_instance::is_first_instance();
+    let is_first_instance = crate::oppla::windows_only_instance::is_first_instance();
     #[cfg(target_os = "windows")]
     if is_first_instance && auto_update::check_pending_installation() {
         return;
@@ -280,12 +280,12 @@ pub fn main() {
         } else {
             #[cfg(any(target_os = "linux", target_os = "freebsd"))]
             {
-                crate::zed::listen_for_cli_connections(open_listener.clone()).is_err()
+                crate::oppla::listen_for_cli_connections(open_listener.clone()).is_err()
             }
 
             #[cfg(target_os = "windows")]
             {
-                !crate::zed::windows_only_instance::handle_single_instance(
+                !crate::oppla::windows_only_instance::handle_single_instance(
                     open_listener.clone(),
                     &args,
                     is_first_instance,
