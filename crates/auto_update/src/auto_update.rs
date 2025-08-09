@@ -478,21 +478,23 @@ impl AutoUpdater {
 
             Ok(JsonRelease {
                 version: version.to_string(),
-                url: client.build_oppla_api_url(&url, &[("update", "1")])?.to_string(),
+                url: {
+                    let u = client.build_oppla_api_url(&url, &[("update", "1")])?;
+                    u.to_string()
+                },
             })
         } else {
-            let mut query_params = vec![
-                ("asset", asset),
-                ("os", os),
-                ("arch", arch),
-            ];
-            
+            let mut query_params = vec![("asset", asset), ("os", os), ("arch", arch)];
+
             // Add release_channel parameter if specified
             if let Some(channel) = release_channel {
                 query_params.push(("release_channel", channel.dev_name()));
             }
 
-            let url_string = client.build_oppla_api_url("/api/releases/latest", &query_params)?.to_string();
+            let url_string = {
+                let u = client.build_oppla_api_url("/api/releases/latest", &query_params)?;
+                u.to_string()
+            };
 
             let mut response = client.get(&url_string, Default::default(), true).await?;
             let mut body = Vec::new();
