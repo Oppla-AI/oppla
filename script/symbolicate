@@ -29,7 +29,7 @@ if [[ "$input_file" == *.json ]]; then
     fi
     if [[ ! -f target/dsyms/$dsym ]]; then
         echo "Downloading $dsym..."
-        curl -o target/dsyms/$dsym.gz "https://zed-debug-symbols.nyc3.digitaloceanspaces.com/$dsym.gz"
+        curl -o target/dsyms/$dsym.gz "https://oppla-debug-symbols.sfo3.digitaloceanspaces.com/$dsym.gz"
         gunzip  target/dsyms/$dsym.gz
     fi
 
@@ -67,8 +67,8 @@ else # ips file
     dsym="$uuid.dwarf"
     if [[ ! -f target/dsyms/$dsym ]]; then
         echo "Downloading $dsym..."
-        curl -f -o target/dsyms/$dsym.gz "https://zed-debug-symbols.nyc3.digitaloceanspaces.com/by-uuid/${uuid}.dwarf.gz" ||
-            curl -f -o target/dsyms/$dsym.gz "https://zed-debug-symbols.nyc3.digitaloceanspaces.com/$channel/Zed-$version-$arch.dwarf.gz"
+        curl -f -o target/dsyms/$dsym.gz "https://oppla-debug-symbols.sfo3.digitaloceanspaces.com/by-uuid/${uuid}.dwarf.gz" ||
+            curl -f -o target/dsyms/$dsym.gz "https://oppla-debug-symbols.sfo3.digitaloceanspaces.com/$channel/Zed-$version-$arch.dwarf.gz"
         gunzip  target/dsyms/$dsym.gz
     fi
 

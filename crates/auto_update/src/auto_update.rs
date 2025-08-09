@@ -401,7 +401,7 @@ impl AutoUpdater {
 
         let release = Self::get_release(
             &this,
-            "zed-remote-server",
+            "oppla-remote-server",
             os,
             arch,
             version,
@@ -445,7 +445,7 @@ impl AutoUpdater {
 
         let release = Self::get_release(
             &this,
-            "zed-remote-server",
+            "oppla-remote-server",
             os,
             arch,
             version,
@@ -474,21 +474,25 @@ impl AutoUpdater {
         if let Some(version) = version {
             let channel = release_channel.map(|c| c.dev_name()).unwrap_or("stable");
 
-            let url = format!("/api/releases/{channel}/{version}/{asset}-{os}-{arch}.gz?update=1",);
+            let url = format!("/api/releases/{channel}/{version}/{asset}-{os}-{arch}.gz");
 
             Ok(JsonRelease {
                 version: version.to_string(),
-                url: client.build_url(&url),
+                url: client.build_oppla_api_url(&url, &[("update", "1")])?.to_string(),
             })
         } else {
-            let mut url_string = client.build_url(&format!(
-                "/api/releases/latest?asset={}&os={}&arch={}",
-                asset, os, arch
-            ));
-            if let Some(param) = release_channel.and_then(|c| c.release_query_param()) {
-                url_string += "&";
-                url_string += param;
+            let mut query_params = vec![
+                ("asset", asset),
+                ("os", os),
+                ("arch", arch),
+            ];
+            
+            // Add release_channel parameter if specified
+            if let Some(channel) = release_channel {
+                query_params.push(("release_channel", channel.dev_name()));
             }
+
+            let url_string = client.build_oppla_api_url("/api/releases/latest", &query_params)?.to_string();
 
             let mut response = client.get(&url_string, Default::default(), true).await?;
             let mut body = Vec::new();
@@ -537,7 +541,7 @@ impl AutoUpdater {
         })?;
 
         let fetched_release_data =
-            Self::get_latest_release(&this, "zed", OS, ARCH, release_channel, &mut cx).await?;
+            Self::get_latest_release(&this, "oppla", OS, ARCH, release_channel, &mut cx).await?;
         let fetched_version = fetched_release_data.clone().version;
         let app_commit_sha = cx.update(|cx| AppCommitSha::try_global(cx).map(|sha| sha.full()));
         let newer_version = Self::check_if_fetched_version_is_newer(
@@ -636,9 +640,9 @@ impl AutoUpdater {
 
     async fn target_path(installer_dir: &InstallerDir) -> Result<PathBuf> {
         let filename = match OS {
-            "macos" => anyhow::Ok("Zed.dmg"),
-            "linux" => Ok("zed.tar.gz"),
-            "windows" => Ok("zed_editor_installer.exe"),
+            "macos" => anyhow::Ok("Oppla.dmg"),
+            "linux" => Ok("oppla.tar.gz"),
+            "windows" => Ok("oppla_editor_installer.exe"),
             unsupported_os => anyhow::bail!("not supported: {unsupported_os}"),
         }?;
 

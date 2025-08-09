@@ -95,11 +95,11 @@ gzip -f "${target_dir}/${remote_server_triple}/release/remote_server.dbg"
 
 if [[ -n "${DIGITALOCEAN_SPACES_SECRET_KEY:-}" && -n "${DIGITALOCEAN_SPACES_ACCESS_KEY:-}" ]]; then
     upload_to_blob_store_public \
-        "zed-debug-symbols" \
+        "oppla-debug-symbols" \
         "${target_dir}/${target_triple}/release/oppla.dbg.gz" \
         "$channel/oppla-$version-${target_triple}.dbg.gz"
     upload_to_blob_store_public \
-        "zed-debug-symbols" \
+        "oppla-debug-symbols" \
         "${target_dir}/${remote_server_triple}/release/remote_server.dbg.gz" \
         "$channel/remote_server-$version-${remote_server_triple}.dbg.gz"
 fi

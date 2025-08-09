@@ -255,7 +255,7 @@ pub fn main() {
         return;
     }
 
-    log::info!("========== starting zed ==========");
+    log::info!("========== starting oppla ==========");
 
     let app = Application::new().with_assets(Assets);
 

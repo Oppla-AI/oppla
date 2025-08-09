@@ -253,6 +253,21 @@ impl HttpClientWithUrl {
             query,
         )?)
     }
+
+    /// Builds a Oppla API URL using the given path.
+    pub fn build_oppla_api_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
+        let base_url = self.base_url();
+        let base_api_url = match base_url.as_ref() {
+            "https://app.oppla.ai/home" => "https://app.oppla.ai",
+            "http://localhost:3000" => "http://localhost:3001",
+            other => other,
+        };
+
+        Ok(Url::parse_with_params(
+            &format!("{}{}", base_api_url, path),
+            query,
+        )?)
+    }
 }
 
 impl HttpClient for Arc<HttpClientWithUrl> {
