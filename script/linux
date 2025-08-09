@@ -55,7 +55,10 @@ if [[ -n $apt ]]; then
     deps+=( libstdc++-10-dev )
   fi
 
-  $maysudo "$apt" update
+  # Fix corrupted apt lists before update
+  $maysudo rm -rf /var/lib/apt/lists/*
+  $maysudo "$apt" clean
+  $maysudo "$apt" update --fix-missing
   $maysudo "$apt" install -y "${deps[@]}"
   finalize
   exit 0
