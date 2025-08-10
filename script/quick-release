@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Quick release script - automatically bumps patch version and releases
+set -euo pipefail
+
+# Get current version
+CURRENT_VERSION=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[] | select(.name == "oppla") | .version')
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+# Bump patch version
+NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+TAG="v${NEW_VERSION}"
+
+echo "📦 Quick Release: ${CURRENT_VERSION} → ${NEW_VERSION}"
+
+# Update version
+sed -i.bak "s/version = \"${CURRENT_VERSION}\"/version = \"${NEW_VERSION}\"/" crates/oppla/Cargo.toml && rm crates/oppla/Cargo.toml.bak
+echo "stable" > crates/oppla/RELEASE_CHANNEL
+cargo update --workspace
+
+# Commit, tag, and push
+git add -A
+git commit -m "Release ${NEW_VERSION}"
+git tag "$TAG"
+git push origin main
+git push origin "$TAG"
+
+echo "✅ Released ${TAG} successfully!"
+echo "🚀 Check build: https://github.com/Oppla-AI/oppla_ai_ide/actions"

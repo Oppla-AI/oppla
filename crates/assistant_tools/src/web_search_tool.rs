@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use ui::{IconName, Tooltip, prelude::*};
 use web_search::WebSearchRegistry;
 use workspace::Workspace;
-use zed_llm_client::{WebSearchResponse, WebSearchResult};
+use oppla_llm_client::{WebSearchResponse, WebSearchResult};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct WebSearchToolInput {
@@ -295,27 +295,32 @@ fn example_search_response() -> WebSearchResponse {
                 title: "Alo".to_string(),
                 url: "https://www.google.com/maps/search/Alo%2C+Toronto%2C+Canada".to_string(),
                 text: "Alo is a popular restaurant in Toronto.".to_string(),
+                relevance_score: None,
             },
             WebSearchResult {
                 title: "Alo".to_string(),
                 url: "https://www.google.com/maps/search/Alo%2C+Toronto%2C+Canada".to_string(),
                 text: "Information about Alo restaurant in Toronto.".to_string(),
+                relevance_score: None,
             },
             WebSearchResult {
                 title: "Edulis".to_string(),
                 url: "https://www.google.com/maps/search/Edulis%2C+Toronto%2C+Canada".to_string(),
                 text: "Details about Edulis restaurant in Toronto.".to_string(),
+                relevance_score: None,
             },
             WebSearchResult {
                 title: "Sushi Masaki Saito".to_string(),
                 url: "https://www.google.com/maps/search/Sushi+Masaki+Saito%2C+Toronto%2C+Canada"
                     .to_string(),
                 text: "Information about Sushi Masaki Saito in Toronto.".to_string(),
+                relevance_score: None,
             },
             WebSearchResult {
                 title: "Shoushin".to_string(),
                 url: "https://www.google.com/maps/search/Shoushin%2C+Toronto%2C+Canada".to_string(),
                 text: "Details about Shoushin restaurant in Toronto.".to_string(),
+                relevance_score: None,
             },
             WebSearchResult {
                 title: "Restaurant 20 Victoria".to_string(),
@@ -323,7 +328,9 @@ fn example_search_response() -> WebSearchResponse {
                     "https://www.google.com/maps/search/Restaurant+20+Victoria%2C+Toronto%2C+Canada"
                         .to_string(),
                 text: "Information about Restaurant 20 Victoria in Toronto.".to_string(),
+                relevance_score: None,
             },
         ],
+        total_results: None,
     }
 }

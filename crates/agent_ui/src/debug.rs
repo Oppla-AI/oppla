@@ -4,7 +4,7 @@ use client::{ModelRequestUsage, RequestUsage};
 use gpui::Global;
 use std::ops::{Deref, DerefMut};
 use ui::prelude::*;
-use zed_llm_client::{Plan, UsageLimit};
+use oppla_llm_client::{Plan, UsageLimit};
 
 /// Debug only: Used for testing various account states
 ///

@@ -30,7 +30,7 @@ use settings::SettingsStore;
 use std::time::Duration;
 use ui::prelude::*;
 use util::debug_panic;
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 use super::anthropic::count_anthropic_tokens;
 use super::google::count_google_tokens;

@@ -34,7 +34,7 @@ use workspace::{
     StatusItemView, Toast, Workspace, create_and_open_local_file, item::ItemHandle,
     notifications::NotificationId,
 };
-use zed_llm_client::UsageLimit;
+use oppla_llm_client::UsageLimit;
 use zeta::RateCompletions;
 
 actions!(

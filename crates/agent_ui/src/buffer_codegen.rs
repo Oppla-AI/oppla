@@ -35,7 +35,7 @@ use std::{
 };
 use streaming_diff::{CharOperation, LineDiff, LineOperation, StreamingDiff};
 use telemetry_events::{AssistantEventData, AssistantKind, AssistantPhase};
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 pub struct BufferCodegen {
     alternatives: Vec<Entity<CodegenAlternative>>,

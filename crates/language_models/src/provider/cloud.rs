@@ -33,7 +33,7 @@ use std::time::Duration;
 use thiserror::Error;
 use ui::{TintColor, prelude::*};
 use util::{ResultExt as _, maybe};
-use zed_llm_client::{
+use oppla_llm_client::{
     CLIENT_SUPPORTS_STATUS_MESSAGES_HEADER_NAME, CURRENT_PLAN_HEADER_NAME, CompletionBody,
     CompletionRequestStatus, CountTokensBody, CountTokensResponse, EXPIRED_LLM_TOKEN_HEADER_NAME,
     ListModelsResponse, MODEL_REQUESTS_RESOURCE_HEADER_VALUE,
@@ -123,10 +123,10 @@ pub struct State {
     user_store: Entity<UserStore>,
     status: client::Status,
     accept_terms_of_service_task: Option<Task<Result<()>>>,
-    models: Vec<Arc<zed_llm_client::LanguageModel>>,
-    default_model: Option<Arc<zed_llm_client::LanguageModel>>,
-    default_fast_model: Option<Arc<zed_llm_client::LanguageModel>>,
-    recommended_models: Vec<Arc<zed_llm_client::LanguageModel>>,
+    models: Vec<Arc<oppla_llm_client::LanguageModel>>,
+    default_model: Option<Arc<oppla_llm_client::LanguageModel>>,
+    default_fast_model: Option<Arc<oppla_llm_client::LanguageModel>>,
+    recommended_models: Vec<Arc<oppla_llm_client::LanguageModel>>,
     _fetch_models_task: Task<()>,
     _settings_subscription: Subscription,
     _llm_token_subscription: Subscription,
@@ -241,8 +241,8 @@ impl State {
             // Right now we represent thinking variants of models as separate models on the client,
             // so we need to insert variants for any model that supports thinking.
             if model.supports_thinking {
-                models.push(Arc::new(zed_llm_client::LanguageModel {
-                    id: zed_llm_client::LanguageModelId(format!("{}-thinking", model.id).into()),
+                models.push(Arc::new(oppla_llm_client::LanguageModel {
+                    id: oppla_llm_client::LanguageModelId(format!("{}-thinking", model.id).into()),
                     display_name: format!("{} Thinking", model.display_name),
                     ..model
                 }));
@@ -251,16 +251,16 @@ impl State {
 
         self.default_model = models
             .iter()
-            .find(|model| model.id == response.default_model)
+            .find(|model| model.id.0.as_ref() == response.default_model.0.as_ref())
             .cloned();
         self.default_fast_model = models
             .iter()
-            .find(|model| model.id == response.default_fast_model)
+            .find(|model| model.id.0.as_ref() == response.default_fast_model.0.as_ref())
             .cloned();
         self.recommended_models = response
             .recommended_models
             .iter()
-            .filter_map(|id| models.iter().find(|model| &model.id == id))
+            .filter_map(|id| models.iter().find(|model| model.id.0.as_ref() == id.0.as_ref()))
             .cloned()
             .collect();
         self.models = models;
@@ -331,7 +331,7 @@ impl CloudLanguageModelProvider {
 
     fn create_language_model(
         &self,
-        model: Arc<zed_llm_client::LanguageModel>,
+        model: Arc<oppla_llm_client::LanguageModel>,
         llm_api_token: LlmApiToken,
     ) -> Arc<dyn LanguageModel> {
         Arc::new(CloudLanguageModel {
@@ -521,7 +521,7 @@ fn render_accept_terms(
 
 pub struct CloudLanguageModel {
     id: LanguageModelId,
-    model: Arc<zed_llm_client::LanguageModel>,
+    model: Arc<oppla_llm_client::LanguageModel>,
     llm_api_token: LlmApiToken,
     client: Arc<Client>,
     request_limiter: RateLimiter,
@@ -614,12 +614,12 @@ impl CloudLanguageModel {
                         .headers()
                         .get(CURRENT_PLAN_HEADER_NAME)
                         .and_then(|plan| plan.to_str().ok())
-                        .and_then(|plan| zed_llm_client::Plan::from_str(plan).ok())
+                        .and_then(|plan| oppla_llm_client::Plan::from_str(plan).ok())
                     {
                         let plan = match plan {
-                            zed_llm_client::Plan::ZedFree => Plan::Free,
-                            zed_llm_client::Plan::ZedPro => Plan::ZedPro,
-                            zed_llm_client::Plan::ZedProTrial => Plan::ZedProTrial,
+                            oppla_llm_client::Plan::ZedFree => Plan::Free,
+                            oppla_llm_client::Plan::ZedPro => Plan::ZedPro,
+                            oppla_llm_client::Plan::ZedProTrial => Plan::ZedProTrial,
                         };
                         return Err(anyhow!(ModelRequestLimitReachedError { plan }));
                     }
@@ -732,20 +732,22 @@ impl LanguageModel for CloudLanguageModel {
     }
 
     fn upstream_provider_id(&self) -> LanguageModelProviderId {
-        use zed_llm_client::LanguageModelProvider::*;
+        use oppla_llm_client::LanguageModelProvider::*;
         match self.model.provider {
             Anthropic => language_model::ANTHROPIC_PROVIDER_ID,
             OpenAi => language_model::OPEN_AI_PROVIDER_ID,
             Google => language_model::GOOGLE_PROVIDER_ID,
+            Oppla => LanguageModelProviderId::from("oppla".to_string()),
         }
     }
 
     fn upstream_provider_name(&self) -> LanguageModelProviderName {
-        use zed_llm_client::LanguageModelProvider::*;
+        use oppla_llm_client::LanguageModelProvider::*;
         match self.model.provider {
             Anthropic => language_model::ANTHROPIC_PROVIDER_NAME,
             OpenAi => language_model::OPEN_AI_PROVIDER_NAME,
             Google => language_model::GOOGLE_PROVIDER_NAME,
+            Oppla => LanguageModelProviderName::from("Oppla".to_string()),
         }
     }
 
@@ -775,11 +777,12 @@ impl LanguageModel for CloudLanguageModel {
 
     fn tool_input_format(&self) -> LanguageModelToolSchemaFormat {
         match self.model.provider {
-            zed_llm_client::LanguageModelProvider::Anthropic
-            | zed_llm_client::LanguageModelProvider::OpenAi => {
+            oppla_llm_client::LanguageModelProvider::Anthropic
+            | oppla_llm_client::LanguageModelProvider::OpenAi
+            | oppla_llm_client::LanguageModelProvider::Oppla => {
                 LanguageModelToolSchemaFormat::JsonSchema
             }
-            zed_llm_client::LanguageModelProvider::Google => {
+            oppla_llm_client::LanguageModelProvider::Google => {
                 LanguageModelToolSchemaFormat::JsonSchemaSubset
             }
         }
@@ -798,15 +801,16 @@ impl LanguageModel for CloudLanguageModel {
 
     fn cache_configuration(&self) -> Option<LanguageModelCacheConfiguration> {
         match &self.model.provider {
-            zed_llm_client::LanguageModelProvider::Anthropic => {
+            oppla_llm_client::LanguageModelProvider::Anthropic => {
                 Some(LanguageModelCacheConfiguration {
                     min_total_token: 2_048,
                     should_speculate: true,
                     max_cache_anchors: 4,
                 })
             }
-            zed_llm_client::LanguageModelProvider::OpenAi
-            | zed_llm_client::LanguageModelProvider::Google => None,
+            oppla_llm_client::LanguageModelProvider::OpenAi
+            | oppla_llm_client::LanguageModelProvider::Google
+            | oppla_llm_client::LanguageModelProvider::Oppla => None,
         }
     }
 
@@ -816,15 +820,15 @@ impl LanguageModel for CloudLanguageModel {
         cx: &App,
     ) -> BoxFuture<'static, Result<u64>> {
         match self.model.provider {
-            zed_llm_client::LanguageModelProvider::Anthropic => count_anthropic_tokens(request, cx),
-            zed_llm_client::LanguageModelProvider::OpenAi => {
+            oppla_llm_client::LanguageModelProvider::Anthropic => count_anthropic_tokens(request, cx),
+            oppla_llm_client::LanguageModelProvider::OpenAi => {
                 let model = match open_ai::Model::from_id(&self.model.id.0) {
                     Ok(model) => model,
                     Err(err) => return async move { Err(anyhow!(err)) }.boxed(),
                 };
                 count_open_ai_tokens(request, model, cx)
             }
-            zed_llm_client::LanguageModelProvider::Google => {
+            oppla_llm_client::LanguageModelProvider::Google => {
                 let client = self.client.clone();
                 let llm_api_token = self.llm_api_token.clone();
                 let model_id = self.model.id.to_string();
@@ -835,7 +839,7 @@ impl LanguageModel for CloudLanguageModel {
                     let token = llm_api_token.acquire(&client).await?;
 
                     let request_body = CountTokensBody {
-                        provider: zed_llm_client::LanguageModelProvider::Google,
+                        provider: oppla_llm_client::LanguageModelProvider::Google,
                         model: model_id,
                         provider_request: serde_json::to_value(&google_ai::CountTokensRequest {
                             generate_content_request,
@@ -875,6 +879,14 @@ impl LanguageModel for CloudLanguageModel {
                 }
                 .boxed()
             }
+            oppla_llm_client::LanguageModelProvider::Oppla => {
+                // For Oppla provider (LiteLLM), use OpenAI token counting as it uses OpenAI format
+                let model = match open_ai::Model::from_id(&self.model.id.0) {
+                    Ok(model) => model,
+                    Err(_) => open_ai::Model::FourOmni, // Default to GPT-4o for token counting
+                };
+                count_open_ai_tokens(request, model, cx)
+            }
         }
     }
 
@@ -911,7 +923,7 @@ impl LanguageModel for CloudLanguageModel {
         );
 
         let llm_api_token = self.llm_api_token.clone();
-        let _provider = self.model.provider;
+        let _provider = self.model.provider.clone();
 
         let future = self.request_limiter.stream(async move {
             let PerformLlmCompletionResponse {
@@ -928,7 +940,7 @@ impl LanguageModel for CloudLanguageModel {
                     prompt_id,
                     intent,
                     mode,
-                    provider: zed_llm_client::LanguageModelProvider::OpenAi, // Always use OpenAI as provider for LiteLLM
+                    provider: oppla_llm_client::LanguageModelProvider::OpenAi, // Always use OpenAI as provider for LiteLLM
                     model: model_name,
                     provider_request: serde_json::to_value(&openai_request)
                         .map_err(|e| anyhow!(e))?,
@@ -956,7 +968,7 @@ impl LanguageModel for CloudLanguageModel {
 
         // ORIGINAL CODE COMMENTED OUT FOR REFERENCE
         /*match self.model.provider {
-            zed_llm_client::LanguageModelProvider::Anthropic => {
+            oppla_llm_client::LanguageModelProvider::Anthropic => {
                 let request = into_anthropic(
                     request,
                     self.model.id.to_string(),
@@ -987,7 +999,7 @@ impl LanguageModel for CloudLanguageModel {
                             prompt_id,
                             intent,
                             mode,
-                            provider: zed_llm_client::LanguageModelProvider::Anthropic,
+                            provider: oppla_llm_client::LanguageModelProvider::Anthropic,
                             model: request.model.clone(),
                             provider_request: serde_json::to_value(&request)
                                 .map_err(|e| anyhow!(e))?,
@@ -1011,7 +1023,7 @@ impl LanguageModel for CloudLanguageModel {
                 });
                 async move { Ok(future.await?.boxed()) }.boxed()
             }
-            zed_llm_client::LanguageModelProvider::OpenAi => {
+            oppla_llm_client::LanguageModelProvider::OpenAi => {
                 let client = self.client.clone();
                 let model = match open_ai::Model::from_id(&self.model.id.0) {
                     Ok(model) => model,
@@ -1039,7 +1051,7 @@ impl LanguageModel for CloudLanguageModel {
                             prompt_id,
                             intent,
                             mode,
-                            provider: zed_llm_client::LanguageModelProvider::OpenAi,
+                            provider: oppla_llm_client::LanguageModelProvider::OpenAi,
                             model: request.model.clone(),
                             provider_request: serde_json::to_value(&request)
                                 .map_err(|e| anyhow!(e))?,
@@ -1059,7 +1071,7 @@ impl LanguageModel for CloudLanguageModel {
                 });
                 async move { Ok(future.await?.boxed()) }.boxed()
             }
-            zed_llm_client::LanguageModelProvider::Google => {
+            oppla_llm_client::LanguageModelProvider::Google => {
                 let client = self.client.clone();
                 let request =
                     into_google(request, self.model.id.to_string(), GoogleModelMode::Default);
@@ -1079,7 +1091,7 @@ impl LanguageModel for CloudLanguageModel {
                             prompt_id,
                             intent,
                             mode,
-                            provider: zed_llm_client::LanguageModelProvider::Google,
+                            provider: oppla_llm_client::LanguageModelProvider::Google,
                             model: request.model.model_id.clone(),
                             provider_request: serde_json::to_value(&request)
                                 .map_err(|e| anyhow!(e))?,

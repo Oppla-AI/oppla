@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# This is a script for automating the release process.
+# This is something important to note.
+
+# Function to print colored output
+print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+# Check if we're in the right directory
+if [ ! -f "crates/oppla/Cargo.toml" ]; then
+    print_error "Must be run from the root of the oppla_ai_ide repository"
+    exit 1
+fi
+
+# Check for uncommitted changes
+if ! git diff --quiet || ! git diff --staged --quiet; then
+    print_error "There are uncommitted changes. Please commit or stash them first."
+    print_info "To see changes: git status"
+    exit 1
+fi
+
+# Get current version from Cargo.toml
+CURRENT_VERSION=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[] | select(.name == "oppla") | .version')
+if [ -z "$CURRENT_VERSION" ]; then
+    print_error "Could not determine current version from Cargo.toml"
+    exit 1
+fi
+
+print_info "Current version: $CURRENT_VERSION"
+
+# Parse version components
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+# Determine version bump type (default to patch)
+BUMP_TYPE="${1:-patch}"
+
+case "$BUMP_TYPE" in
+    major)
+        NEW_MAJOR=$((MAJOR + 1))
+        NEW_MINOR=0
+        NEW_PATCH=0
+        ;;
+    minor)
+        NEW_MAJOR=$MAJOR
+        NEW_MINOR=$((MINOR + 1))
+        NEW_PATCH=0
+        ;;
+    patch)
+        NEW_MAJOR=$MAJOR
+        NEW_MINOR=$MINOR
+        NEW_PATCH=$((PATCH + 1))
+        ;;
+    *)
+        print_error "Invalid bump type: $BUMP_TYPE"
+        print_info "Usage: $0 [major|minor|patch] [preview]"
+        print_info "Examples:"
+        print_info "  $0 patch         # Bump patch version (0.198.0 -> 0.198.1)"
+        print_info "  $0 minor         # Bump minor version (0.198.0 -> 0.199.0)"
+        print_info "  $0 major         # Bump major version (0.198.0 -> 1.0.0)"
+        print_info "  $0 patch preview # Create preview release (0.198.0 -> 0.198.1-pre)"
+        exit 1
+        ;;
+esac
+
+NEW_VERSION="${NEW_MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+
+# Check if this should be a preview release
+IS_PREVIEW="${2:-}"
+RELEASE_CHANNEL="stable"
+TAG_VERSION="v${NEW_VERSION}"
+
+if [ "$IS_PREVIEW" = "preview" ] || [ "$IS_PREVIEW" = "pre" ]; then
+    RELEASE_CHANNEL="preview"
+    TAG_VERSION="v${NEW_VERSION}-pre"
+    print_info "Creating preview release"
+else
+    print_info "Creating stable release"
+fi
+
+print_info "New version will be: $NEW_VERSION"
+print_info "Git tag will be: $TAG_VERSION"
+print_info "Release channel: $RELEASE_CHANNEL"
+
+# Ask for confirmation
+read -p "Do you want to proceed? (y/N) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    print_warning "Release cancelled"
+    exit 0
+fi
+
+# Ensure we're on the latest main branch
+print_info "Updating main branch..."
+git checkout main
+git pull origin main
+
+# Update version in Cargo.toml
+print_info "Updating version in crates/oppla/Cargo.toml..."
+sed -i.bak "s/version = \"${CURRENT_VERSION}\"/version = \"${NEW_VERSION}\"/" crates/oppla/Cargo.toml
+rm crates/oppla/Cargo.toml.bak
+
+# Update RELEASE_CHANNEL file
+print_info "Updating RELEASE_CHANNEL..."
+echo "$RELEASE_CHANNEL" > crates/oppla/RELEASE_CHANNEL
+
+# Update Cargo.lock
+print_info "Updating Cargo.lock..."
+cargo update --workspace
+
+# Commit changes
+print_info "Committing version bump..."
+git add crates/oppla/Cargo.toml crates/oppla/RELEASE_CHANNEL Cargo.lock
+git commit -m "Bump version to ${NEW_VERSION}
+
+Release type: ${RELEASE_CHANNEL}
+Version bump: ${BUMP_TYPE}"
+
+# Create and push tag
+print_info "Creating tag ${TAG_VERSION}..."
+git tag -a "$TAG_VERSION" -m "Release ${TAG_VERSION}
+
+Version: ${NEW_VERSION}
+Channel: ${RELEASE_CHANNEL}
+Type: ${BUMP_TYPE} version bump"
+
+# Push changes and tag
+print_info "Pushing changes to remote..."
+git push origin main
+print_info "Pushing tag to remote..."
+git push origin "$TAG_VERSION"
+
+print_success "Release process completed successfully!"
+print_success "Version bumped from ${CURRENT_VERSION} to ${NEW_VERSION}"
+print_success "Tag ${TAG_VERSION} has been created and pushed"
+print_info ""
+print_info "GitHub Actions will now:"
+print_info "  1. Build the release artifacts"
+print_info "  2. Create a draft GitHub release"
+print_info "  3. Upload artifacts to the release"
+print_info ""
+print_info "To monitor the build progress:"
+print_info "  https://github.com/Oppla-AI/oppla_ai_ide/actions"
+print_info ""
+print_info "Once the build completes, publish the release at:"
+print_info "  https://github.com/Oppla-AI/oppla_ai_ide/releases"

@@ -46,7 +46,7 @@ use text::{BufferSnapshot, ToPoint};
 use ui::IconName;
 use util::{ResultExt, TryFutureExt, post_inc};
 use uuid::Uuid;
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 pub use crate::context_store::*;
 

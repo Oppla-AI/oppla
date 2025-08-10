@@ -29,7 +29,7 @@ use std::{cmp, iter, mem, ops::Range, path::PathBuf, pin::Pin, sync::Arc, task::
 use streaming_diff::{CharOperation, StreamingDiff};
 use streaming_fuzzy_matcher::StreamingFuzzyMatcher;
 use util::debug_panic;
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 #[derive(Serialize)]
 struct CreateFilePromptTemplate {

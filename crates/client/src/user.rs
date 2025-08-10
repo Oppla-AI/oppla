@@ -17,7 +17,7 @@ use std::{
 };
 use text::ReplicaId;
 use util::{TryFutureExt as _, maybe};
-use zed_llm_client::{
+use oppla_llm_client::{
     EDIT_PREDICTIONS_USAGE_AMOUNT_HEADER_NAME, EDIT_PREDICTIONS_USAGE_LIMIT_HEADER_NAME,
     MODEL_REQUESTS_USAGE_AMOUNT_HEADER_NAME, MODEL_REQUESTS_USAGE_LIMIT_HEADER_NAME, UsageLimit,
 };

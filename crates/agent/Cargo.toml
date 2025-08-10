@@ -64,6 +64,7 @@ util.workspace = true
 uuid.workspace = true
 workspace-hack.workspace = true
 zed_llm_client.workspace = true
+oppla_llm_client.workspace = true
 zstd.workspace = true
 
 [dev-dependencies]

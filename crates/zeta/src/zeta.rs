@@ -53,7 +53,7 @@ use uuid::Uuid;
 use workspace::Workspace;
 use workspace::notifications::{ErrorMessagePrompt, NotificationId};
 use worktree::Worktree;
-use zed_llm_client::{
+use oppla_llm_client::{
     AcceptEditPredictionBody, EXPIRED_LLM_TOKEN_HEADER_NAME, MINIMUM_REQUIRED_VERSION_HEADER_NAME,
     PredictEditsBody, PredictEditsResponse, ZED_VERSION_HEADER_NAME,
 };

@@ -107,6 +107,7 @@ dependencies = [
  "language",
  "language_model",
  "log",
+ "oppla_llm_client",
  "parking_lot",
  "paths",
  "postage",
@@ -192,6 +193,7 @@ dependencies = [
  "fs",
  "gpui",
  "language_model",
+ "oppla_llm_client",
  "paths",
  "schemars",
  "serde",
@@ -254,6 +256,7 @@ dependencies = [
  "multi_buffer",
  "notifications",
  "oppla_actions",
+ "oppla_llm_client",
  "ordered-float 2.10.1",
  "parking_lot",
  "paths",
@@ -697,6 +700,7 @@ dependencies = [
  "language_model",
  "log",
  "open_ai",
+ "oppla_llm_client",
  "parking_lot",
  "paths",
  "pretty_assertions",
@@ -849,6 +853,7 @@ dependencies = [
  "lsp",
  "markdown",
  "open",
+ "oppla_llm_client",
  "paths",
  "portable-pty",
  "pretty_assertions",
@@ -2988,6 +2993,7 @@ dependencies = [
  "http_client_tls",
  "httparse",
  "log",
+ "oppla_llm_client",
  "parking_lot",
  "paths",
  "postage",
@@ -6395,6 +6401,7 @@ dependencies = [
  "multi_buffer",
  "notifications",
  "oppla_actions",
+ "oppla_llm_client",
  "panel",
  "picker",
  "postage",
@@ -8394,6 +8401,7 @@ dependencies = [
  "language",
  "lsp",
  "oppla_actions",
+ "oppla_llm_client",
  "paths",
  "project",
  "regex",
@@ -9094,6 +9102,7 @@ dependencies = [
  "icons",
  "image",
  "log",
+ "oppla_llm_client",
  "parking_lot",
  "proto",
  "schemars",
@@ -9141,6 +9150,7 @@ dependencies = [
  "ollama",
  "open_ai",
  "open_router",
+ "oppla_llm_client",
  "partial-json-fixer",
  "project",
  "proto",
@@ -11170,7 +11180,7 @@ dependencies = [
 
 [[package]]
 name = "oppla"
-version = "0.198.0"
+version = "0.199.0"
 dependencies = [
  "activity_indicator",
  "agent",
@@ -11327,6 +11337,17 @@ dependencies = [
  "serde",
  "uuid",
  "workspace-hack",
+]
+
+[[package]]
+name = "oppla_llm_client"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+ "strum 0.27.1",
+ "uuid",
 ]
 
 [[package]]
@@ -18664,6 +18685,7 @@ dependencies = [
  "anyhow",
  "collections",
  "gpui",
+ "oppla_llm_client",
  "serde",
  "workspace-hack",
  "zed_llm_client",
@@ -18679,6 +18701,7 @@ dependencies = [
  "gpui",
  "http_client",
  "language_model",
+ "oppla_llm_client",
  "serde",
  "serde_json",
  "web_search",
@@ -20601,6 +20624,7 @@ dependencies = [
  "log",
  "menu",
  "oppla_actions",
+ "oppla_llm_client",
  "postage",
  "project",
  "proto",

@@ -52,7 +52,7 @@ use ui::{
 use util::ResultExt as _;
 use util::markdown::MarkdownCodeBlock;
 use workspace::{CollaboratorId, Workspace};
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 const CODEBLOCK_CONTAINER_GROUP: &str = "codeblock_container";
 const EDIT_PREVIOUS_MESSAGE_MIN_LINES: usize = 1;

@@ -27,7 +27,7 @@ use terminal_view::TerminalView;
 use ui::prelude::*;
 use util::ResultExt;
 use workspace::{Toast, Workspace, notifications::NotificationId};
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 pub fn init(
     fs: Arc<dyn Fs>,

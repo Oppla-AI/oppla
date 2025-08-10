@@ -49,7 +49,7 @@ use std::{
 use thiserror::Error;
 use util::{ResultExt as _, post_inc};
 use uuid::Uuid;
-use zed_llm_client::{CompletionIntent, CompletionRequestStatus, UsageLimit};
+use oppla_llm_client::{CompletionIntent, CompletionRequestStatus, UsageLimit};
 
 const MAX_RETRY_ATTEMPTS: u8 = 4;
 const BASE_RETRY_DELAY: Duration = Duration::from_secs(5);
@@ -1681,7 +1681,7 @@ impl Thread {
 
         let completion_mode = request
             .mode
-            .unwrap_or(zed_llm_client::CompletionMode::Normal);
+            .unwrap_or(oppla_llm_client::CompletionMode::Normal);
 
         self.last_received_chunk_at = Some(Instant::now());
 

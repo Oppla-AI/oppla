@@ -26,7 +26,7 @@ use std::time::Duration;
 use std::{fmt, io};
 use thiserror::Error;
 use util::serde::is_default;
-use zed_llm_client::{CompletionMode, CompletionRequestStatus};
+use oppla_llm_client::{CompletionMode, CompletionRequestStatus};
 
 pub use crate::model::*;
 pub use crate::rate_limiter::*;

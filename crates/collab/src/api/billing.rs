@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::{sync::Arc, time::Duration};
 use stripe::{CancellationDetailsReason, EventObject, EventType, ListEvents, SubscriptionStatus};
 use util::{ResultExt, maybe};
-use zed_llm_client::LanguageModelProvider;
+use oppla_llm_client::LanguageModelProvider;
 
 use crate::db::billing_subscription::{
     StripeCancellationReason, StripeSubscriptionStatus, SubscriptionKind,

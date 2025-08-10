@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use thiserror::Error;
 use uuid::Uuid;
-use zed_llm_client::Plan;
+use oppla_llm_client::Plan;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

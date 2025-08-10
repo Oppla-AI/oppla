@@ -76,7 +76,7 @@ use workspace::{
     dock::{DockPosition, Panel, PanelEvent},
     notifications::{DetachAndPromptErr, ErrorMessagePrompt, NotificationId},
 };
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 actions!(
     git_panel,

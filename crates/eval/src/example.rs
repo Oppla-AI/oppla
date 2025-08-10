@@ -19,7 +19,7 @@ use collections::HashMap;
 use futures::{FutureExt as _, StreamExt, channel::mpsc, select_biased};
 use gpui::{App, AppContext, AsyncApp, Entity};
 use language_model::{LanguageModel, Role, StopReason};
-use zed_llm_client::CompletionIntent;
+use oppla_llm_client::CompletionIntent;
 
 pub const THREAD_EVENT_TIMEOUT: Duration = Duration::from_secs(60 * 2);
 

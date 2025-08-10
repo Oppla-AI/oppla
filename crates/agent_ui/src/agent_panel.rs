@@ -80,7 +80,7 @@ use workspace::{
     CollaboratorId, DraggedSelection, DraggedTab, ToggleZoom, ToolbarItemView, Workspace,
     dock::{DockPosition, Panel, PanelEvent},
 };
-use zed_llm_client::{CompletionIntent, UsageLimit};
+use oppla_llm_client::{CompletionIntent, UsageLimit};
 
 const AGENT_PANEL_KEY: &str = "agent_panel";
 
