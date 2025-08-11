@@ -1,7 +1,7 @@
 use gpui::{
     ClickEvent, DismissEvent, Entity, EventEmitter, FocusHandle, Focusable, MouseDownEvent, Render,
 };
-use ui::{TintColor, Vector, VectorName, prelude::*};
+use ui::{prelude::*, TintColor, Vector, VectorName};
 use workspace::{ModalView, Workspace};
 
 use crate::DebugPanel;
@@ -128,7 +128,7 @@ impl Render for DebuggerOnboardingModal {
                             .size(LabelSize::Small)
                             .color(Color::Muted),
                     )
-                    .child(Headline::new("Zed's Debugger").size(HeadlineSize::Large)),
+                    .child(Headline::new("Debugger").size(HeadlineSize::Large)),
             )
             .child(h_flex().absolute().top_2().right_2().child(
                 IconButton::new("cancel", IconName::X).on_click(cx.listener(

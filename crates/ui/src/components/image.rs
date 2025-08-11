@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
-use gpui::{svg, App, IntoElement, Rems, RenderOnce, Size, Styled, Window};
+use gpui::{App, IntoElement, Rems, RenderOnce, Size, Styled, Window, svg};
 use serde::{Deserialize, Serialize};
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
-use crate::prelude::*;
 use crate::Color;
+use crate::prelude::*;
 
 #[derive(
     Debug, PartialEq, Eq, Copy, Clone, EnumIter, EnumString, IntoStaticStr, Serialize, Deserialize,
@@ -13,7 +13,7 @@ use crate::Color;
 #[strum(serialize_all = "snake_case")]
 pub enum VectorName {
     ZedLogo,
-    ZedXCopilot,
+    OpplaXCopilot,
     Grid,
     AiGrid,
     DebuggerGrid,
@@ -141,8 +141,8 @@ impl Component for Vector {
                                 Vector::square(VectorName::ZedLogo, rems(8.)).into_any_element(),
                             ),
                             single_example(
-                                "Zed X Copilot",
-                                Vector::square(VectorName::ZedXCopilot, rems(8.))
+                                "Oppla X Copilot",
+                                Vector::square(VectorName::OpplaXCopilot, rems(8.))
                                     .into_any_element(),
                             ),
                         ],
