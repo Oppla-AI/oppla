@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
-use gpui::{App, IntoElement, Rems, RenderOnce, Size, Styled, Window, svg};
+use gpui::{svg, App, IntoElement, Rems, RenderOnce, Size, Styled, Window};
 use serde::{Deserialize, Serialize};
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
-use crate::Color;
 use crate::prelude::*;
+use crate::Color;
 
 #[derive(
     Debug, PartialEq, Eq, Copy, Clone, EnumIter, EnumString, IntoStaticStr, Serialize, Deserialize,
@@ -159,6 +159,6 @@ mod tests {
 
     #[test]
     fn vector_path() {
-        assert_eq!(VectorName::ZedLogo.path().as_ref(), "images/oppla_logo.svg");
+        assert_eq!(VectorName::ZedLogo.path().as_ref(), "images/oppla_logo.png");
     }
 }
