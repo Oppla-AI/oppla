@@ -77,17 +77,12 @@ pub struct LanguageModelPickerDelegate {
     all_models: Arc<GroupedModels>,
     filtered_entries: Vec<LanguageModelPickerEntry>,
     selected_index: usize,
-    can_select_model: bool,
     auto_mode: bool, // true = use default model automatically, false = manual selection
     _authenticate_all_providers_task: Task<()>,
     _subscriptions: Vec<Subscription>,
 }
 
 impl LanguageModelPickerDelegate {
-    pub fn can_select_model(&self) -> bool {
-        self.can_select_model
-    }
-
     pub fn toggle_auto_mode(&mut self, cx: &App) {
         // Check current can_select_model from provider
         let registry = LanguageModelRegistry::global(cx).read(cx);
@@ -113,22 +108,12 @@ impl LanguageModelPickerDelegate {
         let models = all_models(cx);
         let entries = models.entries();
 
-        // Check if Oppla provider is active and get can_select_model status
-        let registry = LanguageModelRegistry::global(cx).read(cx);
-        let can_select_model =
-            if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
-                provider.can_select_model(cx)
-            } else {
-                true
-            };
-
         Self {
             on_model_changed: on_model_changed.clone(),
             all_models: Arc::new(models),
             selected_index: Self::get_active_model_index(&entries, get_active_model(cx)),
             filtered_entries: entries,
             get_active_model: Arc::new(get_active_model),
-            can_select_model,
             auto_mode: true, // Default to auto mode (use default model)
             _authenticate_all_providers_task: Self::authenticate_all_providers(cx),
             _subscriptions: vec![cx.subscribe_in(
