@@ -414,7 +414,7 @@ mod no_action {
     use std::any::Any as _;
 
     actions!(
-        zed,
+        oppla,
         [
             /// Action with special handling which unbinds the keybinding this is associated with,
             /// if it is the highest precedence match.

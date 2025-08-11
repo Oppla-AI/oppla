@@ -788,7 +788,7 @@ impl Render for ConfigurationView {
         let api_key_section = if self.should_render_editor(cx) {
             v_flex()
                 .on_action(cx.listener(Self::save_api_key))
-                .child(Label::new("To use Zed's assistant with OpenAI, you need to add an API key. Follow these steps:"))
+                .child(Label::new("To use Oppla's assistant with OpenAI, you need to add an API key. Follow these steps:"))
                 .child(
                     List::new()
                         .child(InstructionListItem::new(
@@ -806,7 +806,7 @@ impl Render for ConfigurationView {
                 .child(self.api_key_editor.clone())
                 .child(
                     Label::new(
-                        format!("You can also assign the {OPENAI_API_KEY_VAR} environment variable and restart Zed."),
+                        format!("You can also assign the {OPENAI_API_KEY_VAR} environment variable and restart Oppla."),
                     )
                     .size(LabelSize::Small).color(Color::Muted),
                 )

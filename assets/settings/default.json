@@ -1,5 +1,5 @@
 {
-  // The name of the Zed theme to use for the UI.
+  // The name of the Oppla theme to use for the UI.
   //
   // `mode` is one of:
   // - "system": Use the theme that corresponds to the system's appearance
@@ -116,9 +116,9 @@
   "hover_popover_enabled": true,
   // Time to wait in milliseconds before showing the informational hover box.
   "hover_popover_delay": 300,
-  // Whether to confirm before quitting Zed.
+  // Whether to confirm before quitting Oppla.
   "confirm_quit": false,
-  // Whether to restore last closed project when fresh Zed instance is opened
+  // Whether to restore last closed project when fresh Oppla instance is opened
   // May take 3 values:
   //  1. All workspaces open during last session
   //         "restore_on_startup": "last_session"
@@ -159,12 +159,12 @@
   //         "on_last_window_closed": "quit_app",
   "on_last_window_closed": "platform_default",
   // Whether to use the system provided dialogs for Open and Save As.
-  // When set to false, Zed will use the built-in keyboard-first pickers.
+  // When set to false, Oppla will use the built-in keyboard-first pickers.
   "use_system_path_prompts": true,
   // Whether to use the system provided dialogs for prompts, such as confirmation
   // prompts.
-  // When set to false, Zed will use its built-in prompts. Note that on Linux,
-  // this option is ignored and Zed will always use the built-in prompts.
+  // When set to false, Oppla will use its built-in prompts. Note that on Linux,
+  // this option is ignored and Oppla will always use the built-in prompts.
   "use_system_prompts": true,
   // Whether the cursor blinks in the editor.
   "cursor_blink": true,
@@ -276,11 +276,11 @@
   "use_on_type_format": true,
   // Whether to automatically add matching closing characters when typing
   // opening parenthesis, bracket, brace, single or double quote characters.
-  // For example, when you type (, Zed will add a closing ) at the correct position.
+  // For example, when you type (, Oppla will add a closing ) at the correct position.
   "use_autoclose": true,
   // Whether to automatically surround selected text when typing opening parenthesis,
   // bracket, brace, single or double quote characters.
-  // For example, when you select text and type (, Zed will surround the text with ().
+  // For example, when you select text and type (, Oppla will surround the text with ().
   "use_auto_surround": true,
   // Whether indentation of pasted content should be adjusted based on the context.
   "auto_indent_on_paste": true,
@@ -331,7 +331,7 @@
   // - It is adjacent to an edge (start or end)
   // - It is adjacent to a whitespace (left or right)
   "show_whitespaces": "selection",
-  // Settings related to calls in Zed
+  // Settings related to calls in Oppla
   "calls": {
     // Join calls with the microphone live by default
     "mute_on_join": false,
@@ -908,7 +908,7 @@
   //
   // 1. Never automatically save:
   //     "autosave": "off",
-  // 2. Save when changing focus away from the Zed window:
+  // 2. Save when changing focus away from the Oppla window:
   //     "autosave": "on_window_change",
   // 3. Save when changing focus away from a specific buffer:
   //     "autosave": "on_focus_change",
@@ -1013,11 +1013,11 @@
     // Whether to show the git status in the file finder.
     "git_status": true,
     // Whether to use gitignored files when searching.
-    // Only the file Zed had indexed will be used, not necessary all the gitignored files.
+    // Only the file Oppla had indexed will be used, not necessary all the gitignored files.
     //
     // Can accept 3 values:
     //   * `true`: Use all gitignored files
-    //   * `false`: Use only the files Zed had indexed
+    //   * `false`: Use only the files Oppla had indexed
     //   * `null`: Be smart and search for ignored when called from a gitignored worktree
     "include_ignored": null
   },
@@ -1043,9 +1043,9 @@
   //         "arguments": ["--stdin-filepath", "{buffer_path}"]
   //       }
   //     }
-  // 3. Format code using Zed's Prettier integration:
+  // 3. Format code using Oppla's Prettier integration:
   //     "formatter": "prettier"
-  // 4. Default. Format files using Zed's Prettier integration (if applicable),
+  // 4. Default. Format files using Oppla's Prettier integration (if applicable),
   //    or falling back to formatting via language server:
   //     "formatter": "auto"
   "formatter": "auto",
@@ -1072,18 +1072,18 @@
   "tab_size": 4,
   // What debuggers are preferred by default for all languages.
   "debuggers": [],
-  // Control what info is collected by Zed.
+  // Control what info is collected by Oppla.
   "telemetry": {
     // Send debug info like crash reports.
     "diagnostics": true,
-    // Send anonymized usage data like what languages you're using Zed with.
+    // Send anonymized usage data like what languages you're using Oppla with.
     "metrics": true
   },
-  // Whether to disable all AI features in Zed.
+  // Whether to disable all AI features in Oppla.
   //
   // Default: false
   "disable_ai": false,
-  // Automatically update Zed. This setting may be ignored on Linux if
+  // Automatically update Oppla. This setting may be ignored on Linux if
   // installed through a package manager.
   "auto_update": true,
   // How to render LSP `textDocument/documentColor` colors in the editor.
@@ -1105,7 +1105,7 @@
     "button": true,
     // Whether to show warnings or not by default.
     "include_warnings": true,
-    // Settings for using LSP pull diagnostics mechanism in Zed.
+    // Settings for using LSP pull diagnostics mechanism in Oppla.
     "lsp_pull_diagnostics": {
       // Whether to pull for diagnostics or not.
       "enabled": true,
@@ -1132,12 +1132,12 @@
       "max_severity": null
     },
     "cargo": {
-      // When enabled, Zed disables rust-analyzer's check on save and starts to query
+      // When enabled, Oppla disables rust-analyzer's check on save and starts to query
       // Cargo diagnostics separately.
       "fetch_cargo_diagnostics": false
     }
   },
-  // Files or globs of files that will be excluded by Zed entirely. They will be skipped during file
+  // Files or globs of files that will be excluded by Oppla entirely. They will be skipped during file
   // scans, file searches, and not be displayed in the project file tree. Takes precedence over `file_scan_inclusions`.
   "file_scan_exclusions": [
     "**/.git",
@@ -1151,9 +1151,9 @@
     "**/.classpath",
     "**/.settings"
   ],
-  // Files or globs of files that will be included by Zed, even when ignored by git. This is useful
+  // Files or globs of files that will be included by Oppla, even when ignored by git. This is useful
   // for files that are not tracked by git, but are still important to your project. Note that globs
-  // that are overly broad can slow down Zed's file scanning. `file_scan_exclusions` takes
+  // that are overly broad can slow down Oppla's file scanning. `file_scan_exclusions` takes
   // precedence over these inclusions.
   "file_scan_inclusions": [".env*"],
   // Git gutter behavior configuration.
@@ -1413,13 +1413,13 @@
   "tasks": {
     "variables": {},
     "enabled": true,
-    // Use LSP tasks over Zed language extension ones.
+    // Use LSP tasks over Oppla language extension ones.
     // If no LSP tasks are returned due to error/timeout or regular execution,
-    // Zed language extension tasks will be used instead.
+    // Oppla language extension tasks will be used instead.
     //
-    // Other Zed tasks will still be shown:
-    // * Zed task from either of the task config file
-    // * Zed task from history (e.g. one-off task was spawned before)
+    // Other Oppla tasks will still be shown:
+    // * Oppla task from either of the task config file
+    // * Oppla task from history (e.g. one-off task was spawned before)
     //
     // Default: true
     "prefer_lsp": true
@@ -1443,20 +1443,20 @@
   // Settings for which version of Node.js and NPM to use when installing
   // language servers and Copilot.
   //
-  // Note: changing this setting currently requires restarting Zed.
+  // Note: changing this setting currently requires restarting Oppla.
   "node": {
-    // By default, Zed will look for `node` and `npm` on your `$PATH`, and use the
+    // By default, Oppla will look for `node` and `npm` on your `$PATH`, and use the
     // existing executables if their version is recent enough. Set this to `true`
-    // to prevent this, and force Zed to always download and install its own
+    // to prevent this, and force Oppla to always download and install its own
     // version of Node.
     "ignore_system_version": false,
     // You can also specify alternative paths to Node and NPM. If you specify
-    // `path`, but not `npm_path`, Zed will assume that `npm` is located at
+    // `path`, but not `npm_path`, Oppla will assume that `npm` is located at
     // `${path}/../npm`.
     "path": null,
     "npm_path": null
   },
-  // The extensions that Zed should automatically install on startup.
+  // The extensions that Oppla should automatically install on startup.
   //
   // If you don't want any of these extensions, add this field to your settings
   // and change the value to `false`.
@@ -1493,7 +1493,7 @@
     // When LSP servers give an `InsertReplaceEdit` completion, they provides two ranges: `insert` and `replace`. Usually, `insert`
     // contains the word prefix before your cursor and `replace` contains the whole word.
     //
-    // Effectively, this setting just changes whether Zed will use the received range for `insert` or `replace`, so the results may
+    // Effectively, this setting just changes whether Oppla will use the received range for `insert` or `replace`, so the results may
     // differ depending on the underlying LSP server.
     //
     // Possible values:
@@ -1733,7 +1733,7 @@
       "api_url": "https://api.mistral.ai/v1"
     }
   },
-  // Zed's Prettier integration settings.
+  // Oppla's Prettier integration settings.
   // Allows to enable/disable formatting with Prettier
   // and configure default Prettier, used when no project-level Prettier installation is found.
   "prettier": {
@@ -1741,12 +1741,12 @@
     // "allowed": false,
     //
     // // Use regular Prettier json configuration.
-    // // If Prettier is allowed, Zed will use this for its Prettier instance for any applicable file, if
+    // // If Prettier is allowed, Oppla will use this for its Prettier instance for any applicable file, if
     // // the project has no other Prettier installed.
     // "plugins": [],
     //
     // // Use regular Prettier json configuration.
-    // // If Prettier is allowed, Zed will use this for its Prettier instance for any applicable file, if
+    // // If Prettier is allowed, Oppla will use this for its Prettier instance for any applicable file, if
     // // the project has no other Prettier installed.
     // "trailingComma": "es5",
     // "tabWidth": 4,
@@ -1763,7 +1763,7 @@
     // "rust-analyzer": {
     //     // A special flag for rust-analyzer integration, to use server-provided tasks
     //     enable_lsp_tasks": true,
-    //     // These initialization options are merged into Zed's defaults
+    //     // These initialization options are merged into Oppla's defaults
     //     "initialization_options": {
     //         "check": {
     //             "command": "clippy" // rust-analyzer.check.command (default: "check")
@@ -1802,23 +1802,23 @@
   // The server to connect to. If the environment variable
   // ZED_SERVER_URL is set, it will override this setting.
   "server_url": "https://app.oppla.ai/home",
-  // Settings overrides to use when using Zed Preview.
-  // Mostly useful for developers who are managing multiple instances of Zed.
+  // Settings overrides to use when using Oppla Preview.
+  // Mostly useful for developers who are managing multiple instances of Oppla.
   "preview": {
     // "theme": "Andromeda"
   },
-  // Settings overrides to use when using Zed Nightly.
-  // Mostly useful for developers who are managing multiple instances of Zed.
+  // Settings overrides to use when using Oppla Nightly.
+  // Mostly useful for developers who are managing multiple instances of Oppla.
   "nightly": {
     // "theme": "Andromeda"
   },
-  // Settings overrides to use when using Zed Stable.
-  // Mostly useful for developers who are managing multiple instances of Zed.
+  // Settings overrides to use when using Oppla Stable.
+  // Mostly useful for developers who are managing multiple instances of Oppla.
   "stable": {
     // "theme": "Andromeda"
   },
-  // Settings overrides to use when using Zed Dev.
-  // Mostly useful for developers who are managing multiple instances of Zed.
+  // Settings overrides to use when using Oppla Dev.
+  // Mostly useful for developers who are managing multiple instances of Oppla.
   "dev": {
     // "theme": "Andromeda"
   },
@@ -1834,7 +1834,7 @@
   // Supported URI scheme: `http`, `https`, `socks4`, `socks4a`, `socks5`,
   // `socks5h`. `http` will be used when no scheme is specified.
   //
-  // By default no proxy will be used, or Zed will try get proxy settings from
+  // By default no proxy will be used, or Oppla will try get proxy settings from
   // environment variables. If certain hosts should not be proxied,
   // set the `no_proxy` environment variable and provide a comma-separated list.
   //
@@ -1852,7 +1852,7 @@
   "command_aliases": {},
   // ssh_connections is an array of ssh connections.
   // You can configure these from `project: Open Remote` in the command palette.
-  // Zed's ssh support will pull configuration from your ~/.ssh too.
+  // Oppla's ssh support will pull configuration from your ~/.ssh too.
   // Examples:
   // [
   //   {

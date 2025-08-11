@@ -134,7 +134,7 @@ mod tests {
             serde_json_lenient::from_str(&raw).expect("deserializing launch.json");
         let zed = DebugTaskFile::try_from(parsed).expect("converting to Zed debug templates");
         pretty_assertions::assert_eq!(
-            zed,
+            oppla,
             DebugTaskFile(vec![DebugScenario {
                 label: "Debug my JS app".into(),
                 adapter: "JavaScript".into(),

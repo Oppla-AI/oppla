@@ -113,7 +113,7 @@ impl Render for WelcomePage {
                                 h_flex()
                                     .w_full()
                                     .justify_center()
-                                    .child(Headline::new("Welcome to Zed")),
+                                    .child(Headline::new("Welcome to Oppla")),
                             )
                             .child(
                                 h_flex().w_full().justify_center().child(

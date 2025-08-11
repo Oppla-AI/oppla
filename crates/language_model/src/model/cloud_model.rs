@@ -30,12 +30,12 @@ pub struct ModelRequestLimitReachedError {
 impl fmt::Display for ModelRequestLimitReachedError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let message = match self.plan {
-            Plan::Free => "Model request limit reached. Upgrade to Zed Pro for more requests.",
+            Plan::Free => "Model request limit reached. Upgrade to Oppla Pro for more requests.",
             Plan::ZedPro => {
                 "Model request limit reached. Upgrade to usage-based billing for more requests."
             }
             Plan::ZedProTrial => {
-                "Model request limit reached. Upgrade to Zed Pro for more requests."
+                "Model request limit reached. Upgrade to Oppla Pro for more requests."
             }
         };
 

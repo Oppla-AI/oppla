@@ -69,12 +69,12 @@ let
   gpu-lib = if withGLES then libglvnd else vulkan-loader;
   commonArgs =
     let
-      zedCargoLock = builtins.fromTOML (builtins.readFile ../crates/zed/Cargo.toml);
+      opplaCargoLock = builtins.fromTOML (builtins.readFile ../crates/oppla/Cargo.toml);
       stdenv' = stdenv;
     in
     rec {
-      pname = "zed-editor";
-      version = zedCargoLock.package.version + "-nightly";
+      pname = "oppla-editor";
+      version = opplaCargoLock.package.version + "-nightly";
       src = builtins.path {
         path = ../.;
         filter = mkIncludeFilter ../.;
@@ -149,7 +149,7 @@ let
           (darwinMinVersionHook "10.15")
         ];
 
-      cargoExtraArgs = "-p zed -p cli --locked --features=gpui/runtime_shaders";
+      cargoExtraArgs = "-p oppla -p cli --locked --features=gpui/runtime_shaders";
 
       stdenv =
         pkgs:
@@ -175,7 +175,7 @@ let
             ../assets/fonts/plex-sans
           ];
         };
-        ZED_UPDATE_EXPLANATION = "Zed has been installed using Nix. Auto-updates have thus been disabled.";
+        OPPLA_UPDATE_EXPLANATION = "Oppla has been installed using Nix. Auto-updates have thus been disabled.";
         RELEASE_VERSION = version;
         LK_CUSTOM_WEBRTC = livekit-libwebrtc;
 
@@ -248,7 +248,7 @@ craneLib.buildPackage (
     # TODO: put this in a separate derivation that depends on src to avoid running it on every build
     preBuild = ''
       ALLOW_MISSING_LICENSES=yes bash script/generate-licenses
-      echo nightly > crates/zed/RELEASE_CHANNEL
+      echo nightly > crates/oppla/RELEASE_CHANNEL
     '';
 
     installPhase =
@@ -256,21 +256,21 @@ craneLib.buildPackage (
         ''
           runHook preInstall
 
-          pushd crates/zed
+          pushd crates/oppla
           sed -i "s/package.metadata.bundle-nightly/package.metadata.bundle/" Cargo.toml
           export CARGO_BUNDLE_SKIP_BUILD=true
           app_path="$(cargo bundle --profile $CARGO_PROFILE | xargs)"
           popd
 
           mkdir -p $out/Applications $out/bin
-          # Zed expects git next to its own binary
+          # Oppla expects git next to its own binary
           ln -s ${git}/bin/git "$app_path/Contents/MacOS/git"
           mv $TARGET_DIR/cli "$app_path/Contents/MacOS/cli"
           mv "$app_path" $out/Applications/
 
           # Physical location of the CLI must be inside the app bundle as this is used
           # to determine which app to start
-          ln -s "$out/Applications/Zed Nightly.app/Contents/MacOS/cli" $out/bin/zed
+          ln -s "$out/Applications/Oppla Nightly.app/Contents/MacOS/cli" $out/bin/oppla
 
           runHook postInstall
         ''
@@ -279,25 +279,25 @@ craneLib.buildPackage (
           runHook preInstall
 
           mkdir -p $out/bin $out/libexec
-          cp $TARGET_DIR/zed $out/libexec/zed-editor
-          cp $TARGET_DIR/cli  $out/bin/zed
-          ln -s $out/bin/zed $out/bin/zeditor  # home-manager expects the CLI binary to be here
+          cp $TARGET_DIR/oppla $out/libexec/oppla-editor
+          cp $TARGET_DIR/cli  $out/bin/oppla
+          ln -s $out/bin/oppla $out/bin/opplaitor  # home-manager expects the CLI binary to be here
 
 
-          install -D "crates/zed/resources/app-icon-nightly@2x.png" \
-            "$out/share/icons/hicolor/1024x1024@2x/apps/zed.png"
-          install -D crates/zed/resources/app-icon-nightly.png \
-            $out/share/icons/hicolor/512x512/apps/zed.png
+          install -D "crates/oppla/resources/app-icon-nightly@2x.png" \
+            "$out/share/icons/hicolor/1024x1024@2x/apps/oppla.png"
+          install -D crates/oppla/resources/app-icon-nightly.png \
+            $out/share/icons/hicolor/512x512/apps/oppla.png
 
-          # TODO: icons should probably be named "zed-nightly"
+          # TODO: icons should probably be named "oppla-nightly"
           (
             export DO_STARTUP_NOTIFY="true"
-            export APP_CLI="zed"
-            export APP_ICON="zed"
-            export APP_NAME="Zed Nightly"
+            export APP_CLI="oppla"
+            export APP_ICON="oppla"
+            export APP_NAME="Oppla Nightly"
             export APP_ARGS="%U"
             mkdir -p "$out/share/applications"
-            ${lib.getExe envsubst} < "crates/zed/resources/zed.desktop.in" > "$out/share/applications/dev.zed.Zed-Nightly.desktop"
+            ${lib.getExe envsubst} < "crates/oppla/resources/oppla.desktop.in" > "$out/share/applications/dev.oppla.Oppla-Nightly.desktop"
           )
 
           runHook postInstall
@@ -305,7 +305,7 @@ craneLib.buildPackage (
 
     # TODO: why isn't this also done on macOS?
     postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
-      wrapProgram $out/libexec/zed-editor --suffix PATH : ${lib.makeBinPath [ nodejs_22 ]}
+      wrapProgram $out/libexec/oppla-editor --suffix PATH : ${lib.makeBinPath [ nodejs_22 ]}
     '';
 
     meta = {
@@ -313,7 +313,7 @@ craneLib.buildPackage (
       homepage = "https://zed.dev";
       changelog = "https://zed.dev/releases/preview";
       license = lib.licenses.gpl3Only;
-      mainProgram = "zed";
+      mainProgram = "oppla";
       platforms = lib.platforms.linux ++ lib.platforms.darwin;
     };
   }

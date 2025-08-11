@@ -646,6 +646,9 @@ pub trait LanguageModelProvider: 'static {
         None
     }
     fn reset_credentials(&self, cx: &mut App) -> Task<Result<()>>;
+    fn can_select_model(&self, _cx: &App) -> bool {
+        true // Default to true for non-Oppla providers
+    }
 }
 
 #[derive(PartialEq, Eq)]

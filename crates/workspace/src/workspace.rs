@@ -6819,7 +6819,7 @@ actions!(
     ]
 );
 actions!(
-    zed,
+    oppla,
     [
         /// Opens the Zed log file.
         OpenLog

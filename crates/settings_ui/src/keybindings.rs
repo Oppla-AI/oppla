@@ -41,7 +41,7 @@ use crate::{
 const NO_ACTION_ARGUMENTS_TEXT: SharedString = SharedString::new_static("<no arguments>");
 
 actions!(
-    zed,
+    oppla,
     [
         /// Opens the keymap editor.
         OpenKeymapEditor

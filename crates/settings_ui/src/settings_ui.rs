@@ -47,7 +47,7 @@ pub struct ImportCursorSettings {
     pub skip_prompt: bool,
 }
 actions!(
-    zed,
+    oppla,
     [
         /// Opens the settings editor.
         OpenSettingsEditor

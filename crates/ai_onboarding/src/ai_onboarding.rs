@@ -270,15 +270,15 @@ impl ZedAiOnboarding {
 
         v_flex()
             .gap_1()
-            .child(Headline::new("Welcome to Zed AI"))
+            .child(Headline::new("Welcome to Oppla AI"))
             .child(
-                Label::new("Sign in to try Zed Pro for 14 days, no credit card required.")
+                Label::new("Sign in to try Oppla Pro for 14 days, no credit card required.")
                     .color(Color::Muted)
                     .mb_2(),
             )
             .child(self.pro_trial_definition())
             .child(
-                Button::new("sign_in", "Try Zed Pro for Free")
+                Button::new("sign_in", "Try Oppla Pro for Free")
                     .disabled(signing_in)
                     .full_width()
                     .style(ButtonStyle::Tinted(ui::TintColor::Accent))
@@ -299,7 +299,7 @@ impl ZedAiOnboarding {
         v_flex()
             .relative()
             .gap_1()
-            .child(Headline::new("Welcome to Zed AI"))
+            .child(Headline::new("Welcome to Oppla AI"))
             .map(|this| {
                 if self.account_too_young {
                     this.child(young_account_banner)
@@ -335,7 +335,7 @@ impl ZedAiOnboarding {
         v_flex()
             .relative()
             .gap_1()
-            .child(Headline::new("Welcome to the Zed Pro Trial"))
+            .child(Headline::new("Welcome to the Oppla Pro Trial"))
             .child(
                 Label::new("Here's what you get for the next 14 days:")
                     .color(Color::Muted)
@@ -374,7 +374,7 @@ impl ZedAiOnboarding {
     fn render_pro_plan_state(&self, _cx: &mut App) -> AnyElement {
         v_flex()
             .gap_1()
-            .child(Headline::new("Welcome to Zed Pro"))
+            .child(Headline::new("Welcome to Oppla Pro"))
             .child(
                 Label::new("Here's what you get:")
                     .color(Color::Muted)
@@ -388,7 +388,7 @@ impl ZedAiOnboarding {
                     )),
             )
             .child(
-                Button::new("pro", "Continue with Zed Pro")
+                Button::new("pro", "Continue with Oppla Pro")
                     .full_width()
                     .style(ButtonStyle::Outlined)
                     .on_click({

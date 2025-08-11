@@ -127,6 +127,7 @@ pub struct State {
     default_model: Option<Arc<oppla_llm_client::LanguageModel>>,
     default_fast_model: Option<Arc<oppla_llm_client::LanguageModel>>,
     recommended_models: Vec<Arc<oppla_llm_client::LanguageModel>>,
+    can_select_model: bool,
     _fetch_models_task: Task<()>,
     _settings_subscription: Subscription,
     _llm_token_subscription: Subscription,
@@ -151,6 +152,7 @@ impl State {
             default_model: None,
             default_fast_model: None,
             recommended_models: Vec::new(),
+            can_select_model: false,
             _fetch_models_task: cx.spawn(async move |this, cx| {
                 maybe!(async move {
                     let (client, llm_api_token) = this
@@ -264,6 +266,7 @@ impl State {
             .cloned()
             .collect();
         self.models = models;
+        self.can_select_model = response.can_select_model;
         cx.notify();
     }
 
@@ -440,6 +443,10 @@ impl LanguageModelProvider for CloudLanguageModelProvider {
     fn reset_credentials(&self, _cx: &mut App) -> Task<Result<()>> {
         Task::ready(Ok(()))
     }
+
+    fn can_select_model(&self, cx: &App) -> bool {
+        self.state.read(cx).can_select_model
+    }
 }
 
 fn render_accept_terms(
@@ -483,7 +490,7 @@ fn render_accept_terms(
             .child(
                 h_flex()
                     .child(
-                        Label::new("To start using Zed AI, please read and accept the")
+                        Label::new("To start using Oppla AI, please read and accept the")
                             .size(LabelSize::Small),
                     )
                     .child(terms_button),
@@ -498,7 +505,7 @@ fn render_accept_terms(
                     .flex_wrap()
                     .when(thread_fresh_start, |this| this.justify_center())
                     .child(Label::new(
-                        "To start using Zed AI, please read and accept the",
+                        "To start using Oppla AI, please read and accept the",
                     ))
                     .child(terms_button),
             )
@@ -1215,19 +1222,19 @@ impl RenderOnce for ZedAiConfiguration {
         let is_pro = self.plan == Some(proto::Plan::ZedPro);
         let subscription_text = match (self.plan, self.subscription_period) {
             (Some(proto::Plan::ZedPro), Some(_)) => {
-                "You have access to Zed's hosted models through your Pro subscription."
+                "You have access to Oppla's hosted models through your Pro subscription."
             }
             (Some(proto::Plan::ZedProTrial), Some(_)) => {
-                "You have access to Zed's hosted models through your Pro trial."
+                "You have access to Oppla's hosted models through your Pro trial."
             }
             (Some(proto::Plan::Free), Some(_)) => {
-                "You have basic access to Zed's hosted models through the Free plan."
+                "You have basic access to Oppla's hosted models through the Free plan."
             }
             _ => {
                 if self.eligible_for_trial {
-                    "Subscribe for access to Zed's hosted models. Start with a 14 day free trial."
+                    "Subscribe for access to Oppla's hosted models. Start with a 14 day free trial."
                 } else {
-                    "Subscribe for access to Zed's hosted models."
+                    "Subscribe for access to Oppla's hosted models."
                 }
             }
         };
@@ -1255,9 +1262,9 @@ impl RenderOnce for ZedAiConfiguration {
         if !self.is_connected {
             return v_flex()
                 .gap_2()
-                .child(Label::new("Sign in to have access to Zed's complete agentic experience with hosted models."))
+                .child(Label::new("Sign in to have access to Oppla's complete agentic experience with hosted models."))
                 .child(
-                    Button::new("sign_in", "Sign In to use Zed AI")
+                    Button::new("sign_in", "Sign In to use Oppla AI")
                         .icon_color(Color::Muted)
                         .icon(IconName::Github)
                         .icon_size(IconSize::Small)

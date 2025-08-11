@@ -9,7 +9,7 @@ pub mod feedback_modal;
 pub mod system_specs;
 
 actions!(
-    zed,
+    oppla,
     [
         /// Copies system specifications to the clipboard for bug reports.
         CopySystemSpecsIntoClipboard,

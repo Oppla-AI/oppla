@@ -11,16 +11,16 @@ if [[ $# -gt 0 ]]; then
   "
   exit 1
 fi
-export ZED_CHANNEL=$(<crates/zed/RELEASE_CHANNEL)
-export ZED_UPDATE_EXPLANATION="You need to fetch and rebuild zed in $(pwd)"
+export ZED_CHANNEL=$(<crates/oppla/RELEASE_CHANNEL)
+export OPPLA_UPDATE_EXPLANATION="You need to fetch and rebuild zed in $(pwd)"
 script/bundle-linux
 
 target="linux-$(uname -m)"
 commit=$(git rev-parse HEAD | cut -c 1-7)
 if  [[ "$ZED_CHANNEL" == "dev" ]]; then
-  archive="zed-${commit}-${target}.tar.gz"
+  archive="oppla-${commit}-${target}.tar.gz"
 else
-  archive="zed-${target}.tar.gz"
+  archive="oppla-${target}.tar.gz"
 fi
 export ZED_BUNDLE_PATH="${CARGO_TARGET_DIR:-target}/release/${archive}"
 script/install.sh

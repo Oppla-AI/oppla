@@ -29,7 +29,7 @@ impl FeatureFlag for OnBoardingFeatureFlag {
 pub const FIRST_OPEN: &str = "first_open";
 
 actions!(
-    zed,
+    oppla,
     [
         /// Opens the onboarding view.
         OpenOnboarding

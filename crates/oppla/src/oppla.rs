@@ -81,7 +81,7 @@ use workspace::{CloseIntent, CloseWindow, RestoreBanner, with_active_or_new_work
 use workspace::{Pane, notifications::DetachAndPromptErr};
 
 actions!(
-    zed,
+    oppla,
     [
         /// Opens the element inspector for debugging UI.
         DebugElements,

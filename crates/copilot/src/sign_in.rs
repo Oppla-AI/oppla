@@ -253,7 +253,7 @@ impl CopilotCodeVerification {
             .flex_1()
             .gap_2()
             .items_center()
-            .child(Headline::new("Use GitHub Copilot in Zed.").size(HeadlineSize::Large))
+            .child(Headline::new("Use GitHub Copilot in Oppla.").size(HeadlineSize::Large))
             .child(
                 Label::new("Using Copilot requires an active subscription on GitHub.")
                     .color(Color::Muted),

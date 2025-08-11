@@ -527,7 +527,7 @@ impl Render for ConfigurationView {
                 .child(self.api_key_editor.clone())
                 .child(
                     Label::new(format!(
-                        "You can also assign the {VERCEL_API_KEY_VAR} environment variable and restart Zed."
+                        "You can also assign the {VERCEL_API_KEY_VAR} environment variable and restart Oppla."
                     ))
                     .size(LabelSize::Small)
                     .color(Color::Muted),

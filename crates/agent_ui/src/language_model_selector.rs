@@ -77,11 +77,31 @@ pub struct LanguageModelPickerDelegate {
     all_models: Arc<GroupedModels>,
     filtered_entries: Vec<LanguageModelPickerEntry>,
     selected_index: usize,
+    can_select_model: bool,
+    auto_mode: bool, // true = use default model automatically, false = manual selection
     _authenticate_all_providers_task: Task<()>,
     _subscriptions: Vec<Subscription>,
 }
 
 impl LanguageModelPickerDelegate {
+    pub fn can_select_model(&self) -> bool {
+        self.can_select_model
+    }
+
+    pub fn toggle_auto_mode(&mut self, cx: &App) {
+        // Check current can_select_model from provider
+        let registry = LanguageModelRegistry::global(cx).read(cx);
+        let can_select = if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+            provider.can_select_model(cx)
+        } else {
+            true
+        };
+        
+        if can_select {
+            self.auto_mode = !self.auto_mode;
+        }
+    }
+
     fn new(
         get_active_model: impl Fn(&App) -> Option<ConfiguredModel> + 'static,
         on_model_changed: impl Fn(Arc<dyn LanguageModel>, &mut App) + 'static,
@@ -92,12 +112,22 @@ impl LanguageModelPickerDelegate {
         let models = all_models(cx);
         let entries = models.entries();
 
+        // Check if Oppla provider is active and get can_select_model status
+        let registry = LanguageModelRegistry::global(cx).read(cx);
+        let can_select_model = if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+            provider.can_select_model(cx)
+        } else {
+            true
+        };
+
         Self {
             on_model_changed: on_model_changed.clone(),
             all_models: Arc::new(models),
             selected_index: Self::get_active_model_index(&entries, get_active_model(cx)),
             filtered_entries: entries,
             get_active_model: Arc::new(get_active_model),
+            can_select_model,
+            auto_mode: true, // Default to auto mode (use default model)
             _authenticate_all_providers_task: Self::authenticate_all_providers(cx),
             _subscriptions: vec![cx.subscribe_in(
                 &LanguageModelRegistry::global(cx),
@@ -372,6 +402,11 @@ impl PickerDelegate for LanguageModelPickerDelegate {
         _window: &mut Window,
         _cx: &mut Context<Picker<Self>>,
     ) -> bool {
+        // In auto mode, don't allow selection
+        if self.auto_mode {
+            return false;
+        }
+        
         match self.filtered_entries.get(ix) {
             Some(LanguageModelPickerEntry::Model(_)) => true,
             Some(LanguageModelPickerEntry::Separator(_)) | None => false,
@@ -391,6 +426,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
         let all_models = self.all_models.clone();
         let active_model = (self.get_active_model)(cx);
         let bg_executor = cx.background_executor();
+        let auto_mode = self.auto_mode;
 
         let language_model_registry = LanguageModelRegistry::global(cx);
 
@@ -406,27 +442,57 @@ impl PickerDelegate for LanguageModelPickerDelegate {
             .map(|provider| provider.id())
             .collect::<Vec<_>>();
 
-        let recommended_models = all_models
-            .recommended
-            .iter()
-            .filter(|m| configured_provider_ids.contains(&m.model.provider_id()))
-            .cloned()
-            .collect::<Vec<_>>();
-
-        let available_models = all_models
-            .model_infos()
-            .iter()
-            .filter(|m| configured_provider_ids.contains(&m.model.provider_id()))
-            .cloned()
-            .collect::<Vec<_>>();
-
-        let matcher_rec = ModelMatcher::new(recommended_models, bg_executor.clone());
-        let matcher_all = ModelMatcher::new(available_models, bg_executor.clone());
-
-        let recommended = matcher_rec.exact_search(&query);
-        let all = matcher_all.fuzzy_search(&query);
-
-        let filtered_models = GroupedModels::new(all, recommended);
+        let filtered_models = if auto_mode {
+            // In auto mode, only show the currently selected (default) model
+            // User cannot select anything else
+            if let Some(active) = &active_model {
+                let model_info = all_models
+                    .model_infos()
+                    .iter()
+                    .find(|m| m.model.id() == active.model.id() && m.model.provider_id() == active.provider.id())
+                    .cloned();
+                
+                if let Some(info) = model_info {
+                    GroupedModels::new(vec![info], Vec::new())
+                } else {
+                    GroupedModels::new(Vec::new(), Vec::new())
+                }
+            } else {
+                GroupedModels::new(Vec::new(), Vec::new())
+            }
+        } else {
+            // Manual mode: show all available models for selection
+            let all_available = all_models
+                .model_infos()
+                .iter()
+                .filter(|m| configured_provider_ids.contains(&m.model.provider_id()))
+                .cloned()
+                .collect::<Vec<_>>();
+            
+            // Filter recommended models from configured providers
+            let recommended_models = all_models
+                .recommended
+                .iter()
+                .filter(|m| configured_provider_ids.contains(&m.model.provider_id()))
+                .cloned()
+                .collect::<Vec<_>>();
+            
+            let (searched, recommended) = if query.is_empty() {
+                // When no query, show all available and all recommended
+                (all_available, recommended_models)
+            } else {
+                // Two-tier search: exact search for recommended, fuzzy for all
+                let matcher_rec = ModelMatcher::new(recommended_models, bg_executor.clone());
+                let matcher_all = ModelMatcher::new(all_available, bg_executor.clone());
+                
+                let recommended = matcher_rec.exact_search(&query);
+                let all = matcher_all.fuzzy_search(&query);
+                
+                (all, recommended)
+            };
+            
+            GroupedModels::new(searched, recommended)
+        };
 
         cx.spawn_in(window, async move |this, cx| {
             this.update_in(cx, |this, window, cx| {
@@ -537,15 +603,57 @@ impl PickerDelegate for LanguageModelPickerDelegate {
         use feature_flags::FeatureFlagAppExt;
 
         let plan = proto::Plan::ZedPro;
+        
+        // Get the current can_select_model value from the provider
+        let registry = LanguageModelRegistry::global(cx).read(cx);
+        let can_select_model = if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+            provider.can_select_model(cx)
+        } else {
+            true
+        };
 
         Some(
-            h_flex()
+            v_flex()
                 .w_full()
                 .border_t_1()
                 .border_color(cx.theme().colors().border_variant)
-                .p_1()
-                .gap_4()
-                .justify_between()
+                .child(
+                    // Auto/Manual toggle - always visible
+                    h_flex()
+                        .px_2()
+                        .py_1()
+                        .border_b_1()
+                        .border_color(cx.theme().colors().border_variant)
+                        .justify_between()
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .items_center()
+                                .child(
+                                    ui::Switch::new(
+                                        "auto-mode-toggle",
+                                        if self.auto_mode {
+                                            ui::ToggleState::Selected
+                                        } else {
+                                            ui::ToggleState::Unselected
+                                        },
+                                    )
+                                    .label("Auto")
+                                    .disabled(!can_select_model)
+                                    .on_click(cx.listener(|this, _, window, cx| {
+                                        this.delegate.toggle_auto_mode(cx);
+                                        let query = this.query(cx);
+                                        this.update_matches(query, window, cx);
+                                    })),
+                                )
+                        )
+                )
+                .child(
+                    h_flex()
+                        .w_full()
+                        .p_1()
+                        .gap_4()
+                        .justify_between()
                 .when(cx.has_flag::<ZedProFeatureFlag>(), |this| {
                     this.child(match plan {
                         Plan::ZedPro => Button::new("zed-pro", "Oppla Pro")
@@ -582,6 +690,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                                 cx,
                             );
                         }),
+                    )
                 )
                 .into_any(),
         )

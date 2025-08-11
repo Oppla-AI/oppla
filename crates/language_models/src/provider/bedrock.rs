@@ -1251,7 +1251,7 @@ impl Render for ConfigurationView {
         v_flex()
             .size_full()
             .on_action(cx.listener(ConfigurationView::save_credentials))
-            .child(Label::new("To use Zed's assistant with Bedrock, you can set a custom authentication strategy through the settings.json, or use static credentials."))
+            .child(Label::new("To use Oppla's assistant with Bedrock, you can set a custom authentication strategy through the settings.json, or use static credentials."))
             .child(Label::new("But, to access models on AWS, you need to:").mt_1())
             .child(
                 List::new()
@@ -1274,7 +1274,7 @@ impl Render for ConfigurationView {
             .child(self.render_common_fields(cx))
             .child(
                 Label::new(
-                    format!("You can also assign the {ZED_BEDROCK_ACCESS_KEY_ID_VAR}, {ZED_BEDROCK_SECRET_ACCESS_KEY_VAR} AND {ZED_BEDROCK_REGION_VAR} environment variables and restart Zed."),
+                    format!("You can also assign the {ZED_BEDROCK_ACCESS_KEY_ID_VAR}, {ZED_BEDROCK_SECRET_ACCESS_KEY_VAR} AND {ZED_BEDROCK_REGION_VAR} environment variables and restart Oppla."),
                 )
                     .size(LabelSize::Small)
                     .color(Color::Muted)

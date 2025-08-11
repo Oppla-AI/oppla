@@ -1,9 +1,9 @@
-// Zed keymap
+// Oppla keymap
 //
-// For information on binding keys, see the Zed
+// For information on binding keys, see the Oppla
 // documentation: https://zed.dev/docs/key-bindings
 //
-// To see the default key bindings run `zed: open default keymap`
+// To see the default key bindings run `oppla: open default keymap`
 // from the command palette.
 [
   {

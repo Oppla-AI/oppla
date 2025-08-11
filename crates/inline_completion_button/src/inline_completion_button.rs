@@ -199,7 +199,7 @@ impl Render for InlineCompletionButton {
                                         cx.open_url(activate_url.as_str())
                                     })
                                     .entry(
-                                        "Use Zed AI",
+                                        "Use Oppla AI",
                                         None,
                                         move |_, cx| {
                                             set_completion_provider(
@@ -406,7 +406,7 @@ impl InlineCompletionButton {
                     move |_window, cx| hide_copilot(fs.clone(), cx)
                 })
                 .separator()
-                .entry("Use Zed AI", None, {
+                .entry("Use Oppla AI", None, {
                     let fs = fs.clone();
                     move |_window, cx| {
                         set_completion_provider(fs.clone(), cx, EditPredictionProvider::Zed)
@@ -567,7 +567,7 @@ impl InlineCompletionButton {
                                 .child(
                                     Label::new(indoc!{
                                         "Help us improve our open dataset model by sharing data from open source repositories. \
-                                        Zed must detect a license file in your repo for this setting to take effect. \
+                                        Oppla must detect a license file in your repo for this setting to take effect. \
                                         Files with sensitive data and secrets are excluded by default."
                                     })
                                 )
@@ -620,7 +620,7 @@ impl InlineCompletionButton {
                 .icon_color(Color::Muted)
                 .documentation_aside(DocumentationSide::Left, |_| {
                     Label::new(indoc!{"
-                        Open your settings to add sensitive paths for which Zed will never predict edits."}).into_any_element()
+                        Open your settings to add sensitive paths for which Oppla will never predict edits."}).into_any_element()
                 })
                 .handler(move |window, cx| {
                     if let Some(workspace) = window.root().flatten() {
@@ -680,7 +680,7 @@ impl InlineCompletionButton {
         ContextMenu::build(window, cx, |menu, window, cx| {
             self.build_language_settings_menu(menu, window, cx)
                 .separator()
-                .entry("Use Zed AI instead", None, {
+                .entry("Use Oppla AI instead", None, {
                     let fs = self.fs.clone();
                     move |_window, cx| {
                         set_completion_provider(fs.clone(), cx, EditPredictionProvider::Zed)
@@ -771,7 +771,7 @@ impl InlineCompletionButton {
                         },
                         |_window, cx| cx.open_url(&zed_urls::account_url(cx)),
                     )
-                    .entry("Upgrade to Zed Pro or contact us.", None, |_window, cx| {
+                    .entry("Upgrade to Oppla Pro or contact us.", None, |_window, cx| {
                         cx.open_url(&zed_urls::account_url(cx))
                     })
                     .separator();

@@ -180,7 +180,7 @@ pub struct ExtensionIndexLanguageEntry {
 }
 
 actions!(
-    zed,
+    oppla,
     [
         /// Reloads all installed extensions.
         ReloadExtensions

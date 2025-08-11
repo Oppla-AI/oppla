@@ -26,12 +26,12 @@
       "shift-escape": "workspace::ToggleZoom",
       "open": "workspace::Open",
       "ctrl-o": "workspace::Open",
-      "ctrl-=": ["zed::IncreaseBufferFontSize", { "persist": false }],
-      "ctrl-+": ["zed::IncreaseBufferFontSize", { "persist": false }],
-      "ctrl--": ["zed::DecreaseBufferFontSize", { "persist": false }],
-      "ctrl-0": ["zed::ResetBufferFontSize", { "persist": false }],
-      "ctrl-,": "zed::OpenSettings",
-      "ctrl-q": "zed::Quit",
+      "ctrl-=": ["oppla::IncreaseBufferFontSize", { "persist": false }],
+      "ctrl-+": ["oppla::IncreaseBufferFontSize", { "persist": false }],
+      "ctrl--": ["oppla::DecreaseBufferFontSize", { "persist": false }],
+      "ctrl-0": ["oppla::ResetBufferFontSize", { "persist": false }],
+      "ctrl-,": "oppla::OpenSettings",
+      "ctrl-q": "oppla::Quit",
       "f4": "debugger::Start",
       "shift-f5": "debugger::Stop",
       "ctrl-shift-f5": "debugger::RerunSession",
@@ -39,7 +39,7 @@
       "f7": "debugger::StepOver",
       "ctrl-f11": "debugger::StepInto",
       "shift-f11": "debugger::StepOut",
-      "f11": "zed::ToggleFullScreen",
+      "f11": "oppla::ToggleFullScreen",
       "ctrl-alt-z": "edit_prediction::RateCompletions",
       "ctrl-shift-i": "edit_prediction::ToggleMenu",
       "ctrl-alt-l": "lsp_tool::ToggleMenu"
@@ -596,7 +596,7 @@
       "ctrl-shift-f": "pane::DeploySearch",
       "ctrl-shift-h": ["pane::DeploySearch", { "replace_enabled": true }],
       "ctrl-shift-t": "pane::ReopenClosedItem",
-      "ctrl-k ctrl-s": "zed::OpenKeymapEditor",
+      "ctrl-k ctrl-s": "oppla::OpenKeymapEditor",
       "ctrl-k ctrl-t": "theme_selector::Toggle",
       "ctrl-t": "project_symbols::Toggle",
       "ctrl-p": "file_finder::Toggle",
@@ -623,7 +623,7 @@
       "ctrl-k shift-right": "workspace::SwapPaneRight",
       "ctrl-k shift-up": "workspace::SwapPaneUp",
       "ctrl-k shift-down": "workspace::SwapPaneDown",
-      "ctrl-shift-x": "zed::Extensions",
+      "ctrl-shift-x": "oppla::Extensions",
       "ctrl-shift-r": "task::Rerun",
       "ctrl-alt-r": "task::Rerun",
       "alt-t": "task::Rerun",
@@ -641,7 +641,7 @@
   {
     "context": "Workspace && debugger_running",
     "bindings": {
-      "f5": "zed::NoAction"
+      "f5": "oppla::NoAction"
     }
   },
   {

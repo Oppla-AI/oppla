@@ -880,7 +880,7 @@ impl Render for ConfigurationView {
             v_flex()
                 .size_full()
                 .on_action(cx.listener(Self::save_api_key))
-                .child(Label::new("To use Zed's assistant with Google AI, you need to add an API key. Follow these steps:"))
+                .child(Label::new("To use Oppla's assistant with Google AI, you need to add an API key. Follow these steps:"))
                 .child(
                     List::new()
                         .child(InstructionListItem::new(
@@ -906,7 +906,7 @@ impl Render for ConfigurationView {
                 )
                 .child(
                     Label::new(
-                        format!("You can also assign the {GEMINI_API_KEY_VAR} environment variable and restart Zed."),
+                        format!("You can also assign the {GEMINI_API_KEY_VAR} environment variable and restart Oppla."),
                     )
                     .size(LabelSize::Small).color(Color::Muted),
                 )

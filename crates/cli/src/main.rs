@@ -5,7 +5,7 @@
 
 use anyhow::{Context as _, Result};
 use clap::Parser;
-use cli::{CliRequest, CliResponse, IpcHandshake, ipc::IpcOneShotServer};
+use cli::{ipc::IpcOneShotServer, CliRequest, CliResponse, IpcHandshake};
 use collections::HashMap;
 use parking_lot::Mutex;
 use std::{
@@ -36,21 +36,21 @@ trait InstalledApp {
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "zed",
+    name = "oppla",
     disable_version_flag = true,
-    before_help = "The Zed CLI binary.
-This CLI is a separate binary that invokes Zed.
+    before_help = "The Oppla CLI binary.
+This CLI is a separate binary that invokes Oppla.
 
 Examples:
-    `zed`
-          Simply opens Zed
-    `zed --foreground`
+    `oppla`
+          Simply opens Oppla
+    `oppla --foreground`
           Runs in foreground (shows all logs)
-    `zed path-to-your-project`
-          Open your project in Zed
-    `zed -n path-to-file `
+    `oppla path-to-your-project`
+          Open your project in Oppla
+    `oppla -n path-to-file `
           Open file/folder in a new window",
-    after_help = "To read from stdin, append '-', e.g. 'ps axf | zed -'"
+    after_help = "To read from stdin, append '-', e.g. 'ps axf | oppla -'"
 )]
 struct Args {
     /// Wait for all of the given paths to be opened/closed before exiting.
@@ -69,20 +69,20 @@ struct Args {
     /// On Windows, the default is `%LOCALAPPDATA%\Zed`.
     #[arg(long, value_name = "DIR")]
     user_data_dir: Option<String>,
-    /// The paths to open in Zed (space-separated).
+    /// The paths to open in Oppla (space-separated).
     ///
     /// Use `path:line:column` syntax to open a file at the given line and column.
     paths_with_position: Vec<String>,
-    /// Print Zed's version and the app path.
+    /// Print Oppla's version and the app path.
     #[arg(short, long)]
     version: bool,
-    /// Run zed in the foreground (useful for debugging)
+    /// Run oppla in the foreground (useful for debugging)
     #[arg(long)]
     foreground: bool,
-    /// Custom path to Zed.app or the zed binary
+    /// Custom path to Oppla.app or the oppla binary
     #[arg(long)]
     zed: Option<PathBuf>,
-    /// Run zed in dev-server mode
+    /// Run oppla in dev-server mode
     #[arg(long)]
     dev_server_token: Option<String>,
     /// Not supported in Zed CLI, only supported on Zed binary
@@ -132,7 +132,7 @@ fn parse_path_with_position(argument_str: &str) -> anyhow::Result<String> {
 fn main() -> Result<()> {
     #[cfg(all(not(debug_assertions), target_os = "windows"))]
     unsafe {
-        use ::windows::Win32::System::Console::{ATTACH_PARENT_PROCESS, AttachConsole};
+        use windows::Win32::System::Console::{AttachConsole, ATTACH_PARENT_PROCESS};
 
         let _ = AttachConsole(ATTACH_PARENT_PROCESS);
     }
@@ -209,8 +209,8 @@ fn main() -> Result<()> {
     }
 
     let (server, server_name) =
-        IpcOneShotServer::<IpcHandshake>::new().context("Handshake before Zed spawn")?;
-    let url = format!("zed-cli://{server_name}");
+        IpcOneShotServer::<IpcHandshake>::new().context("Handshake before Oppla spawn")?;
+    let url = format!("oppla-cli://{server_name}");
 
     let open_new_workspace = if args.new {
         Some(true)
@@ -223,7 +223,7 @@ fn main() -> Result<()> {
     let env = {
         #[cfg(any(target_os = "linux", target_os = "freebsd"))]
         {
-            // On Linux, the desktop entry uses `cli` to spawn `zed`.
+            // On Linux, the desktop entry uses `cli` to spawn `oppla`.
             // We need to handle env vars correctly since std::env::vars() may not contain
             // project-specific vars (e.g. those set by direnv).
             // By setting env to None here, the LSP will use worktree env vars instead,
@@ -405,7 +405,7 @@ mod linux {
         time::Duration,
     };
 
-    use anyhow::{Context as _, anyhow};
+    use anyhow::{anyhow, Context as _};
     use cli::FORCE_CLI_MODE_ENV_VAR_NAME;
     use fork::Fork;
 
@@ -427,10 +427,13 @@ mod linux {
                 let cli = env::current_exe()?;
                 let dir = cli.parent().context("no parent path for cli")?;
 
-                // libexec is the standard, lib/zed is for Arch (and other non-libexec distros),
-                // ./zed is for the target directory in development builds.
-                let possible_locations =
-                    ["../libexec/zed-editor", "../lib/zed/zed-editor", "./zed"];
+                // libexec is the standard, lib/oppla is for Arch (and other non-libexec distros),
+                // ./oppla is for the target directory in development builds.
+                let possible_locations = [
+                    "../libexec/oppla-editor",
+                    "../lib/oppla/oppla-editor",
+                    "./oppla",
+                ];
                 possible_locations
                     .iter()
                     .find_map(|p| dir.join(p).canonicalize().ok().filter(|path| path != &cli))
@@ -446,7 +449,7 @@ mod linux {
     impl InstalledApp for App {
         fn zed_version_string(&self) -> String {
             format!(
-                "Zed {}{}{} – {}",
+                "Oppla {}{}{} – {}",
                 if *RELEASE_CHANNEL == "stable" {
                     "".to_string()
                 } else {
@@ -462,7 +465,7 @@ mod linux {
         }
 
         fn launch(&self, ipc_url: String) -> anyhow::Result<()> {
-            let sock_path = paths::data_dir().join(format!("zed-{}.sock", *RELEASE_CHANNEL));
+            let sock_path = paths::data_dir().join(format!("oppla-{}.sock", *RELEASE_CHANNEL));
             let sock = UnixDatagram::unbound()?;
             if sock.connect(&sock_path).is_err() {
                 self.boot_background(ipc_url)?;
@@ -561,7 +564,7 @@ mod flatpak {
         if let Some(flatpak_dir) = get_flatpak_dir() {
             let mut args = vec!["/usr/bin/flatpak-spawn".into(), "--host".into()];
             args.append(&mut get_xdg_env_args());
-            args.push("--env=ZED_UPDATE_EXPLANATION=Please use flatpak to update zed".into());
+            args.push("--env=OPPLA_UPDATE_EXPLANATION=Please use flatpak to update zed".into());
             args.push(
                 format!(
                     "--env={EXTRA_LIB_ENV_NAME}={}",
@@ -595,7 +598,10 @@ mod flatpak {
             if args.zed.is_none() {
                 args.zed = Some("/app/libexec/zed-editor".into());
                 unsafe {
-                    env::set_var("ZED_UPDATE_EXPLANATION", "Please use flatpak to update zed")
+                    env::set_var(
+                        "OPPLA_UPDATE_EXPLANATION",
+                        "Please use flatpak to update zed",
+                    )
                 };
             }
         }
@@ -646,14 +652,14 @@ mod windows {
     use anyhow::Context;
     use release_channel::app_identifier;
     use windows::{
+        core::HSTRING,
         Win32::{
-            Foundation::{CloseHandle, ERROR_ALREADY_EXISTS, GENERIC_WRITE, GetLastError},
+            Foundation::{CloseHandle, GetLastError, ERROR_ALREADY_EXISTS, GENERIC_WRITE},
             Storage::FileSystem::{
-                CreateFileW, FILE_FLAGS_AND_ATTRIBUTES, FILE_SHARE_MODE, OPEN_EXISTING, WriteFile,
+                CreateFileW, WriteFile, FILE_FLAGS_AND_ATTRIBUTES, FILE_SHARE_MODE, OPEN_EXISTING,
             },
             System::Threading::CreateMutexW,
         },
-        core::HSTRING,
     };
 
     use crate::{Detect, InstalledApp};
@@ -680,7 +686,7 @@ mod windows {
     impl InstalledApp for App {
         fn zed_version_string(&self) -> String {
             format!(
-                "Zed {}{}{} – {}",
+                "Oppla {}{}{} – {}",
                 if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
                     "".to_string()
                 } else {
@@ -770,9 +776,9 @@ mod mac_os {
         array::{CFArray, CFIndex},
         base::TCFType as _,
         string::kCFStringEncodingUTF8,
-        url::{CFURL, CFURLCreateWithBytes},
+        url::{CFURLCreateWithBytes, CFURL},
     };
-    use core_services::{LSLaunchURLSpec, LSOpenFromURLSpec, kLSLaunchDefaults};
+    use core_services::{kLSLaunchDefaults, LSLaunchURLSpec, LSOpenFromURLSpec};
     use serde::Deserialize;
     use std::{
         ffi::OsStr,
@@ -845,7 +851,7 @@ mod mac_os {
 
     impl InstalledApp for Bundle {
         fn zed_version_string(&self) -> String {
-            format!("Zed {} – {}", self.version(), self.path().display(),)
+            format!("Oppla {} – {}", self.version(), self.path().display(),)
         }
 
         fn launch(&self, url: String) -> anyhow::Result<()> {
@@ -863,7 +869,7 @@ mod mac_os {
                             kCFStringEncodingUTF8,
                             ptr::null(),
                         ));
-                        // equivalent to: open zed-cli:... -a /Applications/Zed\ Preview.app
+                        // equivalent to: open oppla-cli:... -a /Applications/Oppla\ Preview.app
                         let urls_to_open =
                             CFArray::from_copyable(&[url_to_open.as_concrete_TypeRef()]);
                         LSOpenFromURLSpec(

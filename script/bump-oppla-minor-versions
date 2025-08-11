@@ -17,7 +17,7 @@ fi
 git pull -q --ff-only origin main
 
 # Parse the current version
-version=$(script/get-crate-version zed)
+version=$(script/get-crate-version oppla)
 major=$(echo $version | cut -d. -f1)
 minor=$(echo $version | cut -d. -f2)
 patch=$(echo $version | cut -d. -f3)
@@ -40,7 +40,7 @@ function cleanup {
 trap cleanup EXIT
 
 echo "Checking invariants before taking any actions..."
-if [[ $(cat crates/zed/RELEASE_CHANNEL) != dev && $(cat crates/zed/RELEASE_CHANNEL) != nightly ]]; then
+if [[ $(cat crates/oppla/RELEASE_CHANNEL) != dev && $(cat crates/oppla/RELEASE_CHANNEL) != nightly ]]; then
   echo "release channel on main should be dev or nightly"
   exit 1
 fi
@@ -56,7 +56,7 @@ if ! git show-ref --quiet refs/heads/${prev_minor_branch_name}; then
   echo "previous branch ${minor_branch_name} doesn't exist"
   exit 1
 fi
-if [[ $(git show ${prev_minor_branch_name}:crates/zed/RELEASE_CHANNEL) != preview ]]; then
+if [[ $(git show ${prev_minor_branch_name}:crates/oppla/RELEASE_CHANNEL) != preview ]]; then
   echo "release channel on branch ${prev_minor_branch_name} should be preview"
   exit 1
 fi
@@ -64,20 +64,20 @@ fi
 echo "Promoting existing branch ${prev_minor_branch_name} to stable..."
 git checkout -q ${prev_minor_branch_name}
 git clean -q -dff
-stable_tag_name="v$(script/get-crate-version zed)"
+stable_tag_name="v$(script/get-crate-version oppla)"
 if git show-ref --quiet refs/tags/${stable_tag_name}; then
   echo "tag ${stable_tag_name} already exists"
   exit 1
 fi
 old_prev_minor_sha=$(git rev-parse HEAD)
-echo -n stable > crates/zed/RELEASE_CHANNEL
+echo -n stable > crates/oppla/RELEASE_CHANNEL
 git commit -q --all --message "${prev_minor_branch_name} stable"
 git tag ${stable_tag_name}
 
 echo "Creating new preview branch ${minor_branch_name}..."
 git checkout -q main
 git checkout -q -b ${minor_branch_name}
-echo -n preview > crates/zed/RELEASE_CHANNEL
+echo -n preview > crates/oppla/RELEASE_CHANNEL
 git commit -q --all --message "${minor_branch_name} preview"
 git tag ${preview_tag_name}
 
@@ -85,7 +85,7 @@ echo "Preparing main for version ${next_minor_branch_name}..."
 git checkout -q main
 git clean -q -dff
 git checkout -q -b ${bump_main_branch_name}
-cargo set-version --package zed --bump minor
+cargo set-version --package oppla --bump minor
 cargo check -q
 
 git commit -q --all --message "${next_minor_branch_name} dev"
@@ -93,7 +93,7 @@ git commit -q --all --message "${next_minor_branch_name} dev"
 git checkout -q main
 
 cat <<MESSAGE
-Prepared new Zed versions locally. You will need to push the branches and open a PR for the change to main.
+Prepared new Oppla versions locally. You will need to push the branches and open a PR for the change to main.
 
 # To push and open a PR to update main:
 
@@ -105,7 +105,7 @@ Prepared new Zed versions locally. You will need to push the branches and open a
       ${bump_main_branch_name}
 
     echo -e "Release Notes:\n\n-N/A" | gh pr create \\
-      --title "Bump Zed to v${major}.${next_minor}" \\
+      --title "Bump Oppla to v${major}.${next_minor}" \\
       --body-file "-" \\
       --base main \\
       --head ${bump_main_branch_name} \\

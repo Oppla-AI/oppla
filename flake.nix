@@ -27,7 +27,7 @@
       ];
 
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
-      mkZed =
+      mkOppla =
         pkgs:
         let
           rustBin = rust-overlay.lib.mkRustBin { } pkgs;
@@ -39,17 +39,17 @@
     in
     rec {
       packages = forAllSystems (pkgs: rec {
-        default = mkZed pkgs;
+        default = mkOppla pkgs;
         debug = default.override { profile = "dev"; };
       });
       devShells = forAllSystems (pkgs: {
         default = pkgs.callPackage ./nix/shell.nix {
-          zed-editor = packages.${pkgs.hostPlatform.system}.default;
+          oppla-editor = packages.${pkgs.hostPlatform.system}.default;
         };
       });
       formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
       overlays.default = final: _: {
-        zed-editor = mkZed final;
+        oppla-editor = mkOppla final;
       };
     };
 
