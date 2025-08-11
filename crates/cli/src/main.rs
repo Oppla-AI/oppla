@@ -5,7 +5,7 @@
 
 use anyhow::{Context as _, Result};
 use clap::Parser;
-use cli::{ipc::IpcOneShotServer, CliRequest, CliResponse, IpcHandshake};
+use cli::{CliRequest, CliResponse, IpcHandshake, ipc::IpcOneShotServer};
 use collections::HashMap;
 use parking_lot::Mutex;
 use std::{
@@ -132,7 +132,7 @@ fn parse_path_with_position(argument_str: &str) -> anyhow::Result<String> {
 fn main() -> Result<()> {
     #[cfg(all(not(debug_assertions), target_os = "windows"))]
     unsafe {
-        use windows::Win32::System::Console::{AttachConsole, ATTACH_PARENT_PROCESS};
+        use windows::Win32::System::Console::{ATTACH_PARENT_PROCESS, AttachConsole};
 
         let _ = AttachConsole(ATTACH_PARENT_PROCESS);
     }
@@ -405,7 +405,7 @@ mod linux {
         time::Duration,
     };
 
-    use anyhow::{anyhow, Context as _};
+    use anyhow::{Context as _, anyhow};
     use cli::FORCE_CLI_MODE_ENV_VAR_NAME;
     use fork::Fork;
 
@@ -652,14 +652,14 @@ mod windows {
     use anyhow::Context;
     use release_channel::app_identifier;
     use windows::{
-        core::HSTRING,
         Win32::{
-            Foundation::{CloseHandle, GetLastError, ERROR_ALREADY_EXISTS, GENERIC_WRITE},
+            Foundation::{CloseHandle, ERROR_ALREADY_EXISTS, GENERIC_WRITE, GetLastError},
             Storage::FileSystem::{
-                CreateFileW, WriteFile, FILE_FLAGS_AND_ATTRIBUTES, FILE_SHARE_MODE, OPEN_EXISTING,
+                CreateFileW, FILE_FLAGS_AND_ATTRIBUTES, FILE_SHARE_MODE, OPEN_EXISTING, WriteFile,
             },
             System::Threading::CreateMutexW,
         },
+        core::HSTRING,
     };
 
     use crate::{Detect, InstalledApp};
@@ -776,9 +776,9 @@ mod mac_os {
         array::{CFArray, CFIndex},
         base::TCFType as _,
         string::kCFStringEncodingUTF8,
-        url::{CFURLCreateWithBytes, CFURL},
+        url::{CFURL, CFURLCreateWithBytes},
     };
-    use core_services::{kLSLaunchDefaults, LSLaunchURLSpec, LSOpenFromURLSpec};
+    use core_services::{LSLaunchURLSpec, LSOpenFromURLSpec, kLSLaunchDefaults};
     use serde::Deserialize;
     use std::{
         ffi::OsStr,

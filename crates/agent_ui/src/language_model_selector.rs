@@ -91,12 +91,13 @@ impl LanguageModelPickerDelegate {
     pub fn toggle_auto_mode(&mut self, cx: &App) {
         // Check current can_select_model from provider
         let registry = LanguageModelRegistry::global(cx).read(cx);
-        let can_select = if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
-            provider.can_select_model(cx)
-        } else {
-            true
-        };
-        
+        let can_select =
+            if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+                provider.can_select_model(cx)
+            } else {
+                true
+            };
+
         if can_select {
             self.auto_mode = !self.auto_mode;
         }
@@ -114,11 +115,12 @@ impl LanguageModelPickerDelegate {
 
         // Check if Oppla provider is active and get can_select_model status
         let registry = LanguageModelRegistry::global(cx).read(cx);
-        let can_select_model = if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
-            provider.can_select_model(cx)
-        } else {
-            true
-        };
+        let can_select_model =
+            if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+                provider.can_select_model(cx)
+            } else {
+                true
+            };
 
         Self {
             on_model_changed: on_model_changed.clone(),
@@ -406,7 +408,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
         if self.auto_mode {
             return false;
         }
-        
+
         match self.filtered_entries.get(ix) {
             Some(LanguageModelPickerEntry::Model(_)) => true,
             Some(LanguageModelPickerEntry::Separator(_)) | None => false,
@@ -449,9 +451,12 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                 let model_info = all_models
                     .model_infos()
                     .iter()
-                    .find(|m| m.model.id() == active.model.id() && m.model.provider_id() == active.provider.id())
+                    .find(|m| {
+                        m.model.id() == active.model.id()
+                            && m.model.provider_id() == active.provider.id()
+                    })
                     .cloned();
-                
+
                 if let Some(info) = model_info {
                     GroupedModels::new(vec![info], Vec::new())
                 } else {
@@ -468,7 +473,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                 .filter(|m| configured_provider_ids.contains(&m.model.provider_id()))
                 .cloned()
                 .collect::<Vec<_>>();
-            
+
             // Filter recommended models from configured providers
             let recommended_models = all_models
                 .recommended
@@ -476,7 +481,7 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                 .filter(|m| configured_provider_ids.contains(&m.model.provider_id()))
                 .cloned()
                 .collect::<Vec<_>>();
-            
+
             let (searched, recommended) = if query.is_empty() {
                 // When no query, show all available and all recommended
                 (all_available, recommended_models)
@@ -484,13 +489,13 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                 // Two-tier search: exact search for recommended, fuzzy for all
                 let matcher_rec = ModelMatcher::new(recommended_models, bg_executor.clone());
                 let matcher_all = ModelMatcher::new(all_available, bg_executor.clone());
-                
+
                 let recommended = matcher_rec.exact_search(&query);
                 let all = matcher_all.fuzzy_search(&query);
-                
+
                 (all, recommended)
             };
-            
+
             GroupedModels::new(searched, recommended)
         };
 
@@ -603,14 +608,15 @@ impl PickerDelegate for LanguageModelPickerDelegate {
         use feature_flags::FeatureFlagAppExt;
 
         let plan = proto::Plan::ZedPro;
-        
+
         // Get the current can_select_model value from the provider
         let registry = LanguageModelRegistry::global(cx).read(cx);
-        let can_select_model = if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
-            provider.can_select_model(cx)
-        } else {
-            true
-        };
+        let can_select_model =
+            if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+                provider.can_select_model(cx)
+            } else {
+                true
+            };
 
         Some(
             v_flex()
@@ -626,27 +632,26 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                         .border_color(cx.theme().colors().border_variant)
                         .justify_between()
                         .child(
-                            h_flex()
-                                .gap_2()
-                                .items_center()
-                                .child(
-                                    ui::Switch::new(
-                                        "auto-mode-toggle",
-                                        if self.auto_mode {
-                                            ui::ToggleState::Selected
-                                        } else {
-                                            ui::ToggleState::Unselected
-                                        },
-                                    )
-                                    .label("Auto")
-                                    .disabled(!can_select_model)
-                                    .on_click(cx.listener(|this, _, window, cx| {
+                            h_flex().gap_2().items_center().child(
+                                ui::Switch::new(
+                                    "auto-mode-toggle",
+                                    if self.auto_mode {
+                                        ui::ToggleState::Selected
+                                    } else {
+                                        ui::ToggleState::Unselected
+                                    },
+                                )
+                                .label("Auto")
+                                .disabled(!can_select_model)
+                                .on_click(cx.listener(
+                                    |this, _, window, cx| {
                                         this.delegate.toggle_auto_mode(cx);
                                         let query = this.query(cx);
                                         this.update_matches(query, window, cx);
-                                    })),
-                                )
-                        )
+                                    },
+                                )),
+                            ),
+                        ),
                 )
                 .child(
                     h_flex()
@@ -654,43 +659,43 @@ impl PickerDelegate for LanguageModelPickerDelegate {
                         .p_1()
                         .gap_4()
                         .justify_between()
-                .when(cx.has_flag::<ZedProFeatureFlag>(), |this| {
-                    this.child(match plan {
-                        Plan::ZedPro => Button::new("zed-pro", "Oppla Pro")
-                            .icon(IconName::ZedAssistant)
-                            .icon_size(IconSize::Small)
-                            .icon_color(Color::Muted)
-                            .icon_position(IconPosition::Start)
-                            .on_click(|_, window, cx| {
-                                window.dispatch_action(
-                                    Box::new(oppla_actions::OpenAccountSettings),
-                                    cx,
+                        .when(cx.has_flag::<ZedProFeatureFlag>(), |this| {
+                            this.child(match plan {
+                                Plan::ZedPro => Button::new("zed-pro", "Oppla Pro")
+                                    .icon(IconName::ZedAssistant)
+                                    .icon_size(IconSize::Small)
+                                    .icon_color(Color::Muted)
+                                    .icon_position(IconPosition::Start)
+                                    .on_click(|_, window, cx| {
+                                        window.dispatch_action(
+                                            Box::new(oppla_actions::OpenAccountSettings),
+                                            cx,
+                                        )
+                                    }),
+                                Plan::Free | Plan::ZedProTrial => Button::new(
+                                    "try-pro",
+                                    if plan == Plan::ZedProTrial {
+                                        "Upgrade to Pro"
+                                    } else {
+                                        "Try Pro"
+                                    },
                                 )
-                            }),
-                        Plan::Free | Plan::ZedProTrial => Button::new(
-                            "try-pro",
-                            if plan == Plan::ZedProTrial {
-                                "Upgrade to Pro"
-                            } else {
-                                "Try Pro"
-                            },
-                        )
-                        .on_click(|_, _, cx| cx.open_url(TRY_ZED_PRO_URL)),
-                    })
-                })
-                .child(
-                    Button::new("configure", "Configure")
-                        .icon(IconName::Settings)
-                        .icon_size(IconSize::Small)
-                        .icon_color(Color::Muted)
-                        .icon_position(IconPosition::Start)
-                        .on_click(|_, window, cx| {
-                            window.dispatch_action(
-                                oppla_actions::agent::OpenConfiguration.boxed_clone(),
-                                cx,
-                            );
-                        }),
-                    )
+                                .on_click(|_, _, cx| cx.open_url(TRY_ZED_PRO_URL)),
+                            })
+                        })
+                        .child(
+                            Button::new("configure", "Configure")
+                                .icon(IconName::Settings)
+                                .icon_size(IconSize::Small)
+                                .icon_color(Color::Muted)
+                                .icon_position(IconPosition::Start)
+                                .on_click(|_, window, cx| {
+                                    window.dispatch_action(
+                                        oppla_actions::agent::OpenConfiguration.boxed_clone(),
+                                        cx,
+                                    );
+                                }),
+                        ),
                 )
                 .into_any(),
         )

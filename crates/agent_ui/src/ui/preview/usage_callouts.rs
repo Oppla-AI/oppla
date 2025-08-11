@@ -1,8 +1,8 @@
 use client::{ModelRequestUsage, RequestUsage, zed_urls};
 use component::{empty_example, example_group_with_title, single_example};
 use gpui::{AnyElement, App, IntoElement, RenderOnce, Window};
-use ui::{Callout, prelude::*};
 use oppla_llm_client::{Plan, UsageLimit};
+use ui::{Callout, prelude::*};
 
 #[derive(IntoElement, RegisterComponent)]
 pub struct UsageCallout {

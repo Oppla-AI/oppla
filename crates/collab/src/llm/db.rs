@@ -8,9 +8,9 @@ mod tests;
 
 use collections::HashMap;
 pub use ids::*;
+use oppla_llm_client::LanguageModelProvider;
 pub use seed::*;
 pub use tables::*;
-use oppla_llm_client::LanguageModelProvider;
 
 #[cfg(test)]
 pub use tests::TestLlmDb;

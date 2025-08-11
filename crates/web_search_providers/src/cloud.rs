@@ -6,8 +6,8 @@ use futures::AsyncReadExt as _;
 use gpui::{App, AppContext, Context, Entity, Subscription, Task};
 use http_client::{HttpClient, Method};
 use language_model::{LlmApiToken, RefreshLlmTokenListener};
-use web_search::{WebSearchProvider, WebSearchProviderId};
 use oppla_llm_client::{EXPIRED_LLM_TOKEN_HEADER_NAME, WebSearchBody, WebSearchResponse};
+use web_search::{WebSearchProvider, WebSearchProviderId};
 
 pub struct CloudWebSearchProvider {
     state: Entity<State>,
@@ -61,7 +61,10 @@ impl WebSearchProvider for CloudWebSearchProvider {
         let state = self.state.read(cx);
         let client = state.client.clone();
         let llm_api_token = state.llm_api_token.clone();
-        let body = WebSearchBody { query, max_results: None };
+        let body = WebSearchBody {
+            query,
+            max_results: None,
+        };
         cx.background_spawn(async move { perform_web_search(client, llm_api_token, body).await })
     }
 }

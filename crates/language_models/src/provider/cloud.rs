@@ -20,6 +20,13 @@ use language_model::{
     LanguageModelToolChoice, LanguageModelToolSchemaFormat, LlmApiToken,
     ModelRequestLimitReachedError, PaymentRequiredError, RateLimiter, RefreshLlmTokenListener,
 };
+use oppla_llm_client::{
+    CLIENT_SUPPORTS_STATUS_MESSAGES_HEADER_NAME, CURRENT_PLAN_HEADER_NAME, CompletionBody,
+    CompletionRequestStatus, CountTokensBody, CountTokensResponse, EXPIRED_LLM_TOKEN_HEADER_NAME,
+    ListModelsResponse, MODEL_REQUESTS_RESOURCE_HEADER_VALUE,
+    SERVER_SUPPORTS_STATUS_MESSAGES_HEADER_NAME, SUBSCRIPTION_LIMIT_RESOURCE_HEADER_NAME,
+    TOOL_USE_LIMIT_REACHED_HEADER_NAME, ZED_VERSION_HEADER_NAME,
+};
 use proto::Plan;
 use release_channel::AppVersion;
 use schemars::JsonSchema;
@@ -33,13 +40,6 @@ use std::time::Duration;
 use thiserror::Error;
 use ui::{TintColor, prelude::*};
 use util::{ResultExt as _, maybe};
-use oppla_llm_client::{
-    CLIENT_SUPPORTS_STATUS_MESSAGES_HEADER_NAME, CURRENT_PLAN_HEADER_NAME, CompletionBody,
-    CompletionRequestStatus, CountTokensBody, CountTokensResponse, EXPIRED_LLM_TOKEN_HEADER_NAME,
-    ListModelsResponse, MODEL_REQUESTS_RESOURCE_HEADER_VALUE,
-    SERVER_SUPPORTS_STATUS_MESSAGES_HEADER_NAME, SUBSCRIPTION_LIMIT_RESOURCE_HEADER_NAME,
-    TOOL_USE_LIMIT_REACHED_HEADER_NAME, ZED_VERSION_HEADER_NAME,
-};
 
 // COMMENTED OUT UNUSED IMPORTS TO FIX COMPILATION WARNINGS
 // use crate::provider::anthropic::{AnthropicEventMapper, count_anthropic_tokens, into_anthropic};
@@ -262,7 +262,11 @@ impl State {
         self.recommended_models = response
             .recommended_models
             .iter()
-            .filter_map(|id| models.iter().find(|model| model.id.0.as_ref() == id.0.as_ref()))
+            .filter_map(|id| {
+                models
+                    .iter()
+                    .find(|model| model.id.0.as_ref() == id.0.as_ref())
+            })
             .cloned()
             .collect();
         self.models = models;
@@ -827,7 +831,9 @@ impl LanguageModel for CloudLanguageModel {
         cx: &App,
     ) -> BoxFuture<'static, Result<u64>> {
         match self.model.provider {
-            oppla_llm_client::LanguageModelProvider::Anthropic => count_anthropic_tokens(request, cx),
+            oppla_llm_client::LanguageModelProvider::Anthropic => {
+                count_anthropic_tokens(request, cx)
+            }
             oppla_llm_client::LanguageModelProvider::OpenAi => {
                 let model = match open_ai::Model::from_id(&self.model.id.0) {
                     Ok(model) => model,

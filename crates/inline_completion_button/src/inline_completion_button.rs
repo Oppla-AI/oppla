@@ -19,6 +19,7 @@ use language::{
     language_settings::{self, AllLanguageSettings, EditPredictionProvider, all_language_settings},
 };
 use oppla_actions::OpenBrowser;
+use oppla_llm_client::UsageLimit;
 use regex::Regex;
 use settings::{Settings, SettingsStore, update_settings_file};
 use std::{
@@ -34,7 +35,6 @@ use workspace::{
     StatusItemView, Toast, Workspace, create_and_open_local_file, item::ItemHandle,
     notifications::NotificationId,
 };
-use oppla_llm_client::UsageLimit;
 use zeta::RateCompletions;
 
 actions!(
@@ -771,9 +771,11 @@ impl InlineCompletionButton {
                         },
                         |_window, cx| cx.open_url(&zed_urls::account_url(cx)),
                     )
-                    .entry("Upgrade to Oppla Pro or contact us.", None, |_window, cx| {
-                        cx.open_url(&zed_urls::account_url(cx))
-                    })
+                    .entry(
+                        "Upgrade to Oppla Pro or contact us.",
+                        None,
+                        |_window, cx| cx.open_url(&zed_urls::account_url(cx)),
+                    )
                     .separator();
             } else if self.user_store.read(cx).has_overdue_invoices() {
                 menu = menu

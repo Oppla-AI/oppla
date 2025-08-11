@@ -18,6 +18,7 @@ use language_model::{
     LanguageModelTextStream, Role, report_assistant_event,
 };
 use multi_buffer::MultiBufferRow;
+use oppla_llm_client::CompletionIntent;
 use parking_lot::Mutex;
 use project::Project;
 use prompt_store::{PromptBuilder, PromptStore};
@@ -35,7 +36,6 @@ use std::{
 };
 use streaming_diff::{CharOperation, LineDiff, LineOperation, StreamingDiff};
 use telemetry_events::{AssistantEventData, AssistantKind, AssistantPhase};
-use oppla_llm_client::CompletionIntent;
 
 pub struct BufferCodegen {
     alternatives: Vec<Entity<CodegenAlternative>>,

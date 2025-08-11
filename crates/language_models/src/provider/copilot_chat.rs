@@ -26,11 +26,11 @@ use language_model::{
     LanguageModelToolSchemaFormat, LanguageModelToolUse, MessageContent, RateLimiter, Role,
     StopReason, TokenUsage,
 };
+use oppla_llm_client::CompletionIntent;
 use settings::SettingsStore;
 use std::time::Duration;
 use ui::prelude::*;
 use util::debug_panic;
-use oppla_llm_client::CompletionIntent;
 
 use super::anthropic::count_anthropic_tokens;
 use super::google::count_google_tokens;

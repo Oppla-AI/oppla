@@ -30,6 +30,7 @@ use language_model::{
     ModelRequestLimitReachedError, PaymentRequiredError, Role, SelectedModel, StopReason,
     TokenUsage,
 };
+use oppla_llm_client::{CompletionIntent, CompletionRequestStatus, UsageLimit};
 use postage::stream::Stream as _;
 use project::{
     Project,
@@ -49,7 +50,6 @@ use std::{
 use thiserror::Error;
 use util::{ResultExt as _, post_inc};
 use uuid::Uuid;
-use oppla_llm_client::{CompletionIntent, CompletionRequestStatus, UsageLimit};
 
 const MAX_RETRY_ATTEMPTS: u8 = 4;
 const BASE_RETRY_DELAY: Duration = Duration::from_secs(5);

@@ -1,5 +1,5 @@
-use pretty_assertions::assert_eq;
 use oppla_llm_client::LanguageModelProvider;
+use pretty_assertions::assert_eq;
 
 use crate::llm::db::LlmDatabase;
 use crate::test_llm_db;

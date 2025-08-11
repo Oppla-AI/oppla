@@ -11342,6 +11342,7 @@ dependencies = [
 [[package]]
 name = "oppla_llm_client"
 version = "0.1.0"
+source = "git+https://github.com/Oppla-AI/oppla_llm_client.git?branch=main#26f0668c14e499f04278990252cc303168bdfcee"
 dependencies = [
  "anyhow",
  "serde",

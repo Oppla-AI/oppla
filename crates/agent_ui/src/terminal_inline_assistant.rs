@@ -19,6 +19,7 @@ use language_model::{
     ConfiguredModel, LanguageModelRegistry, LanguageModelRequest, LanguageModelRequestMessage,
     Role, report_assistant_event,
 };
+use oppla_llm_client::CompletionIntent;
 use project::Project;
 use prompt_store::{PromptBuilder, PromptStore};
 use std::sync::Arc;
@@ -27,7 +28,6 @@ use terminal_view::TerminalView;
 use ui::prelude::*;
 use util::ResultExt;
 use workspace::{Toast, Workspace, notifications::NotificationId};
-use oppla_llm_client::CompletionIntent;
 
 pub fn init(
     fs: Arc<dyn Fs>,

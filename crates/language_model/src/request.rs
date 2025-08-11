@@ -10,9 +10,9 @@ use gpui::{
     point, px, size,
 };
 use image::codecs::png::PngEncoder;
+use oppla_llm_client::{CompletionIntent, CompletionMode};
 use serde::{Deserialize, Serialize};
 use util::ResultExt;
-use oppla_llm_client::{CompletionIntent, CompletionMode};
 
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub struct LanguageModelImage {

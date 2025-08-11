@@ -1,8 +1,8 @@
 use anyhow::Result;
 use collections::HashMap;
 use gpui::{App, AppContext as _, Context, Entity, Global, SharedString, Task};
-use std::sync::Arc;
 use oppla_llm_client::WebSearchResponse;
+use std::sync::Arc;
 
 pub fn init(cx: &mut App) {
     let registry = cx.new(|_cx| WebSearchRegistry::default());

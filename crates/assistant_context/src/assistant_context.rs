@@ -26,6 +26,7 @@ use language_model::{
     report_assistant_event,
 };
 use open_ai::Model as OpenAiModel;
+use oppla_llm_client::CompletionIntent;
 use paths::contexts_dir;
 use project::Project;
 use prompt_store::PromptBuilder;
@@ -46,7 +47,6 @@ use text::{BufferSnapshot, ToPoint};
 use ui::IconName;
 use util::{ResultExt, TryFutureExt, post_inc};
 use uuid::Uuid;
-use oppla_llm_client::CompletionIntent;
 
 pub use crate::context_store::*;
 
