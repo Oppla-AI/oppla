@@ -13,7 +13,7 @@ use crate::prelude::*;
 #[strum(serialize_all = "snake_case")]
 pub enum VectorName {
     ZedLogo,
-    ZedXCopilot,
+    OpplaXCopilot,
     Grid,
     AiGrid,
     DebuggerGrid,
@@ -141,8 +141,8 @@ impl Component for Vector {
                                 Vector::square(VectorName::ZedLogo, rems(8.)).into_any_element(),
                             ),
                             single_example(
-                                "Zed X Copilot",
-                                Vector::square(VectorName::ZedXCopilot, rems(8.))
+                                "Oppla X Copilot",
+                                Vector::square(VectorName::OpplaXCopilot, rems(8.))
                                     .into_any_element(),
                             ),
                         ],
@@ -159,6 +159,6 @@ mod tests {
 
     #[test]
     fn vector_path() {
-        assert_eq!(VectorName::ZedLogo.path().as_ref(), "images/oppla_logo.svg");
+        assert_eq!(VectorName::ZedLogo.path().as_ref(), "images/oppla_logo.png");
     }
 }

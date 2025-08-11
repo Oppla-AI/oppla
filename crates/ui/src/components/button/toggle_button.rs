@@ -607,17 +607,17 @@ impl<T: ButtonBuilder> Component for ToggleButtonGroup<T> {
                                 [
                                     ToggleButtonWithIcon::new(
                                         "First",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Second",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Third",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
@@ -652,34 +652,34 @@ impl<T: ButtonBuilder> Component for ToggleButtonGroup<T> {
                                 [
                                     ToggleButtonWithIcon::new(
                                         "First",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Second",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Third",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
                                 [
                                     ToggleButtonWithIcon::new(
                                         "Fourth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Fifth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Sixth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
@@ -714,17 +714,17 @@ impl<T: ButtonBuilder> Component for ToggleButtonGroup<T> {
                                 [
                                     ToggleButtonWithIcon::new(
                                         "First",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Second",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Third",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
@@ -761,34 +761,34 @@ impl<T: ButtonBuilder> Component for ToggleButtonGroup<T> {
                                 [
                                     ToggleButtonWithIcon::new(
                                         "First",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Second",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Third",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
                                 [
                                     ToggleButtonWithIcon::new(
                                         "Fourth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Fifth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Sixth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
@@ -824,17 +824,17 @@ impl<T: ButtonBuilder> Component for ToggleButtonGroup<T> {
                                 [
                                     ToggleButtonWithIcon::new(
                                         "First",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Second",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Third",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
@@ -871,34 +871,34 @@ impl<T: ButtonBuilder> Component for ToggleButtonGroup<T> {
                                 [
                                     ToggleButtonWithIcon::new(
                                         "First",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Second",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Third",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],
                                 [
                                     ToggleButtonWithIcon::new(
                                         "Fourth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Fifth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                     ToggleButtonWithIcon::new(
                                         "Sixth",
-                                        IconName::AiZed,
+                                        IconName::AiOppla,
                                         |_, _, _| {},
                                     ),
                                 ],

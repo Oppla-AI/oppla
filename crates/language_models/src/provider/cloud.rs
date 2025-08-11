@@ -369,7 +369,7 @@ impl LanguageModelProvider for CloudLanguageModelProvider {
     }
 
     fn icon(&self) -> IconName {
-        IconName::AiZed
+        IconName::AiOppla
     }
 
     fn default_model(&self, cx: &App) -> Option<Arc<dyn LanguageModel>> {

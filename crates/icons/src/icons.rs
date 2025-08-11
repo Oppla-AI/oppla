@@ -24,7 +24,7 @@ pub enum IconName {
     AiOpenRouter,
     AiVZero,
     AiXAi,
-    AiZed,
+    AiOppla,
     ArrowCircle,
     ArrowDown,
     ArrowDown10,
@@ -303,7 +303,7 @@ pub enum IconName {
     ZedPredictDown,
     ZedPredictError,
     ZedPredictUp,
-    ZedXCopilot,
+    OpplaXCopilot,
 }
 
 impl IconName {
