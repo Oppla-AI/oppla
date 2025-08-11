@@ -1,7 +1,7 @@
 use gpui::{
     ClickEvent, DismissEvent, Entity, EventEmitter, FocusHandle, Focusable, MouseDownEvent, Render,
 };
-use ui::{prelude::*, TintColor, Vector, VectorName};
+use ui::{TintColor, Vector, VectorName, prelude::*};
 use workspace::{ModalView, Workspace};
 
 use crate::DebugPanel;

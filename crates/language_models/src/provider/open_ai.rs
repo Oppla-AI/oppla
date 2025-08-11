@@ -552,7 +552,12 @@ impl OpenAiEventMapper {
 
         // Check for reasoning/thinking content BEFORE regular content
         // This handles models that send reasoning in separate fields
-        if let Some(reasoning) = choice.delta.reasoning.as_ref().or(choice.delta.reasoning_content.as_ref()) {
+        if let Some(reasoning) = choice
+            .delta
+            .reasoning
+            .as_ref()
+            .or(choice.delta.reasoning_content.as_ref())
+        {
             if !reasoning.is_empty() {
                 events.push(Ok(LanguageModelCompletionEvent::Thinking {
                     text: reasoning.clone(),
@@ -565,7 +570,9 @@ impl OpenAiEventMapper {
         if let Some(content) = choice.delta.content.clone() {
             // Only emit text event if content is non-empty OR if there's no reasoning
             // This avoids emitting empty text events when reasoning is present
-            if !content.is_empty() || (choice.delta.reasoning.is_none() && choice.delta.reasoning_content.is_none()) {
+            if !content.is_empty()
+                || (choice.delta.reasoning.is_none() && choice.delta.reasoning_content.is_none())
+            {
                 events.push(Ok(LanguageModelCompletionEvent::Text(content)));
             }
         }
