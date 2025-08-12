@@ -228,8 +228,8 @@ impl HttpClientWithUrl {
     pub fn build_zed_llm_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            // "https://app.oppla.ai/home" => "https://llm.oppla.dev",
-            "https://app.oppla.ai/home" => "http://localhost:8787",
+            "https://app.oppla.ai/home" => "https://llm.oppla.dev",
+            //"https://app.oppla.ai/home" => "http://localhost:8787",
             "http://localhost:3000" => "http://localhost:8787",
             other => other,
         };
