@@ -1,4 +1,4 @@
-name = "Zed Keybind Context"
+name = "Oppla Keybind Context"
 grammar = "rust"
 autoclose_before = ")"
 brackets = [

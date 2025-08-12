@@ -1,70 +1,124 @@
-# Contributing to Zed
+# Contributing to Oppla
 
-Thanks for your interest in contributing to Zed, the collaborative platform that is also a code editor!
+Thank you for your interest in contributing to Oppla! We're building an AI-powered development ecosystem that helps developers know what to build and build it right.
 
-All activity in Zed forums is subject to our [Code of Conduct](https://zed.dev/code-of-conduct). Additionally, contributors must sign our [Contributor License Agreement](https://zed.dev/cla) before their contributions can be merged.
+All activity in Oppla forums is subject to our [Code of Conduct](./CODE_OF_CONDUCT.md). Additionally, contributors must sign our Contributor License Agreement before their contributions can be merged.
 
-## Contribution ideas
+## About This Project
 
-If you're looking for ideas about what to work on, check out:
+Oppla is a fork of [Zed](https://github.com/zed-industries/zed), extending it with AI-powered features for opportunity identification and contextual code generation. We maintain compatibility with Zed's core architecture while adding our unique capabilities.
 
-- Our [public roadmap](https://zed.dev/roadmap) contains a rough outline of our near-term priorities for Zed.
-- Our [top-ranking issues](https://github.com/zed-industries/zed/issues/5393) based on votes by the community.
+## Contribution Ideas
 
-For adding themes or support for a new language to Zed, check out our [docs on developing extensions](https://zed.dev/docs/extensions/developing-extensions).
+Looking for ways to contribute? Check out:
 
-## Proposing changes
+- **AI Features**: Help improve our opportunity identification and code generation capabilities
+- **Editor Enhancements**: Contribute to the core editor functionality inherited from Zed
+- **Extensions**: Develop extensions that leverage Oppla's AI capabilities
+- **Documentation**: Help improve our documentation and examples
+- **Bug Fixes**: Check our [issue tracker](https://github.com/Oppla-AI/oppla/issues) for reported bugs
 
-The best way to propose a change is to [start a discussion on our GitHub repository](https://github.com/zed-industries/zed/discussions).
+For adding themes or language support, check out our [docs on developing extensions](https://oppla.ai/docs/extensions).
 
-First, write a short **problem statement**, which _clearly_ and _briefly_ describes the problem you want to solve independently from any specific solution. It doesn't need to be long or formal, but it's difficult to consider a solution in absence of a clear understanding of the problem.
+## Proposing Changes
 
-Next, write a short **solution proposal**. How can the problem (or set of problems) you have stated above be addressed? What are the pros and cons of your approach? Again, keep it brief and informal. This isn't a specification, but rather a starting point for a conversation.
+The best way to propose a change is to [start a discussion on our GitHub repository](https://github.com/Oppla-AI/oppla/discussions).
 
-By effectively engaging with the Zed team and community early in your process, we're better positioned to give you feedback and understand your pull request once you open it. If the first thing we see from you is a big changeset, we're much less likely to respond to it in a timely manner.
+### 1. Problem Statement
+Write a clear and brief description of the problem you want to solve. Focus on the "what" and "why" rather than the "how".
 
-## Pair programming
+### 2. Solution Proposal
+Describe your proposed solution, including:
+- How it addresses the problem
+- Integration with existing AI features (if applicable)
+- Pros and cons of your approach
+- Any potential impacts on performance or user experience
 
-We plan to set aside time each week to pair program with contributors on promising pull requests in Zed. This will be an experiment. We tend to prefer pairing over async code review on our team, and we'd like to see how well it works in an open source setting. If we're finding it difficult to get on the same page with async review, we may ask you to pair with us if you're open to it. The closer a contribution is to the goals outlined in our roadmap, the more likely we'll be to spend time pairing on it.
+### 3. Early Engagement
+By discussing your ideas early, we can provide feedback and ensure your contribution aligns with Oppla's roadmap and vision.
 
-## Tips to improve the chances of your PR getting reviewed and merged
+## Development Process
 
-- Discuss your plans ahead of time with the team
-- Small, focused, incremental pull requests are much easier to review
-- Spend time explaining your changes in the pull request body
-- Add test coverage and documentation
-- Choose tasks that align with our roadmap
-- Pair with us and watch us code to learn the codebase
-- Low effort PRs, such as those that just re-arrange syntax, won't be merged without a compelling justification
+### Setting Up Your Environment
 
-## File icons
+1. Fork the repository
+2. Clone your fork locally
+3. Copy the example environment files and configure them:
+   - `crates/collab/.env.toml` - Collaboration server configuration
+4. Follow the platform-specific build instructions in `docs/src/development/`
 
-Zed's default icon theme consists of icons that are hand-designed to fit together in a cohesive manner.
+### Code Style and Standards
 
-We do not accept PRs for file icons that are just an off-the-shelf SVG taken from somewhere else.
+- Follow Rust best practices and idioms
+- Ensure your code passes `./script/clippy`
+- Add tests for new functionality
+- Document public APIs and complex logic
+- Consider AI feature integration where appropriate
 
-### Adding new icons to the Zed icon theme
+### Testing
 
-If you would like to add a new icon to the Zed icon theme, [open a Discussion](https://github.com/zed-industries/zed/discussions/new?category=ux-and-design) and we can work with you on getting an icon designed and added to Zed.
+- Write unit tests for new functionality
+- Test AI features with various inputs and edge cases
+- Ensure backward compatibility with Zed's core features
+- Run the full test suite before submitting PRs
 
-## Bird's-eye view of Zed
+## Pull Request Guidelines
 
-Zed is made up of several smaller crates - let's go over those you're most likely to interact with:
+### Tips for Getting Your PR Merged
 
-- [`gpui`](/crates/gpui) is a GPU-accelerated UI framework which provides all of the building blocks for Zed. **We recommend familiarizing yourself with the root level GPUI documentation.**
-- [`editor`](/crates/editor) contains the core `Editor` type that drives both the code editor and all various input fields within Zed. It also handles a display layer for LSP features such as Inlay Hints or code completions.
-- [`project`](/crates/project) manages files and navigation within the filetree. It is also Zed's side of communication with LSP.
-- [`workspace`](/crates/workspace) handles local state serialization and groups projects together.
-- [`vim`](/crates/vim) is a thin implementation of Vim workflow over `editor`.
-- [`lsp`](/crates/lsp) handles communication with external LSP server.
-- [`language`](/crates/language) drives `editor`'s understanding of language - from providing a list of symbols to the syntax map.
-- [`collab`](/crates/collab) is the collaboration server itself, driving the collaboration features such as project sharing.
-- [`rpc`](/crates/rpc) defines messages to be exchanged with collaboration server.
-- [`theme`](/crates/theme) defines the theme system and provides a default theme.
-- [`ui`](/crates/ui) is a collection of UI components and common patterns used throughout Zed.
-- [`cli`](/crates/cli) is the CLI crate which invokes the Zed binary.
-- [`zed`](/crates/zed) is where all things come together, and the `main` entry point for Zed.
+- **Small, focused PRs**: Break large changes into smaller, reviewable chunks
+- **Clear descriptions**: Explain what your PR does and why
+- **Test coverage**: Include tests for new functionality
+- **Documentation**: Update relevant documentation
+- **AI integration**: Consider how new features can leverage or enhance AI capabilities
+- **Performance**: Ensure your changes don't negatively impact performance
 
-## Packaging Zed
+### PR Process
 
-Check our [notes for packaging Zed](https://zed.dev/docs/development/linux#notes-for-packaging-zed).
+1. Create a feature branch from `main`
+2. Make your changes following our guidelines
+3. Test thoroughly
+4. Submit a PR with a clear description
+5. Address review feedback promptly
+6. Once approved, we'll merge your contribution
+
+## Architecture Overview
+
+Oppla extends Zed's architecture with AI capabilities:
+
+### Core Components (from Zed)
+- [`gpui`](/crates/gpui) - GPU-accelerated UI framework
+- [`editor`](/crates/editor) - Core editor functionality
+- [`project`](/crates/project) - Project and file management
+- [`workspace`](/crates/workspace) - Workspace state management
+- [`lsp`](/crates/lsp) - Language Server Protocol support
+- [`language`](/crates/language) - Language understanding and syntax
+- [`collab`](/crates/collab) - Collaboration server
+- [`theme`](/crates/theme) - Theming system
+- [`ui`](/crates/ui) - UI components and patterns
+
+### Oppla AI Extensions
+- AI-powered opportunity identification
+- Contextual code generation
+- Smart prioritization systems
+- Integration with AI models
+
+## Community and Support
+
+- **Discord**: [Join our Discord Server](https://discord.gg/KZJD9WqCkS)
+- **Discussions**: [GitHub Discussions](https://github.com/Oppla-AI/oppla/discussions)
+- **Bug Reports**: [Issue Tracker](https://github.com/Oppla-AI/oppla/issues)
+- **Website**: [oppla.ai](https://oppla.ai)
+- **Documentation**: [oppla.ai/docs](https://oppla.ai/docs)
+
+## Recognition
+
+We acknowledge and thank the [Zed team](https://github.com/zed-industries/zed) for creating the excellent foundation upon which Oppla is built. Many of the core editor features and architecture decisions come from their work.
+
+## License
+
+By contributing to Oppla, you agree that your contributions will be licensed under the same terms as the project. See our LICENSE files for details.
+
+---
+
+We're excited to have you contribute to Oppla! Together, we're building the future of AI-powered development.

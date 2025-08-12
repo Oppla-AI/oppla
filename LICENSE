@@ -1,0 +1,32 @@
+# Oppla License Information
+
+Oppla is a fork of Zed and maintains the same multi-license structure.
+
+## Original Work
+Copyright 2022 - 2025 Zed Industries, Inc.
+
+## Modifications and Additions
+Copyright 2024 - 2025 Insihts, Corp.
+
+## License Structure
+
+This project uses multiple licenses for different components:
+
+- **Core Editor Components**: Licensed under Apache License 2.0 (see LICENSE-APACHE)
+- **Collaboration Server (crates/collab)**: Licensed under AGPL-3.0 (see LICENSE-AGPL)
+- **Copyleft Components**: Licensed under GPL-3.0 (see LICENSE-GPL)
+
+## Attribution
+
+Oppla is built on top of Zed (https://github.com/zed-industries/zed), the high-performance
+multiplayer code editor created by the team behind Atom and Tree-sitter.
+
+## Third-Party Dependencies
+
+Third-party dependencies are managed via cargo-about. See the build documentation
+for details on license compliance.
+
+## Contributing
+
+By contributing to Oppla, you agree that your contributions will be licensed
+under the same terms as the component you are contributing to.

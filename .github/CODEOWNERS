@@ -1,0 +1,33 @@
+# CODEOWNERS file for Oppla
+# This file defines who should review pull requests for different parts of the codebase
+
+# Global owners (will be requested for review on all PRs unless overridden below)
+* @thakurg
+
+# Core editor components (inherited from Zed)
+/crates/editor/ @thakurg
+/crates/gpui/ @thakurg
+/crates/workspace/ @thakurg
+
+# AI and Oppla-specific features
+/crates/ai/ @thakurg
+/crates/assistant/ @thakurg
+
+# Collaboration features
+/crates/collab/ @thakurg
+/crates/rpc/ @thakurg
+/crates/livekit_api/ @thakurg
+
+# Documentation
+*.md @thakurg
+/docs/ @thakurg
+
+# Configuration and deployment
+/.github/ @thakurg
+/script/ @thakurg
+*.toml @thakurg
+
+# Security-sensitive files
+/SECURITY.md @thakurg
+/.env* @thakurg
+**/secrets/ @thakurg

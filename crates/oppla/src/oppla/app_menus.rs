@@ -258,9 +258,9 @@ pub fn app_menus() -> Vec<Menu> {
                     },
                 ),
                 MenuItem::action(
-                    "Zed Twitter",
+                    "Oppla Twitter",
                     super::OpenBrowser {
-                        url: "https://twitter.com/zeddotdev".into(),
+                        url: "https://x.com/opplaai".into(),
                     },
                 ),
                 MenuItem::action(
