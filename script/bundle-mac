@@ -160,10 +160,10 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     CERT_INFO=$(security find-identity -v -p codesigning oppla.keychain | grep "$IDENTITY" || true)
     if [[ -z "$CERT_INFO" ]]; then
         echo "ERROR: Certificate '$IDENTITY' not found in keychain!"
-        security find-identity -v -p codesigning oppla.keychain
+        echo "ERROR: Certificate not found in keychain (run with debug flag for details)"
         exit 1
     fi
-    echo "Certificate found: $CERT_INFO"
+    echo "Certificate found: [REDACTED]"
     
     # Verify certificate can sign
     echo "Verifying certificate..."
@@ -179,7 +179,7 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     # Note: TeamIdentifier may show as "not set" on simple test binaries
     # but will be properly set when signing actual macOS apps
     echo "✅ Certificate verified: $IDENTITY"
-    echo "✅ Team ID for notarization: $APPLE_NOTARIZATION_TEAM"
+    echo "✅ Team ID for notarization: [CONFIGURED]"
     rm -f /tmp/test.c /tmp/test
     
     # Verify designated requirements format

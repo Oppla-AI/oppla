@@ -157,8 +157,7 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
         fi
     else
         echo "❌ Developer ID certificate not found in keychain!"
-        echo "Available identities:"
-        security find-identity -v -p codesigning "$KEYCHAIN_NAME"
+        echo "ERROR: Certificate not found (run with debug flag for details)"
         exit 1
     fi
 
@@ -276,8 +275,7 @@ function sign_app_binaries() {
         echo "Verifying signing identity access..."
         if ! security find-identity -v -p codesigning | grep -q "$IDENTITY"; then
             echo "❌ Cannot find signing identity: $IDENTITY"
-            echo "Available identities:"
-            security find-identity -v -p codesigning
+            echo "ERROR: Certificate not found (run with debug flag for details)"
             exit 1
         fi
 
