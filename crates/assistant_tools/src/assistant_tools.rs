@@ -5,6 +5,7 @@ mod diagnostics_tool;
 mod edit_agent;
 mod edit_file_tool;
 mod fetch_tool;
+mod file_search_tool;
 mod find_path_tool;
 mod grep_tool;
 mod list_directory_tool;
@@ -36,6 +37,7 @@ use crate::delete_path_tool::DeletePathTool;
 use crate::diagnostics_tool::DiagnosticsTool;
 use crate::edit_file_tool::EditFileTool;
 use crate::fetch_tool::FetchTool;
+use crate::file_search_tool::FileSearchTool;
 use crate::find_path_tool::FindPathTool;
 use crate::list_directory_tool::ListDirectoryTool;
 use crate::now_tool::NowTool;
@@ -67,8 +69,9 @@ pub fn init(http_client: Arc<HttpClientWithUrl>, cx: &mut App) {
     registry.register_tool(ReadFileTool);
     registry.register_tool(GrepTool);
     registry.register_tool(ThinkingTool);
-    registry.register_tool(FetchTool::new(http_client));
+    registry.register_tool(FetchTool::new(http_client.clone()));
     registry.register_tool(EditFileTool);
+    registry.register_tool(FileSearchTool::new(http_client));
 
     register_web_search_tool(&LanguageModelRegistry::global(cx), cx);
     cx.subscribe(

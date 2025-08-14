@@ -43,6 +43,14 @@ use crate::{
     agent_configuration::add_llm_provider_modal::{AddLlmProviderModal, LlmCompatibleProvider},
 };
 
+#[derive(Clone, Debug)]
+pub struct TaskSyncData {
+    pub product_name: SharedString,
+    pub big_bet: Option<SharedString>,
+    pub work_item: Option<SharedString>,
+    pub synced_at: Option<std::time::SystemTime>,
+}
+
 pub struct AgentConfiguration {
     fs: Arc<dyn Fs>,
     language_registry: Arc<LanguageRegistry>,
@@ -56,6 +64,8 @@ pub struct AgentConfiguration {
     _registry_subscription: Subscription,
     scroll_handle: ScrollHandle,
     scrollbar_state: ScrollbarState,
+    task_sync_expanded: bool,
+    task_sync_data: Option<TaskSyncData>,
 }
 
 impl AgentConfiguration {
@@ -114,6 +124,8 @@ impl AgentConfiguration {
             _registry_subscription: registry_subscription,
             scroll_handle,
             scrollbar_state,
+            task_sync_expanded: true, // Start expanded if no task is synced
+            task_sync_data: None, // Initially no task is synced
         };
         this.build_provider_configuration_views(window, cx);
         this
@@ -483,6 +495,159 @@ impl AgentConfiguration {
             .child(self.render_single_file_review(cx))
             .child(self.render_sound_notification(cx))
             .child(self.render_modifier_to_send(cx))
+    }
+
+    fn sync_task(&mut self, cx: &mut Context<Self>) {
+        // Placeholder implementation - simulate syncing a task
+        // In real implementation, this would fetch task data from an API or service
+        self.task_sync_data = Some(TaskSyncData {
+            product_name: SharedString::from("Example Product"),
+            big_bet: Some(SharedString::from("Q4 Big Bet Initiative")),
+            work_item: Some(SharedString::from("Implement Task Sync UI")),
+            synced_at: Some(std::time::SystemTime::now()),
+        });
+        
+        // Collapse the section after syncing
+        self.task_sync_expanded = false;
+        cx.notify();
+    }
+
+    fn sync_latest_task(&mut self, cx: &mut Context<Self>) {
+        // Placeholder implementation - refresh the task data
+        // In real implementation, this would fetch updated task data
+        if let Some(ref mut task_data) = self.task_sync_data {
+            task_data.synced_at = Some(std::time::SystemTime::now());
+            // Could update other fields here based on fresh data
+        }
+        cx.notify();
+    }
+
+    fn clear_task_sync(&mut self, cx: &mut Context<Self>) {
+        // Clear the synced task data
+        self.task_sync_data = None;
+        // Expand the section when cleared so user can sync again
+        self.task_sync_expanded = true;
+        cx.notify();
+    }
+
+    fn render_task_sync_section(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let is_synced = self.task_sync_data.is_some();
+        let is_expanded = self.task_sync_expanded;
+
+        v_flex()
+            .p(DynamicSpacing::Base16.rems(cx))
+            .pr(DynamicSpacing::Base20.rems(cx))
+            .gap_2()
+            .border_b_1()
+            .border_color(cx.theme().colors().border)
+            .child(
+                h_flex()
+                    .justify_between()
+                    .child(
+                        v_flex()
+                            .gap_0p5()
+                            .child(
+                                h_flex()
+                                    .gap_2()
+                                    .child(Headline::new("Task Context Sync"))
+                                    .when(is_synced, |this| {
+                                        this.child(
+                                            Chip::new("Synced")
+                                                .bg_color(cx.theme().status().success_background)
+                                                .label_color(Color::Success)
+                                        )
+                                    })
+                            )
+                            .child(
+                                Label::new("Sync your current task to help the AI understand what you're working on")
+                                    .color(Color::Muted)
+                            )
+                    )
+                    .child(
+                        Disclosure::new("task-sync-disclosure", is_expanded)
+                            .opened_icon(IconName::ChevronUp)
+                            .closed_icon(IconName::ChevronDown)
+                            .on_click(cx.listener(|this, _event, _window, _cx| {
+                                this.task_sync_expanded = !this.task_sync_expanded;
+                                _cx.notify();
+                            }))
+                    )
+            )
+            .when(is_expanded, |this| {
+                this.child(
+                    v_flex()
+                        .gap_2()
+                        .mt_2()
+                        .when_some(self.task_sync_data.clone(), |this, task_data| {
+                            this.child(
+                                v_flex()
+                                    .gap_1()
+                                    .p_2()
+                                    .bg(cx.theme().colors().element_background)
+                                    .rounded_md()
+                                    .child(
+                                        h_flex()
+                                            .gap_2()
+                                            .child(Label::new("Product:").color(Color::Muted))
+                                            .child(Label::new(task_data.product_name))
+                                    )
+                                    .when_some(task_data.big_bet, |this, big_bet| {
+                                        this.child(
+                                            h_flex()
+                                                .gap_2()
+                                                .child(Label::new("Big Bet:").color(Color::Muted))
+                                                .child(Label::new(big_bet))
+                                        )
+                                    })
+                                    .when_some(task_data.work_item, |this, work_item| {
+                                        this.child(
+                                            h_flex()
+                                                .gap_2()
+                                                .child(Label::new("Work Item:").color(Color::Muted))
+                                                .child(Label::new(work_item))
+                                        )
+                                    })
+                            )
+                            .child(
+                                h_flex()
+                                    .gap_2()
+                                    .child(
+                                        Button::new("sync-latest", "Sync Latest Information")
+                                            .style(ButtonStyle::Filled)
+                                            .icon(IconName::ArrowCircle)
+                                            .icon_position(IconPosition::Start)
+                                            .on_click(cx.listener(|this, _event, _window, cx| {
+                                                // Placeholder: This will sync the latest task information
+                                                this.sync_latest_task(cx);
+                                            }))
+                                    )
+                                    .child(
+                                        Button::new("clear-sync", "Clear Sync")
+                                            .style(ButtonStyle::Subtle)
+                                            .icon(IconName::Trash)
+                                            .icon_position(IconPosition::Start)
+                                            .on_click(cx.listener(|this, _event, _window, cx| {
+                                                this.clear_task_sync(cx);
+                                            }))
+                                    )
+                            )
+                        })
+                        .when(self.task_sync_data.is_none(), |this| {
+                            this.child(
+                                Button::new("sync-task", "Sync Your Task")
+                                    .style(ButtonStyle::Filled)
+                                    .layer(ElevationIndex::ModalSurface)
+                                    .full_width()
+                                    .icon(IconName::ArrowCircle)
+                                    .icon_size(IconSize::Small)
+                                    .icon_position(IconPosition::Start)
+                                    .on_click(cx.listener(|this, _event, _window, cx| {
+                                        this.sync_task(cx);
+                                    }))
+                            )
+                        })
+                )
+            })
     }
 
     fn render_zed_plan_info(&self, plan: Option<Plan>, cx: &mut Context<Self>) -> impl IntoElement {
@@ -989,6 +1154,7 @@ impl Render for AgentConfiguration {
                     .size_full()
                     .overflow_y_scroll()
                     .child(self.render_general_settings_section(cx))
+                    .child(self.render_task_sync_section(window, cx))
                     .child(self.render_context_servers_section(window, cx))
                     .child(self.render_provider_configuration_section(cx)),
             )
