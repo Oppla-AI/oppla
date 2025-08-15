@@ -229,7 +229,7 @@ impl HttpClientWithUrl {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
             "https://app.oppla.ai/home" => "https://llm.oppla.dev",
-            //"https://app.oppla.ai/home" => "http://localhost:8787",
+            //"https://app.oppla.ai/home" => "http://localhost:8787", // to do testing in local
             "http://localhost:3000" => "http://localhost:8787",
             other => other,
         };

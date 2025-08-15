@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::schema::json_schema_for;
 use crate::ui::ToolCallCardHeader;
+use agent_ui::IdeContext;
 use anyhow::{Context as _, Result, anyhow};
 use assistant_tool::{
     ActionLog, Tool, ToolCard, ToolResult, ToolResultContent, ToolResultOutput, ToolUseStatus,
@@ -40,9 +41,29 @@ pub struct SearchFilter {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     search_type: Option<String>,
     
+    /// Content to extract: "work_item" (work item details only), "big_bet" (big bet details only), or "auto" (automatically decide based on context)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    content_type: Option<String>,
+    
     /// Optional thread ID to search within a specific thread
     #[serde(skip_serializing_if = "Option::is_none")]
     thread_id: Option<String>,
+    
+    /// Optional account ID to filter results by account
+    #[serde(skip_serializing_if = "Option::is_none")]
+    account_id: Option<String>,
+    
+    /// Optional product ID to filter results by product
+    #[serde(skip_serializing_if = "Option::is_none")]
+    product_id: Option<String>,
+    
+    /// Optional board ID to filter results by board
+    #[serde(skip_serializing_if = "Option::is_none")]
+    board_id: Option<String>,
+    
+    /// Optional task ID to filter results by specific task
+    #[serde(skip_serializing_if = "Option::is_none")]
+    task_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -86,16 +107,48 @@ impl FileSearchTool {
         input: FileSearchToolInput,
         llm_api_token: LlmApiToken,
         client: Arc<Client>,
+        context_filters: Option<SearchFilter>,
     ) -> Result<FileSearchResponse> {
         // Acquire the token
         let token = llm_api_token.acquire(&client).await
             .context("Failed to acquire LLM API token")?;
 
+        // Merge context filters with input filters
+        let filter = if let Some(context_filter) = context_filters {
+            let mut merged_filter = input.filter.unwrap_or_else(|| SearchFilter {
+                search_type: None,
+                content_type: None,
+                thread_id: None,
+                account_id: None,
+                product_id: None,
+                board_id: None,
+                task_id: None,
+            });
+            
+            // Only apply context filters if not already specified
+            if merged_filter.account_id.is_none() {
+                merged_filter.account_id = context_filter.account_id;
+            }
+            if merged_filter.product_id.is_none() {
+                merged_filter.product_id = context_filter.product_id;
+            }
+            if merged_filter.board_id.is_none() {
+                merged_filter.board_id = context_filter.board_id;
+            }
+            if merged_filter.task_id.is_none() {
+                merged_filter.task_id = context_filter.task_id;
+            }
+            
+            Some(merged_filter)
+        } else {
+            input.filter
+        };
+
         // Build the request body
         let request_body = FileSearchRequest {
             query: input.query,
             limit: input.limit,
-            filter: input.filter,
+            filter,
         };
 
         // Build the URL for the search endpoint
@@ -152,9 +205,11 @@ impl Tool for FileSearchTool {
     }
 
     fn description(&self) -> String {
-        "Search through your conversations, tasks, and context data to find relevant information. \
-         You can search all content, filter by type (conversations, tasks, compressed), \
-         or search within a specific thread. Results include the content, type, and similarity score."
+        "Search project planning context including big bet descriptions, work item details, requirements, and specifications. \
+         Use this to understand what needs to be implemented and find acceptance criteria. \
+         Filter by type: 'conversations', 'tasks' (work items), 'compressed', or 'all'. \
+         Use content_type to get specific information: 'work_item' for work item details only, 'big_bet' for big bet overview only, or 'auto' (default) to automatically decide. \
+         Automatically uses your synced big bet and work item context. Results include content, type, and similarity score."
             .into()
     }
 
@@ -211,20 +266,47 @@ impl Tool for FileSearchTool {
         let llm_api_token = LlmApiToken::default();
         let client = Client::global(cx);
         
+        // Extract context filters from IdeContext if available
+        let context_filters = cx.try_global::<IdeContext>()
+            .and_then(|ide_context| ide_context.get_sync_data())
+            .map(|sync_data| {
+                // Only include filters that have values
+                let mut filter = SearchFilter {
+                    search_type: None,
+                    content_type: Some("auto".to_string()), // Default to auto
+                    thread_id: None,
+                    account_id: None,
+                    product_id: None,
+                    board_id: None,
+                    task_id: None,
+                };
+                
+                // Always include account, product, and board if we have sync data
+                filter.account_id = Some(sync_data.account_id.to_string());
+                filter.product_id = Some(sync_data.product_id.to_string());
+                filter.board_id = Some(sync_data.board_id.to_string());
+                
+                // Only include task_id if it's actually present
+                filter.task_id = sync_data.task_id.map(|id| id.to_string());
+                
+                filter
+            });
+        
         let http_client = self.http_client.clone();
         let http_client2 = http_client.clone();
         let input2 = input.clone();
         let llm_api_token2 = llm_api_token.clone();
         let client2 = client.clone();
+        let context_filters2 = context_filters.clone();
         
         let search_task = cx.background_spawn(async move {
-            Self::perform_search(http_client, input, llm_api_token, client).await
+            Self::perform_search(http_client, input, llm_api_token, client, context_filters).await
         });
 
         let card = cx.new(|cx| FileSearchToolCard::new(search_task, cx));
 
         let output = cx.background_spawn(async move {
-            let response = Self::perform_search(http_client2, input2, llm_api_token2, client2).await?;
+            let response = Self::perform_search(http_client2, input2, llm_api_token2, client2, context_filters2).await?;
             
             let mut message = format!(
                 "Found {} results",

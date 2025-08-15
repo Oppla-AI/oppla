@@ -32,7 +32,7 @@ pub fn register_requests(_lsp_store: WeakEntity<LspStore>, language_server: &Lan
                     anyhow::bail!("No URI");
                 };
                 let normalized_action_name = uri
-                    .strip_prefix("zed://schemas/action/")
+                    .strip_prefix("oppla://schemas/action/")
                     .context("Invalid URI")?;
                 let action_name = denormalize_action_name(normalized_action_name);
                 let schema = root_schema_from_action_schema(
@@ -71,7 +71,7 @@ pub fn url_schema_for_action(action_name: &str) -> serde_json::Value {
     let file_name = normalized_action_name_to_file_name(normalized_name.clone());
     serde_json::json!({
         "fileMatch": [file_name],
-        "url": format!("zed://schemas/action/{}", normalized_name)
+        "url": format!("oppla://schemas/action/{}", normalized_name)
     })
 }
 

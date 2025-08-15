@@ -16,6 +16,7 @@ eval = []
 
 [dependencies]
 agent_settings.workspace = true
+agent_ui.workspace = true
 anyhow.workspace = true
 assistant_tool.workspace = true
 buffer_diff.workspace = true

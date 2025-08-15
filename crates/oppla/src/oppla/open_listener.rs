@@ -50,24 +50,24 @@ impl OpenRequest {
     pub fn parse(request: RawOpenRequest, cx: &App) -> Result<Self> {
         let mut this = Self::default();
         for url in request.urls {
-            if let Some(server_name) = url.strip_prefix("zed-cli://") {
+            if let Some(server_name) = url.strip_prefix("oppla-cli://") {
                 this.kind = Some(OpenRequestKind::CliConnection(connect_to_cli(server_name)?));
-            } else if let Some(action_index) = url.strip_prefix("zed-dock-action://") {
+            } else if let Some(action_index) = url.strip_prefix("oppla-dock-action://") {
                 this.kind = Some(OpenRequestKind::DockMenuAction {
                     index: action_index.parse()?,
                 });
             } else if let Some(file) = url.strip_prefix("file://") {
                 this.parse_file_path(file)
-            } else if let Some(file) = url.strip_prefix("zed://file") {
+            } else if let Some(file) = url.strip_prefix("oppla://file") {
                 this.parse_file_path(file)
-            } else if let Some(file) = url.strip_prefix("zed://ssh") {
+            } else if let Some(file) = url.strip_prefix("oppla://ssh") {
                 let ssh_url = "ssh:/".to_string() + file;
                 this.parse_ssh_file_path(&ssh_url, cx)?
-            } else if let Some(extension_id) = url.strip_prefix("zed://extension/") {
+            } else if let Some(extension_id) = url.strip_prefix("oppla://extension/") {
                 this.kind = Some(OpenRequestKind::Extension {
                     extension_id: extension_id.to_string(),
                 });
-            } else if url == "zed://agent" {
+            } else if url == "oppla://agent" {
                 this.kind = Some(OpenRequestKind::AgentPanel);
             } else if url.starts_with("ssh://") {
                 this.parse_ssh_file_path(&url, cx)?
@@ -178,7 +178,7 @@ pub fn listen_for_cli_connections(opener: OpenListener) -> Result<()> {
     use release_channel::RELEASE_CHANNEL_NAME;
     use std::os::unix::net::UnixDatagram;
 
-    let sock_path = paths::data_dir().join(format!("zed-{}.sock", *RELEASE_CHANNEL_NAME));
+    let sock_path = paths::data_dir().join(format!("oppla-{}.sock", *RELEASE_CHANNEL_NAME));
     // remove the socket if the process listening on it has died
     if let Err(e) = UnixDatagram::unbound()?.connect(&sock_path) {
         if e.kind() == std::io::ErrorKind::ConnectionRefused {

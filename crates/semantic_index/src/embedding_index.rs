@@ -5,7 +5,6 @@ use crate::{
 };
 use anyhow::{Context as _, Result};
 use collections::Bound;
-use feature_flags::FeatureFlagAppExt;
 use fs::Fs;
 use fs::MTime;
 use futures::{FutureExt as _, stream::StreamExt};
@@ -60,9 +59,6 @@ impl EmbeddingIndex {
         &self,
         cx: &App,
     ) -> impl Future<Output = Result<()>> + use<> {
-        if !cx.is_staff() {
-            return async move { Ok(()) }.boxed();
-        }
 
         let worktree = self.worktree.read(cx).snapshot();
         let worktree_abs_path = worktree.abs_path().clone();
@@ -82,9 +78,6 @@ impl EmbeddingIndex {
         updated_entries: UpdatedEntriesSet,
         cx: &App,
     ) -> impl Future<Output = Result<()>> + use<> {
-        if !cx.is_staff() {
-            return async move { Ok(()) }.boxed();
-        }
 
         let worktree = self.worktree.read(cx).snapshot();
         let worktree_abs_path = worktree.abs_path().clone();

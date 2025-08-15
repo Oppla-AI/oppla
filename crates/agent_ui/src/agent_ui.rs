@@ -47,6 +47,7 @@ use settings::{Settings as _, SettingsStore};
 use std::any::TypeId;
 
 pub use crate::active_thread::ActiveThread;
+pub use crate::agent_configuration::{IdeContext, TaskSyncData};
 use crate::agent_configuration::{ConfigureContextServerModal, ManageProfilesModal};
 pub use crate::agent_panel::{AgentPanel, ConcreteAssistantPanelDelegate};
 pub use crate::inline_assistant::InlineAssistant;

@@ -1,7 +1,9 @@
+mod cloud;
 mod lmstudio;
 mod ollama;
 mod open_ai;
 
+pub use cloud::*;
 pub use lmstudio::*;
 pub use ollama::*;
 pub use open_ai::*;

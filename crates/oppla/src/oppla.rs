@@ -786,7 +786,7 @@ fn register_actions(
                         Toast::new(
                             NotificationId::unique::<RegisterZedScheme>(),
                             format!(
-                                "zed:// links will now open in {}.",
+                                "oppla:// links will now open in {}.",
                                 ReleaseChannel::global(cx).display_name()
                             ),
                         ),

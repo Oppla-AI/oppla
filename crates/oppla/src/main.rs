@@ -48,6 +48,8 @@ use theme::{
     ActiveTheme, IconThemeNotFoundError, SystemAppearance, ThemeNotFoundError, ThemeRegistry,
     ThemeSettings,
 };
+use semantic_index::{SemanticDb, CloudEmbeddingProvider};
+use language_model::LlmApiToken;
 use util::{ConnectionResult, ResultExt, TryFutureExt, maybe};
 use uuid::Uuid;
 use welcome::{FIRST_OPEN, show_welcome_view};
@@ -564,6 +566,40 @@ pub fn main() {
             app_state.user_store.clone(),
             cx,
         );
+        
+        // Initialize semantic index
+        {
+            let db_path = paths::database_dir().join("semantic_index.db");
+            let client = app_state.client.clone();
+            let http_client = client.http_client();
+            
+            cx.spawn(async move |mut cx| {
+                // Get token for authentication
+                let llm_api_token = LlmApiToken::default();
+                
+                // Create embedding provider with Oppla embeddings
+                let embedding_provider = Arc::new(CloudEmbeddingProvider::new(
+                    http_client,
+                    "togethercomputer/m2-bert-80M-32k-retrieval".to_string(),
+                    llm_api_token,
+                    client,
+                ));
+                
+                // Initialize semantic database
+                match SemanticDb::new(db_path, embedding_provider, &mut cx).await {
+                    Ok(semantic_db) => {
+                        cx.update(|cx| {
+                            cx.set_global(semantic_db);
+                            log::info!("Semantic index initialized with Oppla embeddings");
+                        }).ok();
+                    }
+                    Err(e) => {
+                        log::error!("Failed to initialize semantic index: {}", e);
+                    }
+                }
+            })
+            .detach();
+        }
         let prompt_builder = PromptBuilder::load(app_state.fs.clone(), stdout_is_a_pty(), cx);
         agent_ui::init(
             app_state.fs.clone(),
@@ -1242,7 +1278,7 @@ fn parse_url_arg(arg: &str, cx: &App) -> Result<String> {
         Ok(path) => Ok(format!("file://{}", path.display())),
         Err(error) => {
             if arg.starts_with("file://")
-                || arg.starts_with("zed-cli://")
+                || arg.starts_with("oppla-cli://")
                 || arg.starts_with("ssh://")
                 || parse_zed_link(arg, cx).is_some()
             {

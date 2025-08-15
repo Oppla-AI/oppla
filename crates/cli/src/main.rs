@@ -254,7 +254,7 @@ fn main() -> Result<()> {
     }
 
     for path in args.paths_with_position.iter() {
-        if path.starts_with("zed://")
+        if path.starts_with("oppla://")
             || path.starts_with("http://")
             || path.starts_with("https://")
             || path.starts_with("file://")

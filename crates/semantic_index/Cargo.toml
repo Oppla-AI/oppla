@@ -33,6 +33,7 @@ heed.workspace = true
 http_client.workspace = true
 language.workspace = true
 language_model.workspace = true
+language_models.workspace = true
 log.workspace = true
 open_ai.workspace = true
 parking_lot.workspace = true
