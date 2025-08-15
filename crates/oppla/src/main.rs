@@ -24,6 +24,7 @@ use prompt_store::PromptBuilder;
 use reqwest_client::ReqwestClient;
 
 use assets::Assets;
+use language_model::LlmApiToken;
 use node_runtime::{NodeBinaryOptions, NodeRuntime};
 use oppla::{
     OpenListener, OpenRequest, RawOpenRequest, app_menus, build_window_options,
@@ -35,6 +36,7 @@ use parking_lot::Mutex;
 use project::project_settings::ProjectSettings;
 use recent_projects::{SshSettings, open_ssh_project};
 use release_channel::{AppCommitSha, AppVersion, ReleaseChannel};
+use semantic_index::{CloudEmbeddingProvider, SemanticDb};
 use session::{AppSession, Session};
 use settings::{BaseKeymap, Settings, SettingsStore, watch_config_file};
 use std::{
@@ -48,8 +50,6 @@ use theme::{
     ActiveTheme, IconThemeNotFoundError, SystemAppearance, ThemeNotFoundError, ThemeRegistry,
     ThemeSettings,
 };
-use semantic_index::{SemanticDb, CloudEmbeddingProvider};
-use language_model::LlmApiToken;
 use util::{ConnectionResult, ResultExt, TryFutureExt, maybe};
 use uuid::Uuid;
 use welcome::{FIRST_OPEN, show_welcome_view};
@@ -566,17 +566,17 @@ pub fn main() {
             app_state.user_store.clone(),
             cx,
         );
-        
+
         // Initialize semantic index
         {
             let db_path = paths::database_dir().join("semantic_index.db");
             let client = app_state.client.clone();
             let http_client = client.http_client();
-            
+
             cx.spawn(async move |mut cx| {
                 // Get token for authentication
                 let llm_api_token = LlmApiToken::default();
-                
+
                 // Create embedding provider with Oppla embeddings
                 let embedding_provider = Arc::new(CloudEmbeddingProvider::new(
                     http_client,
@@ -584,14 +584,15 @@ pub fn main() {
                     llm_api_token,
                     client,
                 ));
-                
+
                 // Initialize semantic database
                 match SemanticDb::new(db_path, embedding_provider, &mut cx).await {
                     Ok(semantic_db) => {
                         cx.update(|cx| {
                             cx.set_global(semantic_db);
                             log::info!("Semantic index initialized with Oppla embeddings");
-                        }).ok();
+                        })
+                        .ok();
                     }
                     Err(e) => {
                         log::error!("Failed to initialize semantic index: {}", e);

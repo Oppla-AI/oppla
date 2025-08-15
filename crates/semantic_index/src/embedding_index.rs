@@ -59,7 +59,6 @@ impl EmbeddingIndex {
         &self,
         cx: &App,
     ) -> impl Future<Output = Result<()>> + use<> {
-
         let worktree = self.worktree.read(cx).snapshot();
         let worktree_abs_path = worktree.abs_path().clone();
         let scan = self.scan_entries(worktree, cx);
@@ -78,7 +77,6 @@ impl EmbeddingIndex {
         updated_entries: UpdatedEntriesSet,
         cx: &App,
     ) -> impl Future<Output = Result<()>> + use<> {
-
         let worktree = self.worktree.read(cx).snapshot();
         let worktree_abs_path = worktree.abs_path().clone();
         let scan = self.scan_updated_entries(worktree, updated_entries.clone(), cx);

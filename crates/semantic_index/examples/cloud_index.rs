@@ -21,13 +21,13 @@ fn main() {
         let http = Arc::new(HttpClientWithUrl::new(
             reqwest_client::ReqwestClient::new(),
             "https://app.oppla.ai/home", // This will be mapped to the LLM endpoint
-            None, // No proxy
+            None,                        // No proxy
         ));
-        
+
         // Get client and token
         let client = Client::global(cx);
         let llm_api_token = LlmApiToken::default();
-        
+
         // Create the cloud embedding provider
         // Using Together AI's cheapest embedding tier
         let embedding_provider = Arc::new(CloudEmbeddingProvider::new(
@@ -36,7 +36,7 @@ fn main() {
             llm_api_token,
             client.clone(),
         ));
-        
+
         cx.spawn(async move |cx| {
             // Initialize semantic index with cloud provider
             let semantic_index = SemanticDb::new(
@@ -44,25 +44,25 @@ fn main() {
                 embedding_provider,
                 cx,
             );
-            
+
             let mut semantic_index = semantic_index.await.unwrap();
-            
+
             let project_path = Path::new(&args[1]);
             let project = Project::example([project_path], cx).await;
-            
+
             cx.update(|cx| {
                 let language_registry = project.read(cx).languages().clone();
                 let node_runtime = project.read(cx).node_runtime().unwrap().clone();
                 languages::init(language_registry, node_runtime, cx);
             })
             .unwrap();
-            
+
             let project_index = cx
                 .update(|cx| semantic_index.project_index(project.clone(), cx))
                 .unwrap()
                 .await
                 .unwrap();
-            
+
             cx.update(|cx| {
                 let project_index = project_index.read(cx);
                 let query = "function to handle user authentication";
@@ -73,7 +73,7 @@ fn main() {
             .unwrap()
             .await
             .unwrap();
-            
+
             println!("Search completed successfully!");
         })
         .await

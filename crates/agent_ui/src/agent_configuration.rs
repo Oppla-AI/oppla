@@ -6,8 +6,8 @@ mod tool_picker;
 use std::{sync::Arc, time::Duration};
 
 use agent_settings::AgentSettings;
-use assistant_tool::{ToolSource, ToolWorkingSet};
 use anyhow::Context as _;
+use assistant_tool::{ToolSource, ToolWorkingSet};
 use client::Client;
 use collections::HashMap;
 use context_server::ContextServerId;
@@ -18,7 +18,6 @@ use gpui::{
     Action, Animation, AnimationExt as _, AnyView, App, Corner, Entity, EventEmitter, FocusHandle,
     Focusable, ScrollHandle, Subscription, Task, Transformation, WeakEntity, percentage,
 };
-use url::Url;
 use language::LanguageRegistry;
 use language_model::{
     LanguageModelProvider, LanguageModelProviderId, LanguageModelRegistry, ZED_CLOUD_PROVIDER_ID,
@@ -35,6 +34,7 @@ use ui::{
     Chip, ContextMenu, Disclosure, Divider, DividerColor, ElevationIndex, Indicator, PopoverMenu,
     Scrollbar, ScrollbarState, Switch, SwitchColor, SwitchField, Tooltip, prelude::*,
 };
+use url::Url;
 use util::ResultExt as _;
 use workspace::Workspace;
 
@@ -58,41 +58,53 @@ impl IdeContext {
             sync_data: RwLock::new(None),
         });
     }
-    
+
     pub fn get_sync_data(&self) -> Option<TaskSyncData> {
         self.sync_data.read().ok()?.clone()
     }
-    
+
     pub fn set_sync_data(&self, data: TaskSyncData) {
         if let Ok(mut sync_data) = self.sync_data.write() {
             *sync_data = Some(data);
         }
     }
-    
+
     pub fn clear_sync_data(&self) {
         if let Ok(mut sync_data) = self.sync_data.write() {
             *sync_data = None;
         }
     }
-    
+
     // Helper method to get context filter for API searches
     pub fn get_context_filter(&self) -> Option<serde_json::Value> {
         let data = self.get_sync_data()?;
-        
+
         let mut filter = serde_json::json!({
             "type": "tasks"
         });
-        
+
         if let Some(filter_obj) = filter.as_object_mut() {
-            filter_obj.insert("account_id".to_string(), serde_json::Value::String(data.account_id.to_string()));
-            filter_obj.insert("product_id".to_string(), serde_json::Value::String(data.product_id.to_string()));
-            filter_obj.insert("board_id".to_string(), serde_json::Value::String(data.board_id.to_string()));
-            
+            filter_obj.insert(
+                "account_id".to_string(),
+                serde_json::Value::String(data.account_id.to_string()),
+            );
+            filter_obj.insert(
+                "product_id".to_string(),
+                serde_json::Value::String(data.product_id.to_string()),
+            );
+            filter_obj.insert(
+                "board_id".to_string(),
+                serde_json::Value::String(data.board_id.to_string()),
+            );
+
             if let Some(task_id) = data.task_id {
-                filter_obj.insert("task_id".to_string(), serde_json::Value::String(task_id.to_string()));
+                filter_obj.insert(
+                    "task_id".to_string(),
+                    serde_json::Value::String(task_id.to_string()),
+                );
             }
         }
-        
+
         Some(filter)
     }
 }
@@ -107,21 +119,21 @@ pub struct TaskSyncData {
     // Account information
     pub account_id: SharedString,
     pub account_name: SharedString,
-    
+
     // Product information
     pub product_id: SharedString,
     pub product_name: SharedString,
-    
+
     // Big Bet (Board) information
-    pub board_id: SharedString,  // Store the board ID for API searches
-    pub big_bet: Option<SharedString>,  // Display name for Big Bet (board name)
-    pub big_bet_description: Option<SharedString>,  // Board description
-    
+    pub board_id: SharedString, // Store the board ID for API searches
+    pub big_bet: Option<SharedString>, // Display name for Big Bet (board name)
+    pub big_bet_description: Option<SharedString>, // Board description
+
     // Work Item (Task) information (optional)
-    pub task_id: Option<SharedString>,  // Store the task ID for API searches
-    pub work_item: Option<SharedString>,  // Display name for Work Item (task name)
-    pub work_item_description: Option<SharedString>,  // Task description
-    
+    pub task_id: Option<SharedString>, // Store the task ID for API searches
+    pub work_item: Option<SharedString>, // Display name for Work Item (task name)
+    pub work_item_description: Option<SharedString>, // Task description
+
     // Metadata
     pub synced_at: Option<std::time::SystemTime>,
 }
@@ -200,7 +212,7 @@ impl AgentConfiguration {
             scroll_handle,
             scrollbar_state,
             task_sync_expanded: true, // Start expanded if no task is synced
-            task_sync_data: None, // Initially no task is synced
+            task_sync_data: None,     // Initially no task is synced
         };
         this.build_provider_configuration_views(window, cx);
         this
@@ -576,34 +588,34 @@ impl AgentConfiguration {
         // Get the client to acquire JWT token
         let client = Client::global(cx).clone();
         let workspace = self.workspace.clone();
-        
+
         // Spawn an async task to get the token and handle the sync flow
         cx.spawn(async move |this, cx| {
             let background = cx.background_executor().clone();
-            
+
             // Try to acquire the LLM token
             let token_result = client.request(proto::GetLlmToken {}).await;
-            
+
             match token_result {
                 Ok(response) => {
                     let token = response.token;
-                    
+
                     // Start a local HTTP server to receive the callback
                     let server = tiny_http::Server::http("127.0.0.1:0")
                         .expect("failed to find open port for sync callback");
                     let port = server.server_addr().port();
-                    
+
                     // Build the URL with token and callback port
                     let url = format!(
                         "https://app.oppla.ai/home/ide?token={}&callback_port={}",
                         token, port
                     );
-                    
+
                     // Open the URL in the default browser
                     cx.update(|cx| {
                         cx.open_url(&url);
                     }).log_err();
-                    
+
                     // Listen for the callback with sync data
                     let sync_result = background.spawn(async move {
                         for _ in 0..300 { // Wait up to 5 minutes (300 seconds)
@@ -611,7 +623,7 @@ impl AgentConfiguration {
                                 let path = req.url();
                                 let url = Url::parse(&format!("http://example.com{}", path))
                                     .context("failed to parse sync callback url")?;
-                                
+
                                 // Parse the sync data from query parameters
                                 let mut sync_data = TaskSyncData {
                                     account_id: SharedString::default(),
@@ -626,7 +638,7 @@ impl AgentConfiguration {
                                     work_item_description: None,
                                     synced_at: Some(std::time::SystemTime::now()),
                                 };
-                                
+
                                 for (key, value) in url.query_pairs() {
                                     match key.as_ref() {
                                         "account_id" => sync_data.account_id = SharedString::from(value.to_string()),
@@ -642,7 +654,7 @@ impl AgentConfiguration {
                                         _ => {}
                                     }
                                 }
-                                
+
                                 // Send success response and redirect to close the tab
                                 let response_html = r#"<!DOCTYPE html>
                                 <html>
@@ -655,18 +667,18 @@ impl AgentConfiguration {
                                     <p>You can close this tab and return to Oppla IDE.</p>
                                 </body>
                                 </html>"#;
-                                
+
                                 req.respond(
                                     tiny_http::Response::from_string(response_html)
                                         .with_header(tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"text/html"[..]).unwrap())
                                 ).context("failed to respond to sync callback")?;
-                                
+
                                 return Ok(sync_data);
                             }
                         }
                         anyhow::bail!("Sync timeout - no callback received")
                     }).await;
-                    
+
                     // Update the sync data if successful
                     if let Ok(sync_data) = sync_result {
                         cx.update(|cx| {
@@ -680,7 +692,7 @@ impl AgentConfiguration {
                 },
                 Err(err) => {
                     log::error!("Failed to acquire JWT token for task sync: {}", err);
-                    
+
                     // Show user-friendly error message
                     cx.update(|cx| {
                         workspace
@@ -704,7 +716,7 @@ impl AgentConfiguration {
                     }).log_err();
                 }
             }
-            
+
             anyhow::Ok(())
         })
         .detach_and_log_err(cx);
@@ -726,11 +738,11 @@ impl AgentConfiguration {
         self.task_sync_expanded = true;
         cx.notify();
     }
-    
+
     // Method to update sync data after successful sync from web app
     pub fn update_sync_data(&mut self, data: TaskSyncData, cx: &mut Context<Self>) {
         self.task_sync_data = Some(data.clone());
-        
+
         // Store in global context for access across the IDE
         if let Some(ide_context) = cx.try_global::<IdeContext>() {
             ide_context.set_sync_data(data);
@@ -741,13 +753,17 @@ impl AgentConfiguration {
                 ide_context.set_sync_data(data);
             }
         }
-        
+
         // Collapse the section after syncing
         self.task_sync_expanded = false;
         cx.notify();
     }
 
-    fn render_task_sync_section(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render_task_sync_section(
+        &mut self,
+        _window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> impl IntoElement {
         let is_expanded = self.task_sync_expanded;
 
         v_flex()

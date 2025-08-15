@@ -13,7 +13,9 @@ use gpui::{
     AnyWindowHandle, App, AppContext, Context, Entity, IntoElement, Task, WeakEntity, Window,
 };
 use http_client::{HttpClientWithUrl, Method};
-use language_model::{LanguageModel, LanguageModelRequest, LanguageModelToolSchemaFormat, LlmApiToken};
+use language_model::{
+    LanguageModel, LanguageModelRequest, LanguageModelToolSchemaFormat, LlmApiToken,
+};
 use project::Project;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -25,11 +27,11 @@ pub struct FileSearchToolInput {
     /// The search query to find relevant context
     #[serde(skip_serializing_if = "Option::is_none")]
     query: Option<String>,
-    
+
     /// Maximum number of results to return (default: 10, max: 100)
     #[serde(skip_serializing_if = "Option::is_none")]
     limit: Option<u32>,
-    
+
     /// Filter options for the search
     #[serde(skip_serializing_if = "Option::is_none")]
     filter: Option<SearchFilter>,
@@ -40,27 +42,27 @@ pub struct SearchFilter {
     /// Type of content to search: "conversations", "tasks", "compressed", or "all"
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     search_type: Option<String>,
-    
+
     /// Content to extract: "work_item" (work item details only), "big_bet" (big bet details only), or "auto" (automatically decide based on context)
     #[serde(skip_serializing_if = "Option::is_none")]
     content_type: Option<String>,
-    
+
     /// Optional thread ID to search within a specific thread
     #[serde(skip_serializing_if = "Option::is_none")]
     thread_id: Option<String>,
-    
+
     /// Optional account ID to filter results by account
     #[serde(skip_serializing_if = "Option::is_none")]
     account_id: Option<String>,
-    
+
     /// Optional product ID to filter results by product
     #[serde(skip_serializing_if = "Option::is_none")]
     product_id: Option<String>,
-    
+
     /// Optional board ID to filter results by board
     #[serde(skip_serializing_if = "Option::is_none")]
     board_id: Option<String>,
-    
+
     /// Optional task ID to filter results by specific task
     #[serde(skip_serializing_if = "Option::is_none")]
     task_id: Option<String>,
@@ -110,7 +112,9 @@ impl FileSearchTool {
         context_filters: Option<SearchFilter>,
     ) -> Result<FileSearchResponse> {
         // Acquire the token
-        let token = llm_api_token.acquire(&client).await
+        let token = llm_api_token
+            .acquire(&client)
+            .await
             .context("Failed to acquire LLM API token")?;
 
         // Merge context filters with input filters
@@ -124,7 +128,7 @@ impl FileSearchTool {
                 board_id: None,
                 task_id: None,
             });
-            
+
             // Only apply context filters if not already specified
             if merged_filter.account_id.is_none() {
                 merged_filter.account_id = context_filter.account_id;
@@ -138,7 +142,7 @@ impl FileSearchTool {
             if merged_filter.task_id.is_none() {
                 merged_filter.task_id = context_filter.task_id;
             }
-            
+
             Some(merged_filter)
         } else {
             input.filter
@@ -184,8 +188,8 @@ impl FileSearchTool {
         // Read and parse the response
         let mut body = String::new();
         response.body_mut().read_to_string(&mut body).await?;
-        let search_response: FileSearchResponse = serde_json::from_str(&body)
-            .context("Failed to parse search response")?;
+        let search_response: FileSearchResponse =
+            serde_json::from_str(&body).context("Failed to parse search response")?;
 
         Ok(search_response)
     }
@@ -258,16 +262,26 @@ impl Tool for FileSearchTool {
         };
 
         // Validate input
-        if input.query.is_none() && input.filter.as_ref().and_then(|f| f.thread_id.as_ref()).is_none() {
-            return Task::ready(Err(anyhow!("Either 'query' or 'filter.thread_id' must be provided"))).into();
+        if input.query.is_none()
+            && input
+                .filter
+                .as_ref()
+                .and_then(|f| f.thread_id.as_ref())
+                .is_none()
+        {
+            return Task::ready(Err(anyhow!(
+                "Either 'query' or 'filter.thread_id' must be provided"
+            )))
+            .into();
         }
 
         // Get the LLM API token and client
         let llm_api_token = LlmApiToken::default();
         let client = Client::global(cx);
-        
+
         // Extract context filters from IdeContext if available
-        let context_filters = cx.try_global::<IdeContext>()
+        let context_filters = cx
+            .try_global::<IdeContext>()
             .and_then(|ide_context| ide_context.get_sync_data())
             .map(|sync_data| {
                 // Only include filters that have values
@@ -280,25 +294,25 @@ impl Tool for FileSearchTool {
                     board_id: None,
                     task_id: None,
                 };
-                
+
                 // Always include account, product, and board if we have sync data
                 filter.account_id = Some(sync_data.account_id.to_string());
                 filter.product_id = Some(sync_data.product_id.to_string());
                 filter.board_id = Some(sync_data.board_id.to_string());
-                
+
                 // Only include task_id if it's actually present
                 filter.task_id = sync_data.task_id.map(|id| id.to_string());
-                
+
                 filter
             });
-        
+
         let http_client = self.http_client.clone();
         let http_client2 = http_client.clone();
         let input2 = input.clone();
         let llm_api_token2 = llm_api_token.clone();
         let client2 = client.clone();
         let context_filters2 = context_filters.clone();
-        
+
         let search_task = cx.background_spawn(async move {
             Self::perform_search(http_client, input, llm_api_token, client, context_filters).await
         });
@@ -306,17 +320,21 @@ impl Tool for FileSearchTool {
         let card = cx.new(|cx| FileSearchToolCard::new(search_task, cx));
 
         let output = cx.background_spawn(async move {
-            let response = Self::perform_search(http_client2, input2, llm_api_token2, client2, context_filters2).await?;
-            
-            let mut message = format!(
-                "Found {} results",
-                response.total
-            );
-            
+            let response = Self::perform_search(
+                http_client2,
+                input2,
+                llm_api_token2,
+                client2,
+                context_filters2,
+            )
+            .await?;
+
+            let mut message = format!("Found {} results", response.total);
+
             if !response.query.is_empty() {
                 message.push_str(&format!(" for query \"{}\"", response.query));
             }
-            
+
             if !response.results.is_empty() {
                 message.push_str(":\n\n");
                 for (i, result) in response.results.iter().enumerate() {
@@ -367,10 +385,7 @@ struct FileSearchToolCard {
 }
 
 impl FileSearchToolCard {
-    fn new(
-        search_task: Task<Result<FileSearchResponse>>,
-        cx: &mut Context<Self>,
-    ) -> Self {
+    fn new(search_task: Task<Result<FileSearchResponse>>, cx: &mut Context<Self>) -> Self {
         let _task = cx.spawn(async move |this, cx| {
             let response = search_task.await;
             this.update(cx, |this, cx| {
@@ -451,9 +466,12 @@ impl ToolCard for FileSearchToolCard {
                                                 ),
                                         )
                                         .child(
-                                            Label::new(format!("Similarity: {:.2}", result.similarity))
-                                                .size(LabelSize::Small)
-                                                .color(Color::Muted),
+                                            Label::new(format!(
+                                                "Similarity: {:.2}",
+                                                result.similarity
+                                            ))
+                                            .size(LabelSize::Small)
+                                            .color(Color::Muted),
                                         ),
                                 )
                                 .child(
@@ -469,8 +487,8 @@ impl ToolCard for FileSearchToolCard {
                                                 result.content.clone()
                                             })
                                             .size(LabelSize::Small)
-                                            .color(Color::Default)
-                                        )
+                                            .color(Color::Default),
+                                        ),
                                 )
                         }))
                         .into_any(),
@@ -512,14 +530,17 @@ impl Component for FileSearchToolCard {
                 results: vec![
                     FileSearchResult {
                         id: "1".to_string(),
-                        content: "User mentioned they want to implement vim mode with yank functionality".to_string(),
+                        content:
+                            "User mentioned they want to implement vim mode with yank functionality"
+                                .to_string(),
                         result_type: "conversation".to_string(),
                         similarity: 0.92,
                         metadata: serde_json::json!({}),
                     },
                     FileSearchResult {
                         id: "2".to_string(),
-                        content: "Task: Implement yank mode for vim - Status: In Progress".to_string(),
+                        content: "Task: Implement yank mode for vim - Status: In Progress"
+                            .to_string(),
                         result_type: "task".to_string(),
                         similarity: 0.87,
                         metadata: serde_json::json!({}),
