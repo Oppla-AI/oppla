@@ -132,7 +132,7 @@ mod tests {
         "#;
         let parsed: VsCodeDebugTaskFile =
             serde_json_lenient::from_str(&raw).expect("deserializing launch.json");
-        let zed = DebugTaskFile::try_from(parsed).expect("converting to Zed debug templates");
+        let oppla = DebugTaskFile::try_from(parsed).expect("converting to Oppla debug templates");
         pretty_assertions::assert_eq!(
             oppla,
             DebugTaskFile(vec![DebugScenario {

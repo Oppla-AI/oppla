@@ -83,7 +83,7 @@ pub struct LanguageModelPickerDelegate {
 }
 
 impl LanguageModelPickerDelegate {
-    pub fn toggle_auto_mode(&mut self, cx: &App) {
+    pub fn toggle_auto_mode(&mut self, cx: &mut App) {
         // Check current can_select_model from provider
         let registry = LanguageModelRegistry::global(cx).read(cx);
         let can_select =
@@ -95,6 +95,16 @@ impl LanguageModelPickerDelegate {
 
         if can_select {
             self.auto_mode = !self.auto_mode;
+
+            // When toggling auto mode on, select the default model from the cloud provider
+            if self.auto_mode {
+                if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+                    if let Some(default_model) = provider.default_model(cx) {
+                        // Call the on_model_changed callback to update the thread's model
+                        (self.on_model_changed.clone())(default_model, cx);
+                    }
+                }
+            }
         }
     }
 
@@ -108,13 +118,41 @@ impl LanguageModelPickerDelegate {
         let models = all_models(cx);
         let entries = models.entries();
 
+        // Check if the current model is already the default model
+        let current_model = get_active_model(cx);
+        let registry = LanguageModelRegistry::global(cx).read(cx);
+        let cloud_default_model = registry
+            .provider(&language_model::ZED_CLOUD_PROVIDER_ID)
+            .and_then(|provider| provider.default_model(cx));
+
+        // Start with auto mode enabled
+        let auto_mode = true;
+
+        // If auto mode is on and we don't have the default model selected, select it
+        if auto_mode {
+            if let Some(default_model) = cloud_default_model.clone() {
+                // Check if current model is different from default
+                let needs_update = match &current_model {
+                    Some(current) => {
+                        current.model.id() != default_model.id()
+                            || current.provider.id() != default_model.provider_id()
+                    }
+                    None => true,
+                };
+
+                if needs_update {
+                    (on_model_changed.clone())(default_model, cx);
+                }
+            }
+        }
+
         Self {
             on_model_changed: on_model_changed.clone(),
             all_models: Arc::new(models),
             selected_index: Self::get_active_model_index(&entries, get_active_model(cx)),
             filtered_entries: entries,
             get_active_model: Arc::new(get_active_model),
-            auto_mode: true, // Default to auto mode (use default model)
+            auto_mode, // Default to auto mode (use default model)
             _authenticate_all_providers_task: Self::authenticate_all_providers(cx),
             _subscriptions: vec![cx.subscribe_in(
                 &LanguageModelRegistry::global(cx),
@@ -126,6 +164,22 @@ impl LanguageModelPickerDelegate {
                         | language_model::Event::RemovedProvider(_) => {
                             let query = picker.query(cx);
                             picker.delegate.all_models = Arc::new(all_models(cx));
+
+                            // If auto mode is on and provider state changed, update to use new default model
+                            if picker.delegate.auto_mode {
+                                let registry = LanguageModelRegistry::global(cx).read(cx);
+                                if let Some(provider) =
+                                    registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID)
+                                {
+                                    if let Some(default_model) = provider.default_model(cx) {
+                                        (picker.delegate.on_model_changed.clone())(
+                                            default_model,
+                                            cx,
+                                        );
+                                    }
+                                }
+                            }
+
                             // Update matches will automatically drop the previous task
                             // if we get a provider event again
                             picker.update_matches(query, window, cx)
@@ -430,15 +484,21 @@ impl PickerDelegate for LanguageModelPickerDelegate {
             .collect::<Vec<_>>();
 
         let filtered_models = if auto_mode {
-            // In auto mode, only show the currently selected (default) model
+            // In auto mode, show the cloud provider's default model
             // User cannot select anything else
-            if let Some(active) = &active_model {
+            let registry = LanguageModelRegistry::global(cx);
+            let cloud_default = registry
+                .read(cx)
+                .provider(&language_model::ZED_CLOUD_PROVIDER_ID)
+                .and_then(|provider| provider.default_model(cx));
+
+            if let Some(default_model) = cloud_default {
                 let model_info = all_models
                     .model_infos()
                     .iter()
                     .find(|m| {
-                        m.model.id() == active.model.id()
-                            && m.model.provider_id() == active.provider.id()
+                        m.model.id() == default_model.id()
+                            && m.model.provider_id() == default_model.provider_id()
                     })
                     .cloned();
 

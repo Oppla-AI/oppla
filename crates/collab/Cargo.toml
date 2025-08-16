@@ -76,6 +76,7 @@ util.workspace = true
 uuid.workspace = true
 workspace-hack.workspace = true
 zed_llm_client.workspace = true
+oppla_llm_client.workspace = true
 
 [dev-dependencies]
 agent_settings.workspace = true

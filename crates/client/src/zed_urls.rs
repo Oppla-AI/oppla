@@ -28,7 +28,7 @@ pub fn start_trial_url(cx: &App) -> String {
 
 /// Returns the URL to the upgrade page on zed.dev.
 pub fn upgrade_to_zed_pro_url(cx: &App) -> String {
-    format!("{server_url}", server_url = server_url(cx))
+    server_url(cx).to_string()
 }
 
 /// Returns the URL to Zed's terms of service.

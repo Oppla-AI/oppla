@@ -532,7 +532,7 @@ impl Zeta {
                                             cx.new(|cx| {
                                                 ErrorMessagePrompt::new(err.to_string(), cx)
                                                     .with_link_button(
-                                                        "Update Zed",
+                                                        "Update Oppla",
                                                         "https://zed.dev/releases",
                                                     )
                                             })

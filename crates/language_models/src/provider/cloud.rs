@@ -936,7 +936,7 @@ impl LanguageModel for CloudLanguageModel {
         );
 
         let llm_api_token = self.llm_api_token.clone();
-        let _provider = self.model.provider.clone();
+        let _provider = self.model.provider;
 
         let future = self.request_limiter.stream(async move {
             let PerformLlmCompletionResponse {

@@ -301,7 +301,7 @@ pub fn get_shell_safe_zed_path() -> anyhow::Result<String> {
     // but shlex has annotated the error as #[non_exhaustive] so we can't make it a compile error if other
     // errors are introduced in the future :(
     let zed_path_escaped =
-        shlex::try_quote(&zed_path).context("Failed to shell-escape Zed executable path.")?;
+        shlex::try_quote(&zed_path).context("Failed to shell-escape Oppla executable path.")?;
 
     return Ok(zed_path_escaped.to_string());
 }

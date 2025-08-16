@@ -188,7 +188,7 @@ unsafe extern "system" fn wnd_proc(
             with_dialog_data(hwnd, |data| {
                 if let Ok(result) = data.borrow_mut().rx.recv() {
                     if let Err(e) = result {
-                        log::error!("Failed to update Zed: {:?}", e);
+                        log::error!("Failed to update Oppla: {:?}", e);
                         show_error(format!("Error: {:?}", e));
                     }
                 }

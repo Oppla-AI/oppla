@@ -3203,6 +3203,7 @@ dependencies = [
  "nanoid",
  "node_runtime",
  "notifications",
+ "oppla_llm_client",
  "parking_lot",
  "pretty_assertions",
  "project",

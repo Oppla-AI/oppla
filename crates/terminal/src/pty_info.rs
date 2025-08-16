@@ -142,7 +142,7 @@ impl PtyProcessInfo {
         Some(info)
     }
 
-    /// Updates the cached process info, returns whether the Zed-relevant info has changed
+    /// Updates the cached process info, returns whether the Oppla-relevant info has changed
     pub fn has_changed(&mut self) -> bool {
         let current = self.load();
         let has_changed = match (self.current.as_ref(), current.as_ref()) {

@@ -49,6 +49,7 @@ struct SyncBillingSubscriptionResponse {
 
 async fn sync_billing_subscription(
     Extension(app): Extension<Arc<AppState>>,
+    Extension(rpc_server): Extension<Arc<Server>>,
     extract::Json(body): extract::Json<SyncBillingSubscriptionBody>,
 ) -> Result<Json<SyncBillingSubscriptionResponse>> {
     let Some(stripe_client) = app.stripe_client.clone() else {
@@ -88,6 +89,17 @@ async fn sync_billing_subscription(
                 )
             })?;
     }
+
+    // When the user's subscription changes, push down any changes to their plan.
+    // This ensures connected IDE clients get notified immediately.
+    rpc_server
+        .update_plan_for_user_legacy(user.id)
+        .await
+        .trace_err();
+
+    // When the user's subscription changes, we want to refresh their LLM tokens
+    // to either grant/revoke access.
+    rpc_server.refresh_llm_tokens_for_user(user.id).await;
 
     Ok(Json(SyncBillingSubscriptionResponse {
         stripe_customer_id: billing_customer.stripe_customer_id.clone(),

@@ -57,11 +57,23 @@ fn view_release_notes_locally(
     let version = AppVersion::global(cx).to_string();
 
     let client = client::Client::global(cx).http_client();
-    let url = client.build_url(&format!(
-        "/api/release_notes/v2/{}/{}",
-        release_channel.dev_name(),
-        version
-    ));
+    let url = client
+        .build_oppla_api_url(
+            &format!(
+                "/api/release_notes/v2/{}/{}",
+                release_channel.dev_name(),
+                version
+            ),
+            &[],
+        )
+        .map(|u| u.to_string())
+        .unwrap_or_else(|_| {
+            client.build_url(&format!(
+                "/api/release_notes/v2/{}/{}",
+                release_channel.dev_name(),
+                version
+            ))
+        });
 
     let markdown = workspace
         .app_state()

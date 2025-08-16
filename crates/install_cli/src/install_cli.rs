@@ -108,5 +108,5 @@ pub fn install_cli(window: &mut Window, cx: &mut Context<Workspace>) {
         register_zed_scheme(&cx).await.log_err();
         Ok(())
     })
-    .detach_and_prompt_err("Error installing zed cli", window, cx, |_, _, _| None);
+    .detach_and_prompt_err("Error installing oppla cli", window, cx, |_, _, _| None);
 }
