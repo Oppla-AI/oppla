@@ -420,7 +420,7 @@ impl AutoUpdater {
 
         if smol::fs::metadata(&version_path).await.is_err() {
             log::info!(
-                "downloading zed-remote-server {os} {arch} version {}",
+                "downloading oppla-remote-server {os} {arch} version {}",
                 release.version
             );
             download_remote_server_binary(&version_path, release, client, cx).await?;

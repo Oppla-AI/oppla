@@ -36,6 +36,12 @@ impl AgentProfile {
 
         let profile_settings = AgentProfileSettings {
             name: name.into(),
+            prompt_template: base_profile
+                .as_ref()
+                .and_then(|profile| profile.prompt_template.clone()),
+            role_description: base_profile
+                .as_ref()
+                .and_then(|profile| profile.role_description.clone()),
             tools: base_profile
                 .as_ref()
                 .map(|profile| profile.tools.clone())
@@ -240,6 +246,8 @@ mod tests {
                 AgentProfileId("write_minus_mcp".into()),
                 AgentProfileSettings {
                     name: "write_minus_mcp".into(),
+                    prompt_template: None,
+                    role_description: None,
                     enable_all_context_servers: false,
                     ..agent_settings.profiles[&AgentProfileId::default()].clone()
                 },
@@ -248,6 +256,8 @@ mod tests {
                 AgentProfileId("custom_mcp".into()),
                 AgentProfileSettings {
                     name: "mcp".into(),
+                    prompt_template: None,
+                    role_description: None,
                     tools: IndexMap::default(),
                     enable_all_context_servers: false,
                     context_servers: IndexMap::from_iter([("mcp".into(), context_server_preset())]),

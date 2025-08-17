@@ -197,6 +197,8 @@ impl AgentSettingsContent {
             profile_id,
             AgentProfileContent {
                 name: profile_settings.name.into(),
+                prompt_template: profile_settings.prompt_template,
+                role_description: profile_settings.role_description,
                 tools: profile_settings.tools,
                 enable_all_context_servers: Some(profile_settings.enable_all_context_servers),
                 context_servers: profile_settings
@@ -379,6 +381,10 @@ impl From<&str> for LanguageModelProviderSetting {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AgentProfileContent {
     pub name: Arc<str>,
+    /// Optional custom prompt template for this profile.
+    pub prompt_template: Option<String>,
+    /// Optional role description for additional context.
+    pub role_description: Option<String>,
     #[serde(default)]
     pub tools: IndexMap<Arc<str>, bool>,
     /// Whether all context servers are enabled by default.
@@ -482,6 +488,8 @@ impl Settings for AgentSettings {
                             id.clone(),
                             AgentProfileSettings {
                                 name: profile.name.clone().into(),
+                                prompt_template: profile.prompt_template.clone(),
+                                role_description: profile.role_description.clone(),
                                 tools: profile.tools.clone(),
                                 enable_all_context_servers: profile
                                     .enable_all_context_servers

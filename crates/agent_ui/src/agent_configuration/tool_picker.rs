@@ -277,6 +277,8 @@ impl PickerDelegate for ToolPickerDelegate {
                     .entry(profile_id)
                     .or_insert_with(|| AgentProfileContent {
                         name: default_profile.name.into(),
+                        prompt_template: default_profile.prompt_template,
+                        role_description: default_profile.role_description,
                         tools: default_profile.tools,
                         enable_all_context_servers: Some(
                             default_profile.enable_all_context_servers,

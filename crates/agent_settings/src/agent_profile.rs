@@ -11,9 +11,15 @@ pub mod builtin_profiles {
     pub const WRITE: &str = "write";
     pub const ASK: &str = "ask";
     pub const MINIMAL: &str = "minimal";
+    pub const ARCHITECT: &str = "architect";
+    pub const DEVOPS: &str = "devops";
+    pub const MARKETING_SPECIALIST: &str = "marketing-specialist";
 
     pub fn is_builtin(profile_id: &AgentProfileId) -> bool {
-        profile_id.as_str() == WRITE || profile_id.as_str() == ASK || profile_id.as_str() == MINIMAL
+        matches!(
+            profile_id.as_str(),
+            WRITE | ASK | MINIMAL | ARCHITECT | DEVOPS | MARKETING_SPECIALIST
+        )
     }
 }
 
@@ -43,6 +49,10 @@ impl Default for AgentProfileId {
 pub struct AgentProfileSettings {
     /// The name of the profile.
     pub name: SharedString,
+    /// Optional custom prompt template for this profile.
+    pub prompt_template: Option<String>,
+    /// Optional role description for additional context.
+    pub role_description: Option<String>,
     pub tools: IndexMap<Arc<str>, bool>,
     pub enable_all_context_servers: bool,
     pub context_servers: IndexMap<Arc<str>, ContextServerPreset>,

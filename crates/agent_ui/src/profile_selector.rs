@@ -111,6 +111,11 @@ impl ProfileSelector {
             builtin_profiles::WRITE => Some("Get help to write anything."),
             builtin_profiles::ASK => Some("Chat about your codebase."),
             builtin_profiles::MINIMAL => Some("Chat about anything with no tools."),
+            builtin_profiles::ARCHITECT => Some("Design and architect systems."),
+            builtin_profiles::DEVOPS => Some("Manage infrastructure and deployments."),
+            builtin_profiles::MARKETING_SPECIALIST => {
+                Some("Create marketing content and strategies.")
+            }
             _ => None,
         };
         let thread_profile_id = self.thread.read(cx).profile().id();

@@ -328,15 +328,42 @@ impl PromptBuilder {
         context: &ProjectContext,
         model_context: &ModelContext,
     ) -> Result<String, RenderError> {
+        self.generate_assistant_system_prompt_with_profile(context, model_context, None, None)
+    }
+
+    pub fn generate_assistant_system_prompt_with_profile(
+        &self,
+        context: &ProjectContext,
+        model_context: &ModelContext,
+        prompt_template: Option<&str>,
+        role_description: Option<&str>,
+    ) -> Result<String, RenderError> {
         let template_context = PromptTemplateContext {
             project: context.clone(),
             model: model_context.clone(),
             has_tools: !model_context.available_tools.is_empty(),
         };
 
-        self.handlebars
-            .lock()
-            .render("assistant_system_prompt", &template_context)
+        // Determine the template name to use
+        let template_name = prompt_template.unwrap_or("assistant_system_prompt");
+
+        // Add role_description to the context if provided
+        if let Some(role_desc) = role_description {
+            // We need to extend the template context with role_description
+            // Since we can't modify the struct directly, we'll use serde_json
+            let mut value = serde_json::to_value(&template_context).unwrap();
+            if let serde_json::Value::Object(ref mut map) = value {
+                map.insert(
+                    "role_description".to_string(),
+                    serde_json::Value::String(role_desc.to_string()),
+                );
+            }
+            self.handlebars.lock().render(template_name, &value)
+        } else {
+            self.handlebars
+                .lock()
+                .render(template_name, &template_context)
+        }
     }
 
     pub fn generate_inline_transformation_prompt(

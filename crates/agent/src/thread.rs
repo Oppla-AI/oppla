@@ -1363,10 +1363,26 @@ impl Thread {
         };
 
         if let Some(project_context) = self.project_context.borrow().as_ref() {
-            match self
-                .prompt_builder
-                .generate_assistant_system_prompt(project_context, model_context)
-            {
+            // Get profile settings for custom prompt template
+            let profile_settings = AgentSettings::get_global(cx)
+                .profiles
+                .get(self.profile.id())
+                .cloned();
+
+            let result = if let Some(settings) = profile_settings {
+                self.prompt_builder
+                    .generate_assistant_system_prompt_with_profile(
+                        project_context,
+                        model_context,
+                        settings.prompt_template.as_deref(),
+                        settings.role_description.as_deref(),
+                    )
+            } else {
+                self.prompt_builder
+                    .generate_assistant_system_prompt(project_context, model_context)
+            };
+
+            match result {
                 Err(err) => {
                     let message = format!("{err:?}").into();
                     log::error!("{message}");

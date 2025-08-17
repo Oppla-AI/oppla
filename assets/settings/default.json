@@ -858,6 +858,81 @@
         "name": "Minimal",
         "enable_all_context_servers": false,
         "tools": {}
+      },
+      "architect": {
+        "name": "Architect",
+        "prompt_template": "architect_system_prompt",
+        "role_description": "System architect focused on design patterns and scalability",
+        "enable_all_context_servers": true,
+        "tools": {
+          "copy_path": true,
+          "create_directory": true,
+          "delete_path": true,
+          "diagnostics": true,
+          "edit_file": true,
+          "fetch": true,
+          "file_search": true,
+          "list_directory": true,
+          "project_notifications": true,
+          "move_path": true,
+          "now": true,
+          "find_path": true,
+          "read_file": true,
+          "grep": true,
+          "terminal": false,
+          "thinking": true,
+          "web_search": true
+        }
+      },
+      "devops": {
+        "name": "DevOps",
+        "prompt_template": "devops_system_prompt",
+        "role_description": "DevOps engineer focused on infrastructure and automation",
+        "enable_all_context_servers": true,
+        "tools": {
+          "copy_path": true,
+          "create_directory": true,
+          "delete_path": true,
+          "diagnostics": false,
+          "edit_file": true,
+          "fetch": true,
+          "file_search": true,
+          "list_directory": true,
+          "project_notifications": false,
+          "move_path": true,
+          "now": true,
+          "find_path": true,
+          "read_file": true,
+          "grep": true,
+          "terminal": true,
+          "thinking": true,
+          "web_search": true
+        }
+      },
+      "marketing-specialist": {
+        "name": "Marketing Specialist",
+        "prompt_template": "marketing_system_prompt",
+        "role_description": "Marketing specialist focused on content creation and brand strategy",
+        "enable_all_context_servers": false,
+        "tools": {
+          "copy_path": true,
+          "create_directory": true,
+          "delete_path": false,
+          "diagnostics": false,
+          "edit_file": true,
+          "fetch": true,
+          "file_search": true,
+          "list_directory": true,
+          "project_notifications": false,
+          "move_path": true,
+          "now": true,
+          "find_path": true,
+          "read_file": true,
+          "grep": true,
+          "terminal": false,
+          "thinking": true,
+          "web_search": true
+        }
       }
     },
     // Where to show notifications when the agent has either completed
