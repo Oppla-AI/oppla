@@ -67,10 +67,12 @@ fi
 # Get release channel
 pushd crates/oppla
 channel=$(<RELEASE_CHANNEL)
-export ZED_RELEASE_CHANNEL="${channel}"
+export OPPLA_RELEASE_CHANNEL="${channel}"
+export ZED_RELEASE_CHANNEL="${channel}"  # Keep for backward compatibility
 popd
 
-export ZED_BUNDLE=true
+export OPPLA_BUNDLE=true
+export ZED_BUNDLE=true  # Keep for backward compatibility
 
 cargo_bundle_version=$(cargo -q bundle --help 2>&1 | head -n 1 || echo "")
 if [ "$cargo_bundle_version" != "cargo-bundle v0.6.1-zed" ]; then
@@ -447,16 +449,25 @@ function sign_app_binaries() {
         mv "${app_path}" "${dmg_source_directory}"
         notarization_key_file=$(mktemp)
 
-        echo "Adding symlink to /Applications to ${dmg_source_directory}"
-        ln -s /Applications ${dmg_source_directory}
-
-        echo "Creating final DMG at ${dmg_file_path} using ${dmg_source_directory}"
-        hdiutil create -volname Oppla -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
-
-        # If someone runs this bundle script locally, a symlink will be placed in `dmg_source_directory`.
-        # This symlink causes CPU issues with Zed if the Zed codebase is the project being worked on, so we simply remove it for now.
-        echo "Removing symlink to /Applications from ${dmg_source_directory}"
-        rm ${dmg_source_directory}/Applications
+        echo "Creating branded DMG installer..."
+        
+        # Use the branded DMG creation script
+        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        if [ -f "$script_dir/create-branded-dmg.sh" ]; then
+            source "$script_dir/create-branded-dmg.sh"
+            create_branded_dmg "${dmg_source_directory}" "${dmg_file_path}" "$bundle_name"
+        else
+            # Fallback to original method if script not found
+            echo "Adding symlink to /Applications to ${dmg_source_directory}"
+            ln -s /Applications ${dmg_source_directory}
+            
+            echo "Creating final DMG at ${dmg_file_path} using ${dmg_source_directory}"
+            hdiutil create -volname Oppla -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
+            
+            # Remove the Applications symlink after DMG creation
+            echo "Removing symlink to /Applications from ${dmg_source_directory}"
+            rm ${dmg_source_directory}/Applications
+        fi
 
         echo "Adding license agreement to DMG"
         npm install --global dmg-license minimist
@@ -594,8 +605,8 @@ else
 
     sign_binary "target/x86_64-apple-darwin/release/remote_server"
     sign_binary "target/aarch64-apple-darwin/release/remote_server"
-    gzip -f --stdout --best target/x86_64-apple-darwin/release/remote_server > target/zed-remote-server-macos-x86_64.gz
-    gzip -f --stdout --best target/aarch64-apple-darwin/release/remote_server > target/zed-remote-server-macos-aarch64.gz
+    gzip -f --stdout --best target/x86_64-apple-darwin/release/remote_server > target/oppla-remote-server-macos-x86_64.gz
+    gzip -f --stdout --best target/aarch64-apple-darwin/release/remote_server > target/oppla-remote-server-macos-aarch64.gz
 fi
 
 # Upload debug info to sentry.io

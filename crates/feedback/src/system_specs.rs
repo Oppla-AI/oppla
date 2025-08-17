@@ -158,15 +158,17 @@ fn try_determine_available_gpus() -> Option<String> {
     }
 }
 
-/// Returns value of `ZED_BUNDLE_TYPE` set at compiletime or else at runtime.
+/// Returns value of `OPPLA_BUNDLE_TYPE` or `ZED_BUNDLE_TYPE` set at compiletime or else at runtime.
 ///
 /// The compiletime value is used by flatpak since it doesn't seem to have a way to provide a
 /// runtime environment variable.
 ///
-/// The runtime value is used by snap since the Zed snaps use release binaries directly, and so
+/// The runtime value is used by snap since the Oppla snaps use release binaries directly, and so
 /// cannot have this baked in.
 fn bundle_type() -> Option<String> {
-    option_env!("ZED_BUNDLE_TYPE")
+    option_env!("OPPLA_BUNDLE_TYPE")
         .map(|bundle_type| bundle_type.to_string())
+        .or_else(|| option_env!("ZED_BUNDLE_TYPE").map(|bundle_type| bundle_type.to_string()))
+        .or_else(|| env::var("OPPLA_BUNDLE_TYPE").ok())
         .or_else(|| env::var("ZED_BUNDLE_TYPE").ok())
 }

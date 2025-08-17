@@ -532,7 +532,7 @@ pub async fn get_git_committer(cx: &AsyncApp) -> GitCommitter {
     }
 
     let git_binary_path =
-        if cfg!(target_os = "macos") && option_env!("ZED_BUNDLE").as_deref() == Some("true") {
+        if cfg!(target_os = "macos") && (option_env!("OPPLA_BUNDLE").as_deref() == Some("true") || option_env!("ZED_BUNDLE").as_deref() == Some("true")) {
             cx.update(|cx| {
                 cx.path_for_auxiliary_executable("git")
                     .context("could not find git binary path")

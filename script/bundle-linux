@@ -11,7 +11,7 @@ Build a release .tar.gz for Linux.
 
 Options:
   -h, --help     Display this help and exit.
-  --flatpak      Set ZED_BUNDLE_TYPE=flatpak so that this can be included in system info
+  --flatpak      Set OPPLA_BUNDLE_TYPE=flatpak so that this can be included in system info
   "
 }
 
@@ -23,7 +23,8 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         --flatpak)
-            export ZED_BUNDLE_TYPE=flatpak
+            export OPPLA_BUNDLE_TYPE=flatpak
+            export ZED_BUNDLE_TYPE=flatpak  # Keep for backward compatibility
             shift
             ;;
         --)
@@ -43,7 +44,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-export ZED_BUNDLE=true
+export OPPLA_BUNDLE=true
+export ZED_BUNDLE=true  # Keep for backward compatibility
 
 channel=$(<crates/oppla/RELEASE_CHANNEL)
 target_dir="${CARGO_TARGET_DIR:-target}"

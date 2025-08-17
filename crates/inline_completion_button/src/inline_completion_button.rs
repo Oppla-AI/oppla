@@ -205,7 +205,7 @@ impl Render for InlineCompletionButton {
                                             set_completion_provider(
                                                 fs.clone(),
                                                 cx,
-                                                EditPredictionProvider::Zed,
+                                                EditPredictionProvider::Oppla,
                                             )
                                         },
                                     )
@@ -236,7 +236,7 @@ impl Render for InlineCompletionButton {
                 );
             }
 
-            EditPredictionProvider::Zed => {
+            EditPredictionProvider::Zed | EditPredictionProvider::Oppla => {
                 let enabled = self.editor_enabled.unwrap_or(true);
 
                 let zeta_icon = if enabled {
@@ -409,7 +409,7 @@ impl InlineCompletionButton {
                 .entry("Use Oppla AI", None, {
                     let fs = fs.clone();
                     move |_window, cx| {
-                        set_completion_provider(fs.clone(), cx, EditPredictionProvider::Zed)
+                        set_completion_provider(fs.clone(), cx, EditPredictionProvider::Oppla)
                     }
                 })
         })
@@ -484,7 +484,7 @@ impl InlineCompletionButton {
         let subtle_mode = matches!(current_mode, EditPredictionsMode::Subtle);
         let eager_mode = matches!(current_mode, EditPredictionsMode::Eager);
 
-        if matches!(provider, EditPredictionProvider::Zed) {
+        if matches!(provider, EditPredictionProvider::Oppla) {
             menu = menu
                 .separator()
                 .header("Display Modes")
@@ -683,7 +683,7 @@ impl InlineCompletionButton {
                 .entry("Use Oppla AI instead", None, {
                     let fs = self.fs.clone();
                     move |_window, cx| {
-                        set_completion_provider(fs.clone(), cx, EditPredictionProvider::Zed)
+                        set_completion_provider(fs.clone(), cx, EditPredictionProvider::Oppla)
                     }
                 })
                 .separator()

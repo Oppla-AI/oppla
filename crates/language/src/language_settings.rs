@@ -213,6 +213,7 @@ pub enum EditPredictionProvider {
     Copilot,
     Supermaven,
     Zed,
+    Oppla,
 }
 
 impl EditPredictionProvider {
@@ -221,7 +222,18 @@ impl EditPredictionProvider {
             EditPredictionProvider::Zed => true,
             EditPredictionProvider::None
             | EditPredictionProvider::Copilot
-            | EditPredictionProvider::Supermaven => false,
+            | EditPredictionProvider::Supermaven
+            | EditPredictionProvider::Oppla => false,
+        }
+    }
+    
+    pub fn is_oppla(&self) -> bool {
+        match self {
+            EditPredictionProvider::Oppla => true,
+            EditPredictionProvider::None
+            | EditPredictionProvider::Copilot
+            | EditPredictionProvider::Supermaven
+            | EditPredictionProvider::Zed => false,
         }
     }
 }

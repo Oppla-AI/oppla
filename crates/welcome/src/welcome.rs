@@ -32,7 +32,7 @@ actions!(
 );
 
 pub const FIRST_OPEN: &str = "first_open";
-pub const DOCS_URL: &str = "https://zed.dev/docs/";
+pub const DOCS_URL: &str = "https://docs.oppla.ai/";
 
 pub fn init(cx: &mut App) {
     cx.observe_new(|workspace: &mut Workspace, _, _cx| {
@@ -80,7 +80,7 @@ impl Render for WelcomePage {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let edit_prediction_provider_is_zed =
             all_language_settings(None, cx).edit_predictions.provider
-                == EditPredictionProvider::Zed;
+                == EditPredictionProvider::Oppla;
 
         let edit_prediction_label = if edit_prediction_provider_is_zed {
             "Edit Prediction Enabled"
@@ -102,7 +102,7 @@ impl Render for WelcomePage {
                             .w_full()
                             .child(
                                 svg()
-                                    .path("icons/logo_96.svg")
+                                    .path("images/oppla_logo.svg")
                                     .text_color(cx.theme().colors().icon_disabled)
                                     .w(px(40.))
                                     .h(px(40.))

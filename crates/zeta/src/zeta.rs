@@ -1530,7 +1530,7 @@ impl inline_completion::EditPredictionProvider for ZetaInlineCompletionProvider 
     }
 
     fn display_name() -> &'static str {
-        "Zed's Edit Predictions"
+        "Oppla's Edit Predictions"
     }
 
     fn show_completions_in_menu() -> bool {

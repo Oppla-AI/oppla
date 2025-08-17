@@ -113,7 +113,7 @@ pub fn init(client: Arc<Client>, user_store: Entity<UserStore>, cx: &mut App) {
 
                 if !tos_accepted {
                     match provider {
-                        EditPredictionProvider::Zed => {
+                        EditPredictionProvider::Zed | EditPredictionProvider::Oppla => {
                             let Some(window) = cx.active_window() else {
                                 return;
                             };
@@ -241,7 +241,7 @@ fn assign_edit_prediction_provider(
                 editor.set_edit_prediction_provider(Some(provider), window, cx);
             }
         }
-        EditPredictionProvider::Zed => {
+        EditPredictionProvider::Zed | EditPredictionProvider::Oppla => {
             if client.status().borrow().is_connected() {
                 let mut worktree = None;
 
