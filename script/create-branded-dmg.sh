@@ -55,51 +55,24 @@ create_branded_dmg() {
         fi
     fi
     
-    # Create background if it doesn't exist
-    if [ ! -f "$assets_dir/background.png" ]; then
-        echo "Creating default background image..."
-        # Create a simple branded background using ImageMagick if available
-        if command -v convert &> /dev/null; then
-            convert -size 800x400 \
-                -background '#1e1e1e' \
-                -fill '#ffffff' \
-                -gravity center \
-                -pointsize 24 \
-                label:'Drag Oppla to Applications folder to install' \
-                "$assets_dir/background.png"
-        else
-            echo "Warning: No background image found and ImageMagick not installed"
-            echo "Please create a background.png (800x400px) in $assets_dir"
-        fi
-    fi
-    
     # Build the DMG with create-dmg
     local create_dmg_args=(
         --volname "Oppla"
         --window-pos 200 120
-        --window-size 800 400
-        --icon-size 100
-        --icon "$app_name" 200 190
+        --window-size 660 400
+        --icon-size 160
+        --text-size 14
+        --icon "$app_name" 180 170
         --hide-extension "$app_name"
-        --app-drop-link 600 185
+        --app-drop-link 480 170
         --format UDZO
         --no-internet-enable
+        --hdiutil-quiet
     )
     
     # Add volume icon if it exists
     if [ -f "$assets_dir/volume-icon.icns" ]; then
         create_dmg_args+=(--volicon "$assets_dir/volume-icon.icns")
-    fi
-    
-    # Add background if it exists
-    if [ -f "$assets_dir/background.png" ]; then
-        create_dmg_args+=(--background "$assets_dir/background.png")
-    fi
-    
-    # Add README if it exists
-    if [ -f "$(dirname "$script_dir")/README.md" ]; then
-        cp "$(dirname "$script_dir")/README.md" "$dmg_source_directory/README.md"
-        create_dmg_args+=(--add-file "README" "README.md" 400 320)
     fi
     
     # Create the DMG
