@@ -226,7 +226,7 @@ impl EditPredictionProvider {
             | EditPredictionProvider::Oppla => false,
         }
     }
-    
+
     pub fn is_oppla(&self) -> bool {
         match self {
             EditPredictionProvider::Oppla => true,

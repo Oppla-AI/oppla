@@ -2811,7 +2811,6 @@ impl FollowableItem for TextThreadEditor {
     }
 }
 
-
 enum PendingSlashCommand {}
 
 fn invoked_slash_command_fold_placeholder(
@@ -2919,7 +2918,6 @@ fn size_for_image(data: &RenderImage, max_size: Size<Pixels>) -> Size<Pixels> {
         size(image_size.width, image_size.height)
     }
 }
-
 
 pub fn make_lsp_adapter_delegate(
     project: &Entity<Project>,

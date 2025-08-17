@@ -23,9 +23,7 @@ use crate::{
     agent_diff::AgentDiff,
     message_editor::{MessageEditor, MessageEditorEvent},
     slash_command::SlashCommandCompletionProvider,
-    text_thread_editor::{
-        AgentPanelDelegate, TextThreadEditor, make_lsp_adapter_delegate,
-    },
+    text_thread_editor::{AgentPanelDelegate, TextThreadEditor, make_lsp_adapter_delegate},
     thread_history::{HistoryEntryElement, ThreadHistory},
     ui::{AgentOnboardingModal, EndTrialUpsell},
 };
@@ -46,9 +44,9 @@ use editor::{Anchor, AnchorRangeExt as _, Editor, EditorEvent, MultiBuffer};
 use feature_flags::{self, FeatureFlagAppExt};
 use fs::Fs;
 use gpui::{
-    Action, AnyElement, App, AsyncWindowContext, ClipboardItem,
-    Corner, DismissEvent, Entity, EventEmitter, ExternalPaths, FocusHandle, Focusable, Hsla,
-    KeyContext, Pixels, Subscription, Task, UpdateGlobal, WeakEntity, prelude::*,
+    Action, AnyElement, App, AsyncWindowContext, ClipboardItem, Corner, DismissEvent, Entity,
+    EventEmitter, ExternalPaths, FocusHandle, Focusable, Hsla, KeyContext, Pixels, Subscription,
+    Task, UpdateGlobal, WeakEntity, prelude::*,
 };
 use language::LanguageRegistry;
 use language_model::{
@@ -2100,19 +2098,16 @@ impl AgentPanel {
                     .child(self.render_title_view(window, cx)),
             )
             .child(
-                h_flex()
-                    .h_full()
-                    .gap_2()
-                    .child(
-                        h_flex()
-                            .h_full()
-                            .gap(DynamicSpacing::Base02.rems(cx))
-                            .px(DynamicSpacing::Base08.rems(cx))
-                            .border_l_1()
-                            .border_color(cx.theme().colors().border)
-                            .child(new_thread_menu)
-                            .child(agent_panel_menu),
-                    ),
+                h_flex().h_full().gap_2().child(
+                    h_flex()
+                        .h_full()
+                        .gap(DynamicSpacing::Base02.rems(cx))
+                        .px(DynamicSpacing::Base08.rems(cx))
+                        .border_l_1()
+                        .border_color(cx.theme().colors().border)
+                        .child(new_thread_menu)
+                        .child(agent_panel_menu),
+                ),
             )
     }
 

@@ -109,7 +109,7 @@ impl LanguageModelPickerDelegate {
                             }
                             None => true,
                         };
-                        
+
                         if needs_update {
                             // Call the on_model_changed callback to update the thread's model
                             (self.on_model_changed.clone())(default_model, cx);
@@ -189,11 +189,12 @@ impl LanguageModelPickerDelegate {
                                         let needs_update = match &current_model {
                                             Some(current) => {
                                                 current.model.id() != default_model.id()
-                                                    || current.provider.id() != default_model.provider_id()
+                                                    || current.provider.id()
+                                                        != default_model.provider_id()
                                             }
                                             None => true,
                                         };
-                                        
+
                                         if needs_update {
                                             (picker.delegate.on_model_changed.clone())(
                                                 default_model,

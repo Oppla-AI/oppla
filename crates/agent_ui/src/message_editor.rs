@@ -5,10 +5,7 @@ use std::sync::Arc;
 use crate::agent_diff::AgentDiffThread;
 use crate::agent_model_selector::AgentModelSelector;
 use crate::tool_compatibility::{IncompatibleToolsState, IncompatibleToolsTooltip};
-use crate::ui::{
-    MaxModeTooltip,
-    preview::AgentPreview,
-};
+use crate::ui::{MaxModeTooltip, preview::AgentPreview};
 use agent::history_store::HistoryStore;
 use agent::{
     context::{AgentContextKey, ContextLoadResult, load_context},
@@ -48,9 +45,7 @@ use prompt_store::PromptStore;
 use settings::Settings;
 use std::time::Duration;
 use theme::ThemeSettings;
-use ui::{
-    Disclosure, Divider, DividerColor, KeyBinding, PopoverMenuHandle, Tooltip, prelude::*,
-};
+use ui::{Disclosure, Divider, DividerColor, KeyBinding, PopoverMenuHandle, Tooltip, prelude::*};
 use util::ResultExt as _;
 use workspace::{CollaboratorId, Workspace};
 
@@ -208,13 +203,16 @@ impl MessageEditor {
                 // When context changes, reload it for token counting.
                 let _ = this.reload_context(cx);
             }),
-            cx.observe(&thread.read(cx).action_log().clone(), |_this, action_log, cx| {
-                // Only notify if there are actual buffer changes
-                let changed_buffers = action_log.read(cx).changed_buffers(cx);
-                if !changed_buffers.is_empty() {
-                    cx.notify()
-                }
-            }),
+            cx.observe(
+                &thread.read(cx).action_log().clone(),
+                |_this, action_log, cx| {
+                    // Only notify if there are actual buffer changes
+                    let changed_buffers = action_log.read(cx).changed_buffers(cx);
+                    if !changed_buffers.is_empty() {
+                        cx.notify()
+                    }
+                },
+            ),
         ];
 
         let model_selector = cx.new(|cx| {
@@ -360,7 +358,6 @@ impl MessageEditor {
     fn is_editor_empty(&self, cx: &App) -> bool {
         self.editor.read(cx).text(cx).trim().is_empty()
     }
-
 
     fn send_to_model(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let Some(ConfiguredModel { model, provider }) = self
@@ -1274,12 +1271,6 @@ impl MessageEditor {
                 )
             })
     }
-
-
-
-
-
-
 
     fn reload_context(&mut self, cx: &mut Context<Self>) -> Task<Option<ContextLoadResult>> {
         let load_task = cx.spawn(async move |this, cx| {
