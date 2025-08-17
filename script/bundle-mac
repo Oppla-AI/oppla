@@ -449,25 +449,15 @@ function sign_app_binaries() {
         mv "${app_path}" "${dmg_source_directory}"
         notarization_key_file=$(mktemp)
 
-        echo "Creating branded DMG installer..."
+        echo "Adding symlink to /Applications to ${dmg_source_directory}"
+        ln -s /Applications ${dmg_source_directory}
         
-        # Use the branded DMG creation script
-        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-        if [ -f "$script_dir/create-branded-dmg.sh" ]; then
-            source "$script_dir/create-branded-dmg.sh"
-            create_branded_dmg "${dmg_source_directory}" "${dmg_file_path}" "$bundle_name"
-        else
-            # Fallback to original method if script not found
-            echo "Adding symlink to /Applications to ${dmg_source_directory}"
-            ln -s /Applications ${dmg_source_directory}
-            
-            echo "Creating final DMG at ${dmg_file_path} using ${dmg_source_directory}"
-            hdiutil create -volname Oppla -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
-            
-            # Remove the Applications symlink after DMG creation
-            echo "Removing symlink to /Applications from ${dmg_source_directory}"
-            rm ${dmg_source_directory}/Applications
-        fi
+        echo "Creating final DMG at ${dmg_file_path} using ${dmg_source_directory}"
+        hdiutil create -volname Oppla -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
+        
+        # Remove the Applications symlink after DMG creation
+        echo "Removing symlink to /Applications from ${dmg_source_directory}"
+        rm ${dmg_source_directory}/Applications
 
         echo "Adding license agreement to DMG"
         npm install --global dmg-license minimist
