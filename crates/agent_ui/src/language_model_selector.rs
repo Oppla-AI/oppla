@@ -100,8 +100,20 @@ impl LanguageModelPickerDelegate {
             if self.auto_mode {
                 if let Some(provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
                     if let Some(default_model) = provider.default_model(cx) {
-                        // Call the on_model_changed callback to update the thread's model
-                        (self.on_model_changed.clone())(default_model, cx);
+                        // Only update if the model actually changed
+                        let current_model = (self.get_active_model)(cx);
+                        let needs_update = match &current_model {
+                            Some(current) => {
+                                current.model.id() != default_model.id()
+                                    || current.provider.id() != default_model.provider_id()
+                            }
+                            None => true,
+                        };
+                        
+                        if needs_update {
+                            // Call the on_model_changed callback to update the thread's model
+                            (self.on_model_changed.clone())(default_model, cx);
+                        }
                     }
                 }
             }
@@ -172,10 +184,22 @@ impl LanguageModelPickerDelegate {
                                     registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID)
                                 {
                                     if let Some(default_model) = provider.default_model(cx) {
-                                        (picker.delegate.on_model_changed.clone())(
-                                            default_model,
-                                            cx,
-                                        );
+                                        // Only update if the model actually changed
+                                        let current_model = (picker.delegate.get_active_model)(cx);
+                                        let needs_update = match &current_model {
+                                            Some(current) => {
+                                                current.model.id() != default_model.id()
+                                                    || current.provider.id() != default_model.provider_id()
+                                            }
+                                            None => true,
+                                        };
+                                        
+                                        if needs_update {
+                                            (picker.delegate.on_model_changed.clone())(
+                                                default_model,
+                                                cx,
+                                            );
+                                        }
                                     }
                                 }
                             }

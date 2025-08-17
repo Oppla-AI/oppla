@@ -7,7 +7,7 @@ use crate::agent_model_selector::AgentModelSelector;
 use crate::tool_compatibility::{IncompatibleToolsState, IncompatibleToolsTooltip};
 use crate::ui::{
     MaxModeTooltip,
-    preview::{AgentPreview, UsageCallout},
+    preview::AgentPreview,
 };
 use agent::history_store::HistoryStore;
 use agent::{
@@ -50,7 +50,7 @@ use settings::Settings;
 use std::time::Duration;
 use theme::ThemeSettings;
 use ui::{
-    Callout, Disclosure, Divider, DividerColor, KeyBinding, PopoverMenuHandle, Tooltip, prelude::*,
+    Disclosure, Divider, DividerColor, KeyBinding, PopoverMenuHandle, Tooltip, prelude::*,
 };
 use util::ResultExt as _;
 use workspace::{CollaboratorId, Workspace};
@@ -64,7 +64,7 @@ use crate::{
     ToggleContextPicker, ToggleProfileSelector, register_agent_preview,
 };
 use agent::{
-    MessageCrease, Thread, TokenUsageRatio,
+    MessageCrease, Thread,
     context_store::ContextStore,
     thread_store::{TextThreadStore, ThreadStore},
 };
@@ -209,8 +209,12 @@ impl MessageEditor {
                 // When context changes, reload it for token counting.
                 let _ = this.reload_context(cx);
             }),
-            cx.observe(&thread.read(cx).action_log().clone(), |_, _, cx| {
-                cx.notify()
+            cx.observe(&thread.read(cx).action_log().clone(), |this, action_log, cx| {
+                // Only notify if there are actual buffer changes
+                let changed_buffers = action_log.read(cx).changed_buffers(cx);
+                if !changed_buffers.is_empty() {
+                    cx.notify()
+                }
             }),
         ];
 
@@ -1282,98 +1286,6 @@ impl MessageEditor {
             .map_or(false, |model| model.provider.id() == ZED_CLOUD_PROVIDER_ID)
     }
 
-    fn render_usage_callout(&self, line_height: Pixels, cx: &mut Context<Self>) -> Option<Div> {
-        if !self.is_using_zed_provider(cx) {
-            return None;
-        }
-
-        let user_store = self.user_store.read(cx);
-
-        let ubb_enable = user_store
-            .usage_based_billing_enabled()
-            .map_or(false, |enabled| enabled);
-
-        if ubb_enable {
-            return None;
-        }
-
-        let plan = user_store
-            .current_plan()
-            .map(|plan| match plan {
-                Plan::Free => oppla_llm_client::Plan::ZedFree,
-                Plan::ZedPro => oppla_llm_client::Plan::ZedPro,
-                Plan::ZedProTrial => oppla_llm_client::Plan::ZedProTrial,
-            })
-            .unwrap_or(oppla_llm_client::Plan::ZedFree);
-
-        let usage = user_store.model_request_usage()?;
-
-        Some(
-            div()
-                .child(UsageCallout::new(plan, usage))
-                .line_height(line_height),
-        )
-    }
-
-    fn render_token_limit_callout(
-        &self,
-        line_height: Pixels,
-        token_usage_ratio: TokenUsageRatio,
-        cx: &mut Context<Self>,
-    ) -> Option<Div> {
-        let icon = if token_usage_ratio == TokenUsageRatio::Exceeded {
-            Icon::new(IconName::X)
-                .color(Color::Error)
-                .size(IconSize::XSmall)
-        } else {
-            Icon::new(IconName::Warning)
-                .color(Color::Warning)
-                .size(IconSize::XSmall)
-        };
-
-        let title = if token_usage_ratio == TokenUsageRatio::Exceeded {
-            "Thread reached the token limit"
-        } else {
-            "Thread reaching the token limit soon"
-        };
-
-        let description = if self.is_using_zed_provider(cx) {
-            "To continue, start a new thread from a summary or turn burn mode on."
-        } else {
-            "To continue, start a new thread from a summary."
-        };
-
-        let mut callout = Callout::new()
-            .line_height(line_height)
-            .icon(icon)
-            .title(title)
-            .description(description)
-            .primary_action(
-                Button::new("start-new-thread", "Start New Thread")
-                    .label_size(LabelSize::Small)
-                    .on_click(cx.listener(|this, _, window, cx| {
-                        let from_thread_id = Some(this.thread.read(cx).id().clone());
-                        window.dispatch_action(Box::new(NewThread { from_thread_id }), cx);
-                    })),
-            );
-
-        if self.is_using_zed_provider(cx) {
-            callout = callout.secondary_action(
-                IconButton::new("burn-mode-callout", IconName::ZedBurnMode)
-                    .icon_size(IconSize::XSmall)
-                    .on_click(cx.listener(|this, _event, window, cx| {
-                        this.toggle_burn_mode(&ToggleBurnMode, window, cx);
-                    })),
-            );
-        }
-
-        Some(
-            div()
-                .border_t_1()
-                .border_color(cx.theme().colors().border)
-                .child(callout),
-        )
-    }
 
     pub fn last_estimated_token_count(&self) -> Option<u64> {
         self.last_estimated_token_count
@@ -1653,12 +1565,6 @@ impl Focusable for MessageEditor {
 impl Render for MessageEditor {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let thread = self.thread.read(cx);
-        let token_usage_ratio = thread
-            .total_token_usage()
-            .map_or(TokenUsageRatio::Normal, |total_token_usage| {
-                total_token_usage.ratio()
-            });
-
         let burn_mode_enabled = thread.completion_mode() == CompletionMode::Burn;
 
         let action_log = self.thread.read(cx).action_log();
@@ -1702,17 +1608,6 @@ impl Render for MessageEditor {
                 parent.child(self.render_edits_bar(&changed_buffers, window, cx))
             })
             .child(self.render_editor(window, cx))
-            .children({
-                let usage_callout = self.render_usage_callout(line_height, cx);
-
-                if usage_callout.is_some() {
-                    usage_callout
-                } else if token_usage_ratio != TokenUsageRatio::Normal && !burn_mode_enabled {
-                    self.render_token_limit_callout(line_height, token_usage_ratio, cx)
-                } else {
-                    None
-                }
-            })
     }
 }
 

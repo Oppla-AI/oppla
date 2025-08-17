@@ -2105,7 +2105,6 @@ impl Thread {
 
     pub fn summarize(&mut self, cx: &mut Context<Self>) {
         let Some(model) = LanguageModelRegistry::read_global(cx).thread_summary_model() else {
-            println!("No thread summary model");
             return;
         };
 

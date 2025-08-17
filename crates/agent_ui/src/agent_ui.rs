@@ -365,6 +365,11 @@ fn update_active_language_model_from_settings(cx: &mut App) {
         registry.select_commit_message_model(commit_message.as_ref(), cx);
         registry.select_thread_summary_model(thread_summary.as_ref(), cx);
         registry.select_inline_alternative_models(inline_alternatives, cx);
+        
+        // Ensure default_fast_model is populated from the cloud provider if available
+        if let Some(cloud_provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+            registry.update_default_fast_model_from_provider(&cloud_provider, cx);
+        }
     });
 }
 

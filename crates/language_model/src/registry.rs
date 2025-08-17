@@ -303,6 +303,19 @@ impl LanguageModelRegistry {
         self.default_model = model;
     }
 
+    pub fn update_default_fast_model_from_provider(
+        &mut self,
+        provider: &Arc<dyn LanguageModelProvider>,
+        cx: &mut Context<Self>,
+    ) {
+        if let Some(fast_model) = provider.default_fast_model(cx) {
+            self.default_fast_model = Some(ConfiguredModel {
+                provider: provider.clone(),
+                model: fast_model,
+            });
+        }
+    }
+
     pub fn set_inline_assistant_model(
         &mut self,
         model: Option<ConfiguredModel>,

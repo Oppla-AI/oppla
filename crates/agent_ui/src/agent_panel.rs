@@ -26,7 +26,6 @@ use crate::{
     slash_command::SlashCommandCompletionProvider,
     text_thread_editor::{
         AgentPanelDelegate, TextThreadEditor, humanize_token_count, make_lsp_adapter_delegate,
-        render_remaining_tokens,
     },
     thread_history::{HistoryEntryElement, ThreadHistory},
     ui::{AgentOnboardingModal, EndTrialUpsell},
@@ -2106,7 +2105,6 @@ impl AgentPanel {
                 h_flex()
                     .h_full()
                     .gap_2()
-                    .children(self.render_token_count(cx))
                     .child(
                         h_flex()
                             .h_full()
@@ -2118,130 +2116,6 @@ impl AgentPanel {
                             .child(agent_panel_menu),
                     ),
             )
-    }
-
-    fn render_token_count(&self, cx: &App) -> Option<AnyElement> {
-        match &self.active_view {
-            ActiveView::Thread {
-                thread,
-                message_editor,
-                ..
-            } => {
-                let active_thread = thread.read(cx);
-                let message_editor = message_editor.read(cx);
-
-                let editor_empty = message_editor.is_editor_fully_empty(cx);
-
-                if active_thread.is_empty() && editor_empty {
-                    return None;
-                }
-
-                let thread = active_thread.thread().read(cx);
-                let is_generating = thread.is_generating();
-                let conversation_token_usage = thread.total_token_usage()?;
-
-                let (total_token_usage, is_estimating) =
-                    if let Some((editing_message_id, unsent_tokens)) =
-                        active_thread.editing_message_id()
-                    {
-                        let combined = thread
-                            .token_usage_up_to_message(editing_message_id)
-                            .add(unsent_tokens);
-
-                        (combined, unsent_tokens > 0)
-                    } else {
-                        let unsent_tokens =
-                            message_editor.last_estimated_token_count().unwrap_or(0);
-                        let combined = conversation_token_usage.add(unsent_tokens);
-
-                        (combined, unsent_tokens > 0)
-                    };
-
-                let is_waiting_to_update_token_count =
-                    message_editor.is_waiting_to_update_token_count();
-
-                if total_token_usage.total == 0 {
-                    return None;
-                }
-
-                let token_color = match total_token_usage.ratio() {
-                    TokenUsageRatio::Normal if is_estimating => Color::Default,
-                    TokenUsageRatio::Normal => Color::Muted,
-                    TokenUsageRatio::Warning => Color::Warning,
-                    TokenUsageRatio::Exceeded => Color::Error,
-                };
-
-                let token_count = h_flex()
-                    .id("token-count")
-                    .flex_shrink_0()
-                    .gap_0p5()
-                    .when(!is_generating && is_estimating, |parent| {
-                        parent
-                            .child(
-                                h_flex()
-                                    .mr_1()
-                                    .size_2p5()
-                                    .justify_center()
-                                    .rounded_full()
-                                    .bg(cx.theme().colors().text.opacity(0.1))
-                                    .child(
-                                        div().size_1().rounded_full().bg(cx.theme().colors().text),
-                                    ),
-                            )
-                            .tooltip(move |window, cx| {
-                                Tooltip::with_meta(
-                                    "Estimated New Token Count",
-                                    None,
-                                    format!(
-                                        "Current Conversation Tokens: {}",
-                                        humanize_token_count(conversation_token_usage.total)
-                                    ),
-                                    window,
-                                    cx,
-                                )
-                            })
-                    })
-                    .child(
-                        Label::new(humanize_token_count(total_token_usage.total))
-                            .size(LabelSize::Small)
-                            .color(token_color)
-                            .map(|label| {
-                                if is_generating || is_waiting_to_update_token_count {
-                                    label
-                                        .with_animation(
-                                            "used-tokens-label",
-                                            Animation::new(Duration::from_secs(2))
-                                                .repeat()
-                                                .with_easing(pulsating_between(0.6, 1.)),
-                                            |label, delta| label.alpha(delta),
-                                        )
-                                        .into_any()
-                                } else {
-                                    label.into_any_element()
-                                }
-                            }),
-                    )
-                    .child(Label::new("/").size(LabelSize::Small).color(Color::Muted))
-                    .child(
-                        Label::new(humanize_token_count(total_token_usage.max))
-                            .size(LabelSize::Small)
-                            .color(Color::Muted),
-                    )
-                    .into_any();
-
-                Some(token_count)
-            }
-            ActiveView::TextThread { context_editor, .. } => {
-                let element = render_remaining_tokens(context_editor, cx)?;
-
-                Some(element.into_any_element())
-            }
-            ActiveView::ExternalAgentThread { .. }
-            | ActiveView::History
-            | ActiveView::Configuration => {
-                return None;
-            }
-        }
     }
 
     fn should_render_trial_end_upsell(&self, cx: &mut Context<Self>) -> bool {
