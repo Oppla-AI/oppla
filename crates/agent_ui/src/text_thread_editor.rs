@@ -2861,12 +2861,12 @@ fn invoked_slash_command_fold_placeholder(
 
 enum TokenState {
     NoTokensLeft {
-        max_token_count: u64,
-        token_count: u64,
+        _max_token_count: u64,
+        _token_count: u64,
     },
     HasMoreTokens {
-        max_token_count: u64,
-        token_count: u64,
+        _max_token_count: u64,
+        _token_count: u64,
         over_warn_threshold: bool,
     },
 }
@@ -2881,15 +2881,15 @@ fn token_state(context: &Entity<AssistantContext>, cx: &App) -> Option<TokenStat
     let max_token_count = model.max_token_count_for_mode(context.read(cx).completion_mode().into());
     let token_state = if max_token_count.saturating_sub(token_count) == 0 {
         TokenState::NoTokensLeft {
-            max_token_count,
-            token_count,
+            _max_token_count: max_token_count,
+            _token_count: token_count,
         }
     } else {
         let over_warn_threshold =
             token_count as f32 / max_token_count as f32 >= WARNING_TOKEN_THRESHOLD;
         TokenState::HasMoreTokens {
-            max_token_count,
-            token_count,
+            _max_token_count: max_token_count,
+            _token_count: token_count,
             over_warn_threshold,
         }
     };
@@ -2920,35 +2920,6 @@ fn size_for_image(data: &RenderImage, max_size: Size<Pixels>) -> Size<Pixels> {
     }
 }
 
-pub fn humanize_token_count(count: u64) -> String {
-    match count {
-        0..=999 => count.to_string(),
-        1000..=9999 => {
-            let thousands = count / 1000;
-            let hundreds = (count % 1000 + 50) / 100;
-            if hundreds == 0 {
-                format!("{}k", thousands)
-            } else if hundreds == 10 {
-                format!("{}k", thousands + 1)
-            } else {
-                format!("{}.{}k", thousands, hundreds)
-            }
-        }
-        1_000_000..=9_999_999 => {
-            let millions = count / 1_000_000;
-            let hundred_thousands = (count % 1_000_000 + 50_000) / 100_000;
-            if hundred_thousands == 0 {
-                format!("{}M", millions)
-            } else if hundred_thousands == 10 {
-                format!("{}M", millions + 1)
-            } else {
-                format!("{}.{}M", millions, hundred_thousands)
-            }
-        }
-        10_000_000.. => format!("{}M", (count + 500_000) / 1_000_000),
-        _ => format!("{}k", (count + 500) / 1000),
-    }
-}
 
 pub fn make_lsp_adapter_delegate(
     project: &Entity<Project>,

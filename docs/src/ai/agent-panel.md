@@ -7,7 +7,7 @@ To open it, use the `agent: new thread` action in [the Command Palette](../getti
 If you're using the Agent Panel for the first time, you need to have at least one LLM provider configured.
 You can do that by:
 
-1. [subscribing to our Pro plan](https://zed.dev/pricing), so you have access to our hosted models
+1. [subscribing to our Pro plan](https://oppla.ai/pricing), so you have access to our hosted models
 2. or by [bringing your own API keys](./llm-providers.md#use-your-own-keys) for your desired provider
 
 ## Overview {#overview}

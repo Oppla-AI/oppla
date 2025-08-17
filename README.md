@@ -69,7 +69,7 @@ You can [download Oppla directly](https://oppla.ai/download) or install via your
 
 ### Architecture Overview
 
-Oppla inherits Zed's modular architecture and extends it with AI capabilities:
+Oppla inherits the modular architecture from Zed and extends it with AI capabilities:
 
 - [`gpui`](/crates/gpui) - GPU-accelerated UI framework (from Zed)
 - [`editor`](/crates/editor) - Core editor functionality (from Zed)
@@ -98,7 +98,7 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 
 ## Licensing
 
-Oppla maintains the same licensing structure as Zed. See the LICENSE files for details:
+Oppla maintains the same licensing structure as the original Zed project. See the LICENSE files for details:
 
 - [LICENSE-AGPL](./LICENSE-AGPL) - For the collaboration server
 - [LICENSE-APACHE](./LICENSE-APACHE) - For core components

@@ -16,7 +16,7 @@ Zed uses GitHub's OAuth flow to authenticate users, requiring only the `read:use
 3. Authenticate with your GitHub account when prompted.
 4. After successful authentication, your browser will display a confirmation, and you'll be automatically signed in to Zed.
 
-**Note**: If you're behind a corporate firewall, ensure that connections to `zed.dev` and `collab.zed.dev` are allowed.
+**Note**: If you're behind a corporate firewall, ensure that connections to `oppla.ai` and `collab.oppla.ai` are allowed.
 
 ## Signing Out
 
@@ -27,6 +27,6 @@ To sign out of Zed, you can use either of these methods:
 
 ## Email Addresses {#email}
 
-Your Zed account's email address is the address provided by GitHub OAuth. If you have a public email address then it will be used, otherwise your primary GitHub email address will be used. Changes to your email address on GitHub can be synced to your Zed account by [signing in to zed.dev](https://zed.dev/sign_in).
+Your Zed account's email address is the address provided by GitHub OAuth. If you have a public email address then it will be used, otherwise your primary GitHub email address will be used. Changes to your email address on GitHub can be synced to your Zed account by [signing in to oppla.ai](https://oppla.ai/sign_in).
 
 Stripe is used for billing, and will use your Zed account's email address when starting a subscription. Changes to your Zed account email address do not currently update the email address used in Stripe. See [Updating Billing Information](./ai/billing.md#updating-billing-info) for how to change this email address.

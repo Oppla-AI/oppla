@@ -3,7 +3,7 @@ title: Privacy Policy
 slug: privacy-policy
 ---
 
-At Zed Industries, Inc. ("Zed", "Company" or "we"), we take privacy and the security of data seriously. This Privacy Policy is established to help advise you about how we treat your personal data. By using or accessing our website located at zed.dev, or the Solution or services available pursuant the Zed End User Terms located at [https://zed.dev/terms](https://zed.dev/terms) (collectively, the "Services"), you acknowledge awareness of the practices and policies outlined below, and hereby consent that we will collect, use, and share your personal data as described in this Privacy Policy.
+At Oppla ("Oppla", "Company" or "we"), we take privacy and the security of data seriously. This Privacy Policy is established to help advise you about how we treat your personal data. By using or accessing our website located at oppla.ai, or the Solution or services available pursuant the Oppla End User Terms located at [https://oppla.ai/legal/terms-of-service](https://oppla.ai/legal/terms-of-service) (collectively, the "Services"), you acknowledge awareness of the practices and policies outlined below, and hereby consent that we will collect, use, and share your personal data as described in this Privacy Policy.
 
 As we grow and expand our Services, we may modify this Privacy Policy from time to time. When material modifications are made, we will alert you to any such changes by placing a notice on the Company website, by sending you an email and/or by some other means. Please note that if you've opted not to receive legal notice emails from us (or haven't provided us with a valid email address), those legal notices will still govern your use of the Services. If you use the Services after any changes to the Privacy Policy have been published on our website, you consent and agree to all of the changes.
 
@@ -46,7 +46,7 @@ We collect Personal Data about you from the following categories of sources:
   - Usage data, unless you opt out.
   - Crash reports, unless you opt out.
   - When you make requests to language models we host for you.
-    - Zed does not store or train on your requests without consent.
+    - Oppla does not store or train on your requests without consent.
   - Other relevant data necessary to provide you with our Services.
 
 #### Third Parties
@@ -69,11 +69,11 @@ We collect Personal Data about you from the following categories of sources:
 - Marketing the Services
   - Marketing and selling the Services.
 - Corresponding with You
-  - Responding to correspondence that we receive from you, contacting you when necessary or requested, and sending you information about Zed or our Services.
+  - Responding to correspondence that we receive from you, contacting you when necessary or requested, and sending you information about Oppla or our Services.
   - Sending emails and other communications according to your preferences or that display content that we think will interest you.
 - Meeting Legal Requirements and Enforcing Legal Terms
   - Fulfilling our legal obligations under applicable law, regulation, court order or other legal process, such as preventing, detecting and investigating security incidents and potentially illegal or prohibited activities.
-  - Protecting the rights, property or safety of you, Zed or another party.
+  - Protecting the rights, property or safety of you, Oppla or another party.
   - Enforcing any agreements with you.
   - Responding to claims that any posting or other content violates third-party rights.
   - Resolving disputes.
@@ -256,10 +256,10 @@ The Services are hosted and operated in the United States ("U.S.") through Compa
 
 If you have additional questions about this Privacy Policy, the methods in which we collect and use your Personal Data or your choices and rights regarding such collection and use, please do not hesitate to contact us at:
 
-- Website: zed.dev
-- Email Address: hi@zed.dev
+- Website: oppla.ai
+- Email Address: hi@oppla.ai
 - Corporate Address:
-  Zed Industries, Inc.
+  Oppla Industries, Inc.
   2590 Welton St
   Suite 200
   PO Box 1916

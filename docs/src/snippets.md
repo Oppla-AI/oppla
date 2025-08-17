@@ -40,4 +40,4 @@ To create JSX snippets you have to use `javascript.json` snippets file, instead 
 
 ## See also
 
-For more configuration information, see the [`simple-completion-language-server` instructions](https://github.com/zed-industries/simple-completion-language-server/tree/main).
+For more configuration information, see the [`simple-completion-language-server` instructions](https://github.com/Oppla-AI/simple-completion-language-server/tree/main).

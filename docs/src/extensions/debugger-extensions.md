@@ -108,7 +108,7 @@ Note however that you do _not_ need to go through a 2-phase resolution; if you c
 
 ## Available Extensions
 
-Check out all the DAP servers that have already been exposed as extensions [on Zed's site](https://zed.dev/extensions?filter=debug-adapters).
+Check out all the DAP servers that have already been exposed as extensions [on Zed's site](https://oppla.ai/extensions?filter=debug-adapters).
 
 We recommend taking a look at their repositories as a way to understand how they are generally created and structured.
 

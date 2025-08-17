@@ -8,5 +8,5 @@ a build of Zed on Windows, and you can compile it yourself with these instructio
 
 For now, we welcome contributions from the community to improve Windows support.
 
-- [GitHub Issues with 'Windows' label](https://github.com/zed-industries/zed/issues?q=is%3Aissue+is%3Aopen+label%3Awindows)
-- [Zed Community Discord](https://zed.dev/community-links) -> `#windows`
+- [GitHub Issues with 'Windows' label](https://github.com/Oppla-AI/oppla/issues?q=is%3Aissue+is%3Aopen+label%3Awindows)
+- [Zed Community Discord](https://oppla.ai/community-links) -> `#windows`

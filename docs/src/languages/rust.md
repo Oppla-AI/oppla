@@ -156,7 +156,7 @@ This will stop rust-analyzer from running `cargo check ...` on save, yet still a
 ## More server configuration
 
 <!--
-TBD: Is it possible to specify RUSTFLAGS? https://github.com/zed-industries/zed/issues/14334
+TBD: Is it possible to specify RUSTFLAGS? https://github.com/Oppla-AI/oppla/issues/14334
 -->
 
 Rust-analyzer [manual](https://rust-analyzer.github.io/book/) describes various features and configuration options for rust-analyzer language server.

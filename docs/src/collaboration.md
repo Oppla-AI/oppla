@@ -16,15 +16,15 @@ Before you can collaborate, you'll need to add a collaborator to your contacts. 
 
 You can add an existing Zed user as a contact from the contacts menu, deployed from the `Show contacts menu` button in the upper right-hand corner of the window or by `collab: toggle contacts menu` (`cmd-shift-c`) and then clicking the `Search for new contact` button to the right of the search box.
 
-![Inviting a collaborator to the current project](https://zed.dev/img/collaboration/add-a-collaborator.png)
+![Inviting a collaborator to the current project](https://oppla.ai/img/collaboration/add-a-collaborator.png)
 
 When you invite a collaborator to a project not in a call they will receive a notification to join, and a new call is created.
 
-![Receiving an invite to join a call](https://zed.dev/img/collaboration/receiving-an-invite.jpg)
+![Receiving an invite to join a call](https://oppla.ai/img/collaboration/receiving-an-invite.jpg)
 
 ### Inviting non-Zed users
 
-If someone you want to collaborate with has not yet signed up for Zed, they will need to [download the app](https://zed.dev/download) and sign in for the first time before you can add them. Identity is tied to GitHub accounts, so new users will need to authenticate with GitHub in order to sign into Zed.
+If someone you want to collaborate with has not yet signed up for Zed, they will need to [download the app](https://oppla.ai/download) and sign in for the first time before you can add them. Identity is tied to GitHub accounts, so new users will need to authenticate with GitHub in order to sign into Zed.
 
 ### Voice chat
 
@@ -36,7 +36,7 @@ When joining a call, Zed will automatically share your microphone with other use
 
 When you invite a collaborator to join your project, a new call begins. Your Zed windows will show the call participants in the title bar of the window.
 
-![A new Zed call with two collaborators](https://zed.dev/img/collaboration/new-call.png)
+![A new Zed call with two collaborators](https://oppla.ai/img/collaboration/new-call.png)
 
 Collaborators in the same project as you are in color, and have a cursor color. Collaborators in other projects are shown in gray. Collaborators that have access to the current project will have their own cursor color under their avatar.
 
@@ -54,7 +54,7 @@ To follow a collaborator, click on their avatar in the top right of the window. 
 
 When you join a project, you'll immediately start following the collaborator that invited you.
 
-![Automatically following the person inviting us to a project](https://zed.dev/img/collaboration/joining-a-call.png)
+![Automatically following the person inviting us to a project](https://oppla.ai/img/collaboration/joining-a-call.png)
 
 When you are in a pane that is following a collaborator, you will:
 

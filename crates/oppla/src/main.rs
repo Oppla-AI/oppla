@@ -253,7 +253,7 @@ pub fn main() {
             app_commit_sha.clone(),
             *release_channel::RELEASE_CHANNEL,
         );
-        println!("Zed System Specs (from CLI):\n{}", system_specs);
+        println!("Oppla System Specs (from CLI):\n{}", system_specs);
         return;
     }
 
@@ -390,7 +390,7 @@ pub fn main() {
         handle_keymap_file_changes(user_keymap_file_rx, cx);
         client::init_settings(cx);
         let user_agent = format!(
-            "Zed/{} ({}; {})",
+            "Oppla/{} ({}; {})",
             AppVersion::global(cx),
             std::env::consts::OS,
             std::env::consts::ARCH
@@ -1226,17 +1226,17 @@ struct Args {
     dev_server_token: Option<String>,
 
     /// Prints system specs. Useful for submitting issues on GitHub when encountering a bug
-    /// that prevents Zed from starting, so you can't run `zed: copy system specs to clipboard`
+    /// that prevents Oppla from starting, so you can't run `oppla: copy system specs to clipboard`
     #[arg(long)]
     system_specs: bool,
 
     /// Used for SSH/Git password authentication, to remove the need for netcat as a dependency,
-    /// by having Zed act like netcat communicating over a Unix socket.
+    /// by having Oppla act like netcat communicating over a Unix socket.
     #[arg(long, hide = true)]
     askpass: Option<String>,
 
     /// Used for the MCP Server, to remove the need for netcat as a dependency,
-    /// by having Zed act like netcat communicating over a Unix socket.
+    /// by having Oppla act like netcat communicating over a Unix socket.
     #[arg(long, hide = true)]
     nc: Option<String>,
 

@@ -1,14 +1,14 @@
 # Edit Prediction
 
 Edit Prediction is Zed's native mechanism for predicting the code you want to write through AI.
-Each keystroke sends a new request to our [open source, open dataset Zeta model](https://huggingface.co/zed-industries/zeta) and it returns with individual or multi-line suggestions that can be quickly accepted by pressing `tab`.
+Each keystroke sends a new request to our [open source, open dataset Zeta model](https://huggingface.co/Oppla-AI/zeta) and it returns with individual or multi-line suggestions that can be quickly accepted by pressing `tab`.
 
 ## Configuring Zeta
 
 Zed's Edit Prediction was initially introduced via a banner on the title bar.
 Clicking on it would take you to a modal with a button ("Enable Edit Prediction") that sets `zed` as your `edit_prediction_provider`.
 
-![Onboarding banner and modal](https://zed.dev/img/edit-prediction/docs.webp)
+![Onboarding banner and modal](https://oppla.ai/img/edit-prediction/docs.webp)
 
 But, if you haven't come across the banner, Zed's Edit Prediction is the default edit prediction provider and you should see it right away in your status bar.
 
@@ -29,7 +29,7 @@ Toggle between them via the `mode` key:
 
 Or directly via the UI through the status bar menu:
 
-![Edit Prediction status bar menu, with the modes toggle.](https://zed.dev/img/edit-prediction/status-bar-menu.webp)
+![Edit Prediction status bar menu, with the modes toggle.](https://oppla.ai/img/edit-prediction/status-bar-menu.webp)
 
 ### Conflict With Other `tab` Actions {#edit-predictions-conflict}
 

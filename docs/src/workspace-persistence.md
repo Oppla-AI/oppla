@@ -11,7 +11,7 @@ The naming convention of these databases takes on the form of `0-<zed_channel>`:
 - Stable: `0-stable`
 - Preview: `0-preview`
 
-**If you encounter workspace persistence issues in Zed, deleting the database and restarting Zed often resolves the problem, as the database may have been corrupted at some point.** If your issue continues after restarting Zed and regenerating a new database, please [file an issue](https://github.com/zed-industries/zed/issues/new?template=10_bug_report.yml).
+**If you encounter workspace persistence issues in Zed, deleting the database and restarting Zed often resolves the problem, as the database may have been corrupted at some point.** If your issue continues after restarting Zed and regenerating a new database, please [file an issue](https://github.com/Oppla-AI/oppla/issues/new?template=10_bug_report.yml).
 
 ## Settings
 

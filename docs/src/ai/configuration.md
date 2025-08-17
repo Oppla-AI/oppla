@@ -17,4 +17,4 @@ To do that, add the following key to your `settings.json`:
 }
 ```
 
-Read [the following blog post](https://zed.dev/blog/disable-ai-features) to learn more about our motivation to promote this, as much as we also encourage users to explore AI-assisted programming.
+Read [the following blog post](https://oppla.ai/blog/disable-ai-features) to learn more about our motivation to promote this, as much as we also encourage users to explore AI-assisted programming.

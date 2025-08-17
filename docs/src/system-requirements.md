@@ -51,4 +51,4 @@ Not yet available as an official download. Can be built [from source](./developm
 
 ## Web
 
-Not supported at this time. See our [Platform Support issue](https://github.com/zed-industries/zed/issues/5391).
+Not supported at this time. See our [Platform Support issue](https://github.com/Oppla-AI/oppla/issues/5391).

@@ -45,7 +45,6 @@ use oppla_actions::agent::ToggleModelSelector;
 use oppla_llm_client::CompletionIntent;
 use project::Project;
 use prompt_store::PromptStore;
-use proto::Plan;
 use settings::Settings;
 use std::time::Duration;
 use theme::ThemeSettings;
@@ -60,7 +59,7 @@ use crate::context_strip::{ContextStrip, ContextStripEvent, SuggestContextKind};
 use crate::profile_selector::ProfileSelector;
 use crate::{
     ActiveThread, AgentDiffPane, ChatWithFollow, ExpandMessageEditor, Follow, KeepAll,
-    ModelUsageContext, NewThread, OpenAgentDiff, RejectAll, RemoveAllContext, ToggleBurnMode,
+    ModelUsageContext, OpenAgentDiff, RejectAll, RemoveAllContext, ToggleBurnMode,
     ToggleContextPicker, ToggleProfileSelector, register_agent_preview,
 };
 use agent::{
@@ -79,7 +78,7 @@ pub struct MessageEditor {
     editor: Entity<Editor>,
     workspace: WeakEntity<Workspace>,
     project: Entity<Project>,
-    user_store: Entity<UserStore>,
+    _user_store: Entity<UserStore>,
     context_store: Entity<ContextStore>,
     prompt_store: Option<Entity<PromptStore>>,
     history_store: Option<WeakEntity<HistoryStore>>,
@@ -209,7 +208,7 @@ impl MessageEditor {
                 // When context changes, reload it for token counting.
                 let _ = this.reload_context(cx);
             }),
-            cx.observe(&thread.read(cx).action_log().clone(), |this, action_log, cx| {
+            cx.observe(&thread.read(cx).action_log().clone(), |_this, action_log, cx| {
                 // Only notify if there are actual buffer changes
                 let changed_buffers = action_log.read(cx).changed_buffers(cx);
                 if !changed_buffers.is_empty() {
@@ -235,7 +234,7 @@ impl MessageEditor {
         Self {
             editor: editor.clone(),
             project: thread.read(cx).project().clone(),
-            user_store,
+            _user_store: user_store,
             thread,
             incompatible_tools_state: incompatible_tools.clone(),
             workspace,
@@ -362,9 +361,6 @@ impl MessageEditor {
         self.editor.read(cx).text(cx).trim().is_empty()
     }
 
-    pub fn is_editor_fully_empty(&self, cx: &App) -> bool {
-        self.editor.read(cx).is_empty(cx)
-    }
 
     fn send_to_model(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let Some(ConfiguredModel { model, provider }) = self
@@ -1279,21 +1275,11 @@ impl MessageEditor {
             })
     }
 
-    fn is_using_zed_provider(&self, cx: &App) -> bool {
-        self.thread
-            .read(cx)
-            .configured_model()
-            .map_or(false, |model| model.provider.id() == ZED_CLOUD_PROVIDER_ID)
-    }
 
 
-    pub fn last_estimated_token_count(&self) -> Option<u64> {
-        self.last_estimated_token_count
-    }
 
-    pub fn is_waiting_to_update_token_count(&self) -> bool {
-        self.update_token_count_task.is_some()
-    }
+
+
 
     fn reload_context(&mut self, cx: &mut Context<Self>) -> Task<Option<ContextLoadResult>> {
         let load_task = cx.spawn(async move |this, cx| {
@@ -1565,12 +1551,12 @@ impl Focusable for MessageEditor {
 impl Render for MessageEditor {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let thread = self.thread.read(cx);
-        let burn_mode_enabled = thread.completion_mode() == CompletionMode::Burn;
+        let _burn_mode_enabled = thread.completion_mode() == CompletionMode::Burn;
 
         let action_log = self.thread.read(cx).action_log();
         let changed_buffers = action_log.read(cx).changed_buffers(cx);
 
-        let line_height = TextSize::Small.rems(cx).to_pixels(window.rem_size()) * 1.5;
+        let _line_height = TextSize::Small.rems(cx).to_pixels(window.rem_size()) * 1.5;
 
         let has_configured_providers = LanguageModelRegistry::read_global(cx)
             .providers()

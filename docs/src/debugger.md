@@ -350,7 +350,7 @@ The Debugger supports the following theme options:
 
 ## Troubleshooting
 
-If you're running into problems with the debugger, please [open a GitHub issue](https://github.com/zed-industries/zed/issues/new?template=04_bug_debugger.yml) or [schedule an onboarding call](https://cal.com/team/zed-research/debugger) with us so we can help understand and fix your issue.
+If you're running into problems with the debugger, please [open a GitHub issue](https://github.com/Oppla-AI/oppla/issues/new?template=04_bug_debugger.yml) or [schedule an onboarding call](https://cal.com/team/zed-research/debugger) with us so we can help understand and fix your issue.
 
 There are also some features you can use to gather more information about the problem:
 

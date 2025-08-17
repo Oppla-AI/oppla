@@ -10,7 +10,7 @@ Navigating through the icon theme list by moving up and down will change the ico
 
 ## Installing more Icon Themes
 
-More icon themes are available from the Extensions page, which you can access via the command palette with "zed: Extensions" or the [Zed website](https://zed.dev/extensions).
+More icon themes are available from the Extensions page, which you can access via the command palette with "zed: Extensions" or the [Zed website](https://oppla.ai/extensions).
 
 ## Configuring Icon Themes
 

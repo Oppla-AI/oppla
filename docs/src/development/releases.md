@@ -2,8 +2,8 @@
 
 Zed currently maintains two public releases for macOS:
 
-- [Stable](https://zed.dev/download): This is the primary version that people download and use.
-- [Preview](https://zed.dev/releases/preview): which receives updates a week ahead of Stable for early adopters.
+- [Stable](https://oppla.ai/download): This is the primary version that people download and use.
+- [Preview](https://oppla.ai/releases/preview): which receives updates a week ahead of Stable for early adopters.
 
 Typically we cut a new minor release every Wednesday. The current Preview becomes Stable, and the new Preview contains everything on main up until that point.
 
@@ -16,7 +16,7 @@ You will need write access to the Zed repository to do this:
 - Checkout `main` and ensure your working copy is clean.
 - Run `./script/bump-zed-minor-versions` and push the tags
   and branches as instructed.
-- Wait for the builds to appear on [the Releases tab on GitHub](https://github.com/zed-industries/zed/releases) (typically takes around 30 minutes)
+- Wait for the builds to appear on [the Releases tab on GitHub](https://github.com/Oppla-AI/oppla/releases) (typically takes around 30 minutes)
 - While you're waiting:
   - Start creating the new release notes for preview. You can start with the output of `./script/get-preview-channel-changes`.
   - Start drafting the release tweets.
@@ -36,9 +36,9 @@ You will need write access to the Zed repository to do this:
 - Leave a comment on the PR `/cherry-pick v0.XXX.x`. Once your PR is merged, the GitHub bot will send a PR to the branch.
   - In case of a merge conflict, you will have to cherry-pick manually and push the change to the `v0.XXX.x` branch.
 - After the commits are cherry-picked onto the branch, run `./script/trigger-release {preview|stable}`. This will bump the version numbers, create a new release tag, and kick off a release build.
-  - This can also be run from the [GitHub Actions UI](https://github.com/zed-industries/zed/actions/workflows/bump_patch_version.yml):
-    ![](https://github.com/zed-industries/zed/assets/1486634/9e31ae95-09e1-4c7f-9591-944f4f5b63ea)
-- Wait for the builds to appear on [the Releases tab on GitHub](https://github.com/zed-industries/zed/releases) (typically takes around 30 minutes)
+  - This can also be run from the [GitHub Actions UI](https://github.com/Oppla-AI/oppla/actions/workflows/bump_patch_version.yml):
+    ![](https://github.com/Oppla-AI/oppla/assets/1486634/9e31ae95-09e1-4c7f-9591-944f4f5b63ea)
+- Wait for the builds to appear on [the Releases tab on GitHub](https://github.com/Oppla-AI/oppla/releases) (typically takes around 30 minutes)
 - Proof-read and edit the release notes as needed.
 - Download the artifacts for each release and test that you can run them locally.
 - Publish the release.

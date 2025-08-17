@@ -13,7 +13,7 @@
 
 # Configuration
 
-- [Configuring Zed](./configuring-zed.md)
+- [Configuring Oppla](./configuring-oppla.md)
 - [Configuring Languages](./configuring-languages.md)
 - [Key bindings](./key-bindings.md)
 - [Snippets](./snippets.md)
@@ -25,7 +25,7 @@
 <!-- - [Globs](./globs.md) -->
 <!-- - [Fonts](./fonts.md) -->
 
-# Using Zed
+# Using Oppla
 
 - [Multibuffers](./multibuffers.md)
 - [Outline Panel](./outline-panel.md)
@@ -145,9 +145,9 @@
 - [Yarn](./languages/yarn.md)
 - [Zig](./languages/zig.md)
 
-# Developing Zed
+# Developing Oppla
 
-- [Developing Zed](./development.md)
+- [Developing Oppla](./development.md)
   - [macOS](./development/macos.md)
   - [Linux](./development/linux.md)
   - [Windows](./development/windows.md)

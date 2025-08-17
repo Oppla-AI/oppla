@@ -3,7 +3,7 @@
 JSON support is available natively in Zed.
 
 - Tree-sitter: [tree-sitter/tree-sitter-json](https://github.com/tree-sitter/tree-sitter-json)
-- Language Server: [zed-industries/json-language-server](https://github.com/zed-industries/json-language-server)
+- Language Server: [Oppla-AI/json-language-server](https://github.com/Oppla-AI/json-language-server)
 
 ## JSONC
 

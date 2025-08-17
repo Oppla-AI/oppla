@@ -1,11 +1,11 @@
 # Plans and Usage
 
-To view your current usage, you can visit your account at [zed.dev/account](https://zed.dev/account).
+To view your current usage, you can visit your account at [oppla.ai/account](https://oppla.ai/account).
 You’ll also find usage meters in-product when you’re nearing the limit for your plan or trial.
 
 ## Available Plans {#plans}
 
-For costs and more information on pricing, visit [Zed’s pricing page](https://zed.dev/pricing).
+For costs and more information on pricing, visit [Zed’s pricing page](https://oppla.ai/pricing).
 
 Please note that if you’re interested in just using Zed as the world’s fastest editor, with no AI or subscription features, you can always do so for free, without [authentication](../accounts.md).
 
@@ -23,7 +23,7 @@ Plans come with a set amount of prompts included, with the number varying depend
 
 ## Usage-Based Pricing {#ubp}
 
-You may opt in to usage-based pricing for prompts that exceed what is included in your paid plan from [your account page](https://zed.dev/account).
+You may opt in to usage-based pricing for prompts that exceed what is included in your paid plan from [your account page](https://oppla.ai/account).
 
 Usage-based pricing is only available with a paid plan, and is exclusively opt-in.
 From the dashboard, you can toggle usage-based pricing for usage exceeding your paid plan.
@@ -36,4 +36,4 @@ Cost per request for each model can be found on [the models page](./models.md).
 
 ## Business Usage {#business-usage}
 
-Email [sales@zed.dev](mailto:sales@zed.dev) with any questions on business plans, metering, and usage-based pricing.
+Email [sales@oppla.ai](mailto:sales@oppla.ai) with any questions on business plans, metering, and usage-based pricing.

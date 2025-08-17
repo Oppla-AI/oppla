@@ -4,7 +4,7 @@ Zed uses the [Model Context Protocol](https://modelcontextprotocol.io/) to inter
 
 > The Model Context Protocol (MCP) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. Whether you're building an AI-powered IDE, enhancing a chat interface, or creating custom AI workflows, MCP provides a standardized way to connect LLMs with the context they need.
 
-Check out the [Anthropic news post](https://www.anthropic.com/news/model-context-protocol) and the [Zed blog post](https://zed.dev/blog/mcp) for a general intro to MCP.
+Check out the [Anthropic news post](https://www.anthropic.com/news/model-context-protocol) and the [Zed blog post](https://oppla.ai/blog/mcp) for a general intro to MCP.
 
 ## Installing MCP Servers
 
@@ -16,21 +16,21 @@ To learn how to create your own, check out the [MCP Server Extensions](../extens
 Thanks to our awesome community, many MCP servers have already been added as extensions.
 You can check which ones are available via any of these routes:
 
-1. [the Zed website](https://zed.dev/extensions?filter=context-servers)
+1. [the Zed website](https://oppla.ai/extensions?filter=context-servers)
 2. in the app, open the Command Palette and run the `zed: extensions` action
 3. in the app, go to the Agent Panel's top-right menu and look for the "View Server Extensions" menu item
 
 In any case, here are some of the ones available:
 
-- [Context7](https://zed.dev/extensions/context7-mcp-server)
-- [GitHub](https://zed.dev/extensions/github-mcp-server)
-- [Puppeteer](https://zed.dev/extensions/puppeteer-mcp-server)
-- [Gem](https://zed.dev/extensions/gem)
-- [Brave Search](https://zed.dev/extensions/brave-search-mcp-server)
+- [Context7](https://oppla.ai/extensions/context7-mcp-server)
+- [GitHub](https://oppla.ai/extensions/github-mcp-server)
+- [Puppeteer](https://oppla.ai/extensions/puppeteer-mcp-server)
+- [Gem](https://oppla.ai/extensions/gem)
+- [Brave Search](https://oppla.ai/extensions/brave-search-mcp-server)
 - [Prisma](https://github.com/aqrln/prisma-mcp-zed)
-- [Framelink Figma](https://zed.dev/extensions/framelink-figma-mcp-server)
-- [Linear](https://zed.dev/extensions/linear-mcp-server)
-- [Resend](https://zed.dev/extensions/resend-mcp-server)
+- [Framelink Figma](https://oppla.ai/extensions/framelink-figma-mcp-server)
+- [Linear](https://oppla.ai/extensions/linear-mcp-server)
+- [Resend](https://oppla.ai/extensions/resend-mcp-server)
 
 ### As Custom Servers
 
@@ -75,7 +75,7 @@ Mentioning your MCP server by name helps the agent pick it up.
 
 If you want to ensure a given server will be used, you can create [a custom profile](./agent-panel.md#custom-profiles) by turning off the built-in tools (either all of them or the ones that would cause conflicts) and turning on only the tools coming from the MCP server.
 
-As an example, [the Dagger team suggests](https://container-use.com/agent-integrations#add-container-use-agent-profile-optional) doing that with their [Container Use MCP server](https://zed.dev/extensions/container-use-mcp-server):
+As an example, [the Dagger team suggests](https://container-use.com/agent-integrations#add-container-use-agent-profile-optional) doing that with their [Container Use MCP server](https://oppla.ai/extensions/container-use-mcp-server):
 
 ```json
 "agent": {

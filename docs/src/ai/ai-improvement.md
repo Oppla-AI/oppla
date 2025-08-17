@@ -43,7 +43,7 @@ Users who are working on open source licensed projects may optionally opt-in to 
 
 When working on other projects where you haven't opted-in, Zed will not persistently store user content or use user content for training of its models.
 
-You can see exactly how Zed detects open source licenses in: [license_detection.rs](https://github.com/zed-industries/zed/blob/main/crates/zeta/src/license_detection.rs).
+You can see exactly how Zed detects open source licenses in: [license_detection.rs](https://github.com/Oppla-AI/oppla/blob/main/crates/zeta/src/license_detection.rs).
 
 ### Exclusions
 
@@ -69,7 +69,7 @@ You can inspect this exclusion list by opening `zed: open default settings` from
 }
 ```
 
-Users may explicitly exclude additional paths and/or file extensions by adding them to [`edit_predictions.disabled_globs`](https://zed.dev/docs/configuring-zed#edit-predictions) in their Zed settings.json:
+Users may explicitly exclude additional paths and/or file extensions by adding them to [`edit_predictions.disabled_globs`](https://oppla.ai/docs/configuring-zed#edit-predictions) in their Zed settings.json:
 
 ```json
 {
@@ -93,12 +93,12 @@ This data includes:
 
 ### Data Handling
 
-Collected data is stored in Snowflake, a private database where we track other metrics. We periodically review this data to select training samples for inclusion in our model training dataset. We ensure any included data is anonymized and contains no sensitive information (access tokens, user IDs, email addresses, etc). This training dataset is publicly available at [huggingface.co/datasets/zed-industries/zeta](https://huggingface.co/datasets/zed-industries/zeta).
+Collected data is stored in Snowflake, a private database where we track other metrics. We periodically review this data to select training samples for inclusion in our model training dataset. We ensure any included data is anonymized and contains no sensitive information (access tokens, user IDs, email addresses, etc). This training dataset is publicly available at [huggingface.co/datasets/Oppla-AI/zeta](https://huggingface.co/datasets/Oppla-AI/zeta).
 
 ### Model Output
 
-We then use this training dataset to fine-tune [Qwen2.5-Coder-7B](https://huggingface.co/Qwen/Qwen2.5-Coder-7B) and make the resulting model available at [huggingface.co/zed-industries/zeta](https://huggingface.co/zed-industries/zeta).
+We then use this training dataset to fine-tune [Qwen2.5-Coder-7B](https://huggingface.co/Qwen/Qwen2.5-Coder-7B) and make the resulting model available at [huggingface.co/Oppla-AI/zeta](https://huggingface.co/Oppla-AI/zeta).
 
 ## Applicable terms
 
-Please see the [Zed Terms of Service](https://zed.dev/terms-of-service) for more.
+Please see the [Zed Terms of Service](https://oppla.ai/terms-of-service) for more.

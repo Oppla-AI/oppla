@@ -20,8 +20,8 @@ It is entirely possible to use Zed without sharing any data with us and without 
 
 ## Legal Links
 
-- [Terms of Service](https://zed.dev/terms-of-service)
-- [Terms of Use](https://zed.dev/terms)
-- [Privacy Policy](https://zed.dev/privacy-policy)
-- [Zed's Contributor License and Feedback Agreement](https://zed.dev/cla)
-- [Subprocessors](https://zed.dev/subprocessors)
+- [Terms of Service](https://oppla.ai/terms-of-service)
+- [Terms of Use](https://oppla.ai/terms)
+- [Privacy Policy](https://oppla.ai/privacy-policy)
+- [Zed's Contributor License and Feedback Agreement](https://oppla.ai/cla)
+- [Subprocessors](https://oppla.ai/subprocessors)

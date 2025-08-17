@@ -32,7 +32,7 @@ cargo run --config 'profile.release.debug="full"'
 cargo build --config 'profile.release.debug="full"'
 ```
 
-> If you wish to avoid passing the `--config` flag on every invocation of `cargo`. You may also change the section in the [root `Cargo.toml`](https://github.com/zed-industries/zed/blob/main/Cargo.toml)
+> If you wish to avoid passing the `--config` flag on every invocation of `cargo`. You may also change the section in the [root `Cargo.toml`](https://github.com/Oppla-AI/oppla/blob/main/Cargo.toml)
 >
 > from
 >

@@ -465,7 +465,7 @@ fn show_software_emulation_warning_if_needed(
     if specs.is_software_emulated && std::env::var("ZED_ALLOW_EMULATED_GPU").is_err() {
         let message = format!(
             db::indoc! {r#"
-            Zed uses Vulkan for rendering and requires a compatible GPU.
+            Oppla uses Vulkan for rendering and requires a compatible GPU.
 
             Currently you are using a software emulated GPU ({}) which
             will result in awful performance.
@@ -1689,7 +1689,7 @@ fn open_telemetry_log_file(
             }
             let log_suffix = &log[start_offset..];
             let header = concat!(
-                "// Zed collects anonymous usage data to help us understand how people are using the app.\n",
+                "// Oppla collects anonymous usage data to help us understand how people are using the app.\n",
                 "// Telemetry can be disabled via the `settings.json` file.\n",
                 "// Here is the data that has been reported for the current session:\n",
             );

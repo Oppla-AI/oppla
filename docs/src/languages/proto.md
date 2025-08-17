@@ -1,6 +1,6 @@
 # Proto
 
-Proto/proto3 (Protocol Buffers definition language) support is available through the [Proto extension](https://github.com/zed-industries/zed/tree/main/extensions/proto).
+Proto/proto3 (Protocol Buffers definition language) support is available through the [Proto extension](https://github.com/Oppla-AI/oppla/tree/main/extensions/proto).
 
 - Tree-sitter: [coder3101/tree-sitter-proto](https://github.com/coder3101/tree-sitter-proto)
 - Language Servers: [protobuf-language-server](https://github.com/lasorda/protobuf-language-server)
@@ -60,7 +60,7 @@ IndentWidth: 4
 ColumnLimit: 120
 ```
 
-Or you can have zed directly invoke `clang-format` by specifying it as a [formatter](https://zed.dev/docs/configuring-zed#formatter) in your settings:
+Or you can have zed directly invoke `clang-format` by specifying it as a [formatter](https://oppla.ai/docs/configuring-zed#formatter) in your settings:
 
 ```json
   "languages": {

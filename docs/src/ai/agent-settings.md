@@ -101,7 +101,7 @@ Specify a custom temperature for a provider and/or model:
   },
   // To set parameters for a specific provider and model:
   {
-    "provider": "zed.dev",
+    "provider": "oppla.ai",
     "model": "claude-sonnet-4",
     "temperature": 1.0
   }

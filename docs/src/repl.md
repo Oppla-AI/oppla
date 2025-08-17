@@ -15,7 +15,7 @@ Bring the power of [Jupyter kernels](https://docs.jupyter.org/en/latest/projects
             type='video/mp4; codecs="avc1.4D401E, mp4a.40.2"'
         />
         <source
-          src="https://zed.dev/img/post/repl/typescript-deno-kernel-markdown.png"
+          src="https://oppla.ai/img/post/repl/typescript-deno-kernel-markdown.png"
           type="image/png"
         />
     </video>

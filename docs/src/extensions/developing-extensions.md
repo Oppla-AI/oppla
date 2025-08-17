@@ -71,7 +71,7 @@ crate-type = ["cdylib"]
 zed_extension_api = "0.1.0"
 ```
 
-Use the latest version of the [`zed_extension_api`](https://crates.io/crates/zed_extension_api) available on crates.io. Make sure it's still [compatible with Zed versions](https://github.com/zed-industries/zed/blob/main/crates/extension_api#compatible-zed-versions) you want to support.
+Use the latest version of the [`zed_extension_api`](https://crates.io/crates/zed_extension_api) available on crates.io. Make sure it's still [compatible with Zed versions](https://github.com/Oppla-AI/oppla/blob/main/crates/extension_api#compatible-zed-versions) you want to support.
 
 In the `src/lib.rs` file in your Rust crate you will need to define a struct for your extension and implement the `Extension` trait, as well as use the `register_extension!` macro to register your extension:
 
@@ -95,13 +95,13 @@ zed::register_extension!(MyExtension);
 
 1. Fork the repo
 
-> Note: It is very helpful if you fork the `zed-industries/extensions` repo to a personal GitHub account instead of a GitHub organization, as this allows Zed staff to push any needed changes to your PR to expedite the publishing process.
+> Note: It is very helpful if you fork the `Oppla-AI/extensions` repo to a personal GitHub account instead of a GitHub organization, as this allows Zed staff to push any needed changes to your PR to expedite the publishing process.
 
 2. Clone the repo to your local machine
 
 ```sh
 # Substitute the url of your fork here:
-# git clone https://github.com/zed-industries/extensions
+# git clone https://github.com/Oppla-AI/extensions
 cd extensions
 git submodule init
 git submodule update
@@ -109,7 +109,7 @@ git submodule update
 
 ## Publishing your extension
 
-To publish an extension, open a PR to [the `zed-industries/extensions` repo](https://github.com/zed-industries/extensions).
+To publish an extension, open a PR to [the `Oppla-AI/extensions` repo](https://github.com/Oppla-AI/extensions).
 
 In your PR, do the following:
 
@@ -140,7 +140,7 @@ Once your PR is merged, the extension will be packaged and published to the Zed 
 
 ## Updating an extension
 
-To update an extension, open a PR to [the `zed-industries/extensions` repo](https://github.com/zed-industries/extensions).
+To update an extension, open a PR to [the `Oppla-AI/extensions` repo](https://github.com/Oppla-AI/extensions).
 
 In your PR do the following:
 

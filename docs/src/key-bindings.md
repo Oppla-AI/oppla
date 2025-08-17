@@ -45,9 +45,9 @@ For example:
 ]
 ```
 
-You can see all of Zed's default bindings in the default keymaps for [MacOS](https://github.com/zed-industries/zed/blob/main/assets/keymaps/default-macos.json) or [Linux](https://github.com/zed-industries/zed/blob/main/assets/keymaps/default-linux.json).
+You can see all of Zed's default bindings in the default keymaps for [MacOS](https://github.com/Oppla-AI/oppla/blob/main/assets/keymaps/default-macos.json) or [Linux](https://github.com/Oppla-AI/oppla/blob/main/assets/keymaps/default-linux.json).
 
-If you want to debug problems with custom keymaps you can use `dev: Open Key Context View` from the command palette. Please file [an issue](https://github.com/zed-industries/zed) if you run into something you think should work but isn't.
+If you want to debug problems with custom keymaps you can use `dev: Open Key Context View` from the command palette. Please file [an issue](https://github.com/Oppla-AI/oppla) if you run into something you think should work but isn't.
 
 ### Keybinding syntax
 
@@ -126,9 +126,9 @@ If you're using Vim mode, we have information on how [vim modes influence the co
 Pretty much all of Zed's functionality is exposed as actions. Although there is
 no explicitly documented list, you can find most of them by searching in the
 command palette, by looking in the default keymaps for
-[MacOS](https://github.com/zed-industries/zed/blob/main/assets/keymaps/default-macos.json)
+[MacOS](https://github.com/Oppla-AI/oppla/blob/main/assets/keymaps/default-macos.json)
 or
-[Linux](https://github.com/zed-industries/zed/blob/main/assets/keymaps/default-linux.json), or by using Zed's autocomplete in your keymap file.
+[Linux](https://github.com/Oppla-AI/oppla/blob/main/assets/keymaps/default-linux.json), or by using Zed's autocomplete in your keymap file.
 
 Most actions do not require any arguments, and so you can bind them as strings: `"ctrl-a": "language_selector::Toggle"`. Some require a single argument, and must be bound as an array: `"cmd-1": ["workspace::ActivatePane", 0]`. Some actions require multiple arguments, and are bound as an array of a string and an object: `"ctrl-a": ["pane::DeploySearch", { "replace_enabled": true }]`.
 
