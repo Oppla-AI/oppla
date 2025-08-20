@@ -52,6 +52,7 @@ util.workspace = true
 workspace.workspace = true
 worktree.workspace = true
 workspace-hack.workspace = true
+oppla_llm_client.workspace = true
 
 [dev-dependencies]
 client = { workspace = true, features = ["test-support"] }

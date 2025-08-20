@@ -1178,6 +1178,13 @@ impl AgentPanel {
         self.agent_panel_menu_handle.toggle(window, cx);
     }
 
+    pub fn get_active_thread(&self, cx: &App) -> Option<WeakEntity<Thread>> {
+        match &self.active_view {
+            ActiveView::Thread { thread, .. } => Some(thread.read(cx).thread().downgrade()),
+            _ => None,
+        }
+    }
+
     pub fn increase_font_size(
         &mut self,
         action: &IncreaseBufferFontSize,

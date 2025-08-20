@@ -294,6 +294,10 @@ impl State {
         if response.status().is_success() {
             let mut body = String::new();
             response.body_mut().read_to_string(&mut body).await?;
+            
+            // Log the raw models response exactly as received from server
+            log::info!("📊 /models raw API Response: {}", body);
+            
             return Ok(serde_json::from_str(&body)?);
         } else {
             let mut body = String::new();
@@ -849,7 +853,8 @@ impl LanguageModel for CloudLanguageModel {
                     into_google(request, model_id.clone(), GoogleModelMode::Default);
                 async move {
                     let http_client = &client.http_client();
-                    let token = llm_api_token.acquire(&client).await?;
+                    let mut token = llm_api_token.acquire(&client).await?;
+                    let mut refreshed_token = false;
 
                     let request_body = CountTokensBody {
                         provider: oppla_llm_client::LanguageModelProvider::Google,
@@ -858,42 +863,60 @@ impl LanguageModel for CloudLanguageModel {
                             generate_content_request,
                         })?,
                     };
-                    let request = http_client::Request::builder()
-                        .method(Method::POST)
-                        .uri(
-                            http_client
-                                .build_zed_llm_url("/count_tokens", &[])?
-                                .as_ref(),
-                        )
-                        .header("Content-Type", "application/json")
-                        .header("Authorization", format!("Bearer {token}"))
-                        .body(serde_json::to_string(&request_body)?.into())?;
-                    let mut response = http_client.send(request).await?;
-                    let status = response.status();
-                    let headers = response.headers().clone();
-                    let mut response_body = String::new();
-                    response
-                        .body_mut()
-                        .read_to_string(&mut response_body)
-                        .await?;
+                    
+                    loop {
+                        let request = http_client::Request::builder()
+                            .method(Method::POST)
+                            .uri(
+                                http_client
+                                    .build_zed_llm_url("/count_tokens", &[])?
+                                    .as_ref(),
+                            )
+                            .header("Content-Type", "application/json")
+                            .header("Authorization", format!("Bearer {token}"))
+                            .body(serde_json::to_string(&request_body)?.into())?;
+                        let mut response = http_client.send(request).await?;
+                        let status = response.status();
 
-                    if status.is_success() {
-                        let response_body: CountTokensResponse =
-                            serde_json::from_str(&response_body)?;
+                        if status.is_success() {
+                            let mut response_body = String::new();
+                            response
+                                .body_mut()
+                                .read_to_string(&mut response_body)
+                                .await?;
+                            let response_body: CountTokensResponse =
+                                serde_json::from_str(&response_body)?;
 
-                        Ok(response_body.tokens as u64)
-                    } else {
-                        Err(anyhow!(ApiError {
+                            return Ok(response_body.tokens as u64);
+                        }
+                        
+                        // Check for expired token and retry once
+                        if !refreshed_token 
+                            && response.headers().get(EXPIRED_LLM_TOKEN_HEADER_NAME).is_some() {
+                            log::info!("Token expired for /count_tokens, refreshing and retrying...");
+                            token = llm_api_token.refresh(&client).await?;
+                            refreshed_token = true;
+                            continue;
+                        }
+                        
+                        // If not successful and not an expired token issue, return error
+                        let headers = response.headers().clone();
+                        let mut response_body = String::new();
+                        response
+                            .body_mut()
+                            .read_to_string(&mut response_body)
+                            .await?;
+                        return Err(anyhow!(ApiError {
                             status,
                             body: response_body,
                             headers
-                        }))
+                        }));
                     }
                 }
                 .boxed()
             }
             oppla_llm_client::LanguageModelProvider::Oppla => {
-                // For Oppla provider (LiteLLM), use OpenAI token counting as it uses OpenAI format
+                // Oppla provider uses OpenAI-compatible token counting
                 let model = match open_ai::Model::from_id(&self.model.id.0) {
                     Ok(model) => model,
                     Err(_) => open_ai::Model::FourOmni, // Default to GPT-4o for token counting
@@ -921,8 +944,8 @@ impl LanguageModel for CloudLanguageModel {
         let app_version = cx.update(|cx| AppVersion::global(cx)).ok();
         let _thinking_allowed = request.thinking_allowed;
 
-        // MODIFIED FOR LITELLM: Always use OpenAI format for cloud provider
-        // LiteLLM expects OpenAI-compatible requests regardless of the actual model provider
+        // Oppla's LLM API expects OpenAI-compatible format for all requests
+        // Convert all model requests to OpenAI format regardless of the actual provider
         let client = self.client.clone();
         let model_id = self.model.id.0.clone();
         let model_name = self.model.id.to_string();
@@ -931,7 +954,7 @@ impl LanguageModel for CloudLanguageModel {
         let openai_request = into_open_ai(
             request,
             &model_id,
-            true, // supports_parallel_tool_calls - LiteLLM handles this
+            true, // supports_parallel_tool_calls - handled by Oppla's API
             Some(self.model.max_output_tokens as u64), // Convert usize to Option<u64>
         );
 
@@ -953,7 +976,7 @@ impl LanguageModel for CloudLanguageModel {
                     prompt_id,
                     intent,
                     mode,
-                    provider: oppla_llm_client::LanguageModelProvider::OpenAi, // Always use OpenAI as provider for LiteLLM
+                    provider: oppla_llm_client::LanguageModelProvider::OpenAi, // Oppla API expects OpenAI provider format
                     model: model_name,
                     provider_request: serde_json::to_value(&openai_request)
                         .map_err(|e| anyhow!(e))?,
@@ -965,7 +988,7 @@ impl LanguageModel for CloudLanguageModel {
                 Err(err) => anyhow!(err),
             })?;
 
-            // Always use OpenAI event mapper since we're using OpenAI format
+            // Use OpenAI event mapper to parse responses from Oppla's API
             let mut mapper = OpenAiEventMapper::new();
             Ok(map_cloud_completion_events(
                 Box::pin(
@@ -979,7 +1002,8 @@ impl LanguageModel for CloudLanguageModel {
 
         async move { Ok(future.await?.boxed()) }.boxed()
 
-        // ORIGINAL CODE COMMENTED OUT FOR REFERENCE
+        // Previous provider-specific implementation preserved for reference
+        // Current implementation uses unified OpenAI format for all providers
         /*match self.model.provider {
             oppla_llm_client::LanguageModelProvider::Anthropic => {
                 let request = into_anthropic(

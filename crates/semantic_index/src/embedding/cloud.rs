@@ -4,6 +4,7 @@ use client::Client;
 use futures::{AsyncReadExt as _, FutureExt, future::BoxFuture};
 use http_client::{AsyncBody, HttpClient, HttpClientWithUrl, Method, Request};
 use language_model::LlmApiToken;
+use oppla_llm_client::EXPIRED_LLM_TOKEN_HEADER_NAME;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -55,10 +56,11 @@ impl EmbeddingProvider for CloudEmbeddingProvider {
 
         async move {
             // Acquire the JWT token
-            let token = llm_api_token
+            let mut token = llm_api_token
                 .acquire(&client)
                 .await
                 .context("Failed to acquire LLM API token")?;
+            let mut refreshed_token = false;
 
             // Build the URL using build_zed_llm_url
             let url = http_client
@@ -71,26 +73,58 @@ impl EmbeddingProvider for CloudEmbeddingProvider {
                 input: texts.iter().map(|t| t.text).collect(),
             };
 
-            let body =
+            let request_body =
                 serde_json::to_string(&request).context("Failed to serialize embedding request")?;
 
-            // Build HTTP request with authentication
-            let http_request = Request::builder()
-                .method(Method::POST)
-                .uri(url.as_str())
-                .header("Content-Type", "application/json")
-                .header("Authorization", format!("Bearer {}", token))
-                .body(AsyncBody::from(body))
-                .context("Failed to build HTTP request")?;
+            loop {
+                // Build HTTP request with authentication
+                let http_request = Request::builder()
+                    .method(Method::POST)
+                    .uri(url.as_str())
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", format!("Bearer {}", token))
+                    .body(AsyncBody::from(request_body.clone()))
+                    .context("Failed to build HTTP request")?;
 
-            // Send the request
-            let mut response = http_client
-                .send(http_request)
-                .await
-                .context("Failed to send embedding request")?;
+                // Send the request
+                let mut response = http_client
+                    .send(http_request)
+                    .await
+                    .context("Failed to send embedding request")?;
 
-            // Check status
-            if !response.status().is_success() {
+                // Check status
+                if response.status().is_success() {
+                    // Parse response
+                    let mut body = String::new();
+                    response
+                        .body_mut()
+                        .read_to_string(&mut body)
+                        .await
+                        .context("Failed to read response body")?;
+
+                    let response: CloudEmbeddingResponse =
+                        serde_json::from_str(&body).context("Failed to parse embedding response")?;
+
+                    // Convert to Embedding type
+                    let embeddings = response
+                        .data
+                        .into_iter()
+                        .map(|data| Embedding::new(data.embedding))
+                        .collect();
+
+                    return Ok(embeddings);
+                }
+                
+                // Check for expired token and retry once
+                if !refreshed_token 
+                    && response.headers().get(EXPIRED_LLM_TOKEN_HEADER_NAME).is_some() {
+                    log::info!("Token expired for /embeddings, refreshing and retrying...");
+                    token = llm_api_token.refresh(&client).await?;
+                    refreshed_token = true;
+                    continue;
+                }
+                
+                // If not successful and not an expired token issue, return error
                 let mut body = String::new();
                 response.body_mut().read_to_string(&mut body).await?;
                 return Err(anyhow!(
@@ -99,26 +133,6 @@ impl EmbeddingProvider for CloudEmbeddingProvider {
                     body
                 ));
             }
-
-            // Parse response
-            let mut body = String::new();
-            response
-                .body_mut()
-                .read_to_string(&mut body)
-                .await
-                .context("Failed to read response body")?;
-
-            let response: CloudEmbeddingResponse =
-                serde_json::from_str(&body).context("Failed to parse embedding response")?;
-
-            // Convert to Embedding type
-            let embeddings = response
-                .data
-                .into_iter()
-                .map(|data| Embedding::new(data.embedding))
-                .collect();
-
-            Ok(embeddings)
         }
         .boxed()
     }

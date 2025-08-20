@@ -91,11 +91,18 @@ impl AgentModelSelector {
 
 impl Render for AgentModelSelector {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let model = self.selector.read(cx).delegate.active_model(cx);
-        let model_name = model
-            .as_ref()
-            .map(|model| model.model.name().0)
-            .unwrap_or_else(|| SharedString::from("Select a Model"));
+        let delegate = &self.selector.read(cx).delegate;
+        let model = delegate.active_model(cx);
+        let is_auto_mode = delegate.is_auto_mode();
+        
+        let model_name = if is_auto_mode {
+            SharedString::from("Auto")
+        } else {
+            model
+                .as_ref()
+                .map(|model| model.model.name().0)
+                .unwrap_or_else(|| SharedString::from("Select a Model"))
+        };
 
         let provider_icon = model.as_ref().map(|model| model.provider.icon());
 

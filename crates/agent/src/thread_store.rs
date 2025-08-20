@@ -893,6 +893,25 @@ impl ThreadsDatabase {
                 )
             "})?()
         .map_err(|e| anyhow!("Failed to create threads table: {}", e))?;
+        
+        connection.exec(indoc! {"
+                CREATE TABLE IF NOT EXISTS thread_memories (
+                    id TEXT PRIMARY KEY,
+                    thread_id TEXT NOT NULL,
+                    summary TEXT NOT NULL,
+                    compression_ratio REAL NOT NULL,
+                    tokens_saved INTEGER NOT NULL,
+                    data TEXT NOT NULL,
+                    FOREIGN KEY (thread_id) REFERENCES threads(id) ON DELETE CASCADE
+                )
+            "})?()
+        .map_err(|e| anyhow!("Failed to create thread_memories table: {}", e))?;
+        
+        connection.exec(indoc! {"
+                CREATE INDEX IF NOT EXISTS idx_thread_memories_thread_id 
+                ON thread_memories(thread_id)
+            "})?()
+        .map_err(|e| anyhow!("Failed to create thread_memories index: {}", e))?;
 
         let db = Self {
             executor: executor.clone(),

@@ -291,6 +291,10 @@ impl LanguageModelPickerDelegate {
     pub fn active_model(&self, cx: &App) -> Option<ConfiguredModel> {
         (self.get_active_model)(cx)
     }
+
+    pub fn is_auto_mode(&self) -> bool {
+        self.auto_mode
+    }
 }
 
 struct GroupedModels {

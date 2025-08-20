@@ -1,0 +1,295 @@
+#!/usr/bin/env bash
+
+# Windows bundling script following Mac/Linux patterns
+# Creates portable .zip archives for Windows distribution
+
+set -euo pipefail
+source script/lib/blob-store.sh
+
+# Function for displaying help info
+help_info() {
+  echo "
+Usage: ${0##*/} [options]
+Build a portable .zip archive for Windows.
+
+Options:
+  -h, --help     Display this help and exit.
+  --local-only   Create local build only (no archive).
+  --open-result  Open the result directory after build.
+  --bundle-name  Custom bundle name.
+  "
+}
+
+# Parse all arguments manually
+local_only=false
+open_result=false
+bundle_name=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            help_info
+            exit 0
+            ;;
+        --local-only)
+            local_only=true
+            shift
+            ;;
+        --open-result)
+            open_result=true
+            shift
+            ;;
+        --bundle-name)
+            if [[ $# -gt 1 ]]; then
+                bundle_name="$2"
+                shift 2
+            else
+                echo "Error: --bundle-name requires a value" >&2
+                exit 1
+            fi
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            help_info
+            exit 1
+            ;;
+        *)
+            echo "Error: Unexpected argument: $1" >&2
+            help_info
+            exit 1
+            ;;
+    esac
+done
+
+# Get release channel
+pushd crates/oppla > /dev/null
+channel=$(<RELEASE_CHANNEL)
+export OPPLA_RELEASE_CHANNEL="${channel}"
+export ZED_RELEASE_CHANNEL="${channel}"  # Keep for backward compatibility
+popd > /dev/null
+
+# Set bundle environment variables
+export OPPLA_BUNDLE=true
+export ZED_BUNDLE=true  # Keep for backward compatibility
+
+# Get version
+version="$(cd .. && ./get-crate-version oppla)"
+export RELEASE_VERSION="${version}"
+
+echo "Building Oppla for Windows, channel: $channel, version: $version"
+
+# Get target directory
+target_dir="${CARGO_TARGET_DIR:-target}"
+
+# Generate the licenses first, so they can be baked into the binaries
+echo "Generating licenses..."
+cd .. && ./generate-licenses
+
+# Check for Windows target support
+if command -v rustup >/dev/null 2>&1; then
+    echo "Adding Windows target..."
+    rustup target add x86_64-pc-windows-msvc
+    rustup target add i686-pc-windows-msvc
+    rustup target add aarch64-pc-windows-msvc
+fi
+
+# Determine target architecture
+version_info=$(rustc --version --verbose)
+host_line=$(echo "$version_info" | grep host)
+host_target=${host_line#*: }
+
+# Default to x86_64 Windows target
+windows_target="x86_64-pc-windows-msvc"
+arch="x64"
+
+# Try to detect host architecture for cross-compilation
+if [[ "$host_target" == *"x86_64"* ]]; then
+    windows_target="x86_64-pc-windows-msvc"
+    arch="x64"
+elif [[ "$host_target" == *"i686"* ]]; then
+    windows_target="i686-pc-windows-msvc"
+    arch="x86"
+elif [[ "$host_target" == *"aarch64"* ]]; then
+    # For ARM64 hosts, we'll build x64 binaries for better compatibility
+    windows_target="x86_64-pc-windows-msvc"
+    arch="x64"
+fi
+
+echo "Using Windows target: $windows_target (arch: $arch)"
+
+# Build Windows binaries
+echo "Building Windows binaries..."
+cargo build --release --target "${windows_target}" --package oppla --package cli --package auto_update_helper
+
+# Build explorer_command_injector.dll with channel-specific features
+echo "Building explorer_command_injector.dll..."
+case "$channel" in
+"stable")
+    cargo build --release --features stable --no-default-features --target "${windows_target}" --package explorer_command_injector
+    ;;
+"preview")
+    cargo build --release --features preview --no-default-features --target "${windows_target}" --package explorer_command_injector
+    ;;
+*)
+    cargo build --release --target "${windows_target}" --package explorer_command_injector
+    ;;
+esac
+
+# Build remote_server
+echo "Building remote_server..."
+cargo build --release --target "${windows_target}" --package remote_server
+
+# Prepare portable application directory
+suffix=""
+if [ "$channel" != "stable" ]; then
+  suffix="-$channel"
+fi
+
+temp_dir=$(mktemp -d)
+app_dir="${temp_dir}/oppla${suffix}"
+
+echo "Preparing portable application directory in $temp_dir..."
+
+# Create directory structure
+mkdir -p "${app_dir}/bin"
+mkdir -p "${app_dir}/lib"
+mkdir -p "${app_dir}/libexec"
+
+# Copy binaries
+echo "Copying binaries..."
+cp "${target_dir}/${windows_target}/release/oppla.exe" "${app_dir}/libexec/oppla-editor.exe"
+cp "${target_dir}/${windows_target}/release/cli.exe" "${app_dir}/bin/oppla.exe"
+cp "${target_dir}/${windows_target}/release/auto_update_helper.exe" "${app_dir}/libexec/auto_update_helper.exe"
+cp "${target_dir}/${windows_target}/release/explorer_command_injector.dll" "${app_dir}/lib/zed_explorer_command_injector.dll"
+
+# Copy Windows-specific resources
+echo "Copying resources..."
+icon_suffix=""
+case "$channel" in
+    "stable") icon_suffix="" ;;
+    "preview") icon_suffix="-preview" ;;
+    "nightly") icon_suffix="-nightly" ;;
+    "dev") icon_suffix="-dev" ;;
+esac
+
+# Copy icon if it exists
+icon_file="crates/oppla/resources/app-icon${icon_suffix}.ico"
+if [ -f "$icon_file" ]; then
+    cp "$icon_file" "${app_dir}/oppla.ico"
+fi
+
+# Copy generated licenses
+if [ -f "../assets/licenses.md" ]; then
+    cp "../assets/licenses.md" "${app_dir}/licenses.md"
+fi
+
+# Copy Windows-specific resources
+resources_dir="../crates/oppla/resources/windows"
+if [ -d "$resources_dir" ]; then
+    find "$resources_dir" -name "*.exe" -exec cp {} "${app_dir}/libexec" \;
+fi
+
+# Handle debug symbols
+echo "Processing debug symbols..."
+# Compress PDB files for upload
+if [ -f "${target_dir}/${windows_target}/release/oppla.pdb" ]; then
+    gzip -f --stdout --best "${target_dir}/${windows_target}/release/oppla.pdb" > "${target_dir}/${windows_target}/release/oppla-${version}-${channel}.pdb.gz"
+fi
+if [ -f "${target_dir}/${windows_target}/release/cli.pdb" ]; then
+    gzip -f --stdout --best "${target_dir}/${windows_target}/release/cli.pdb" > "${target_dir}/${windows_target}/release/cli-${version}-${channel}.pdb.gz"
+fi
+if [ -f "${target_dir}/${windows_target}/release/auto_update_helper.pdb" ]; then
+    gzip -f --stdout --best "${target_dir}/${windows_target}/release/auto_update_helper.pdb" > "${target_dir}/${windows_target}/release/auto_update_helper-${version}-${channel}.pdb.gz"
+fi
+if [ -f "${target_dir}/${windows_target}/release/explorer_command_injector.pdb" ]; then
+    gzip -f --stdout --best "${target_dir}/${windows_target}/release/explorer_command_injector.pdb" > "${target_dir}/${windows_target}/release/explorer_command_injector-${version}-${channel}.pdb.gz"
+fi
+
+# Upload debug symbols if credentials are available
+if [[ -n "${AZURE_TENANT_ID:-}" && -n "${AZURE_CLIENT_ID:-}" && -n "${AZURE_CLIENT_SECRET:-}" ]]; then
+    echo "Uploading debug symbols to blob storage..."
+
+    debug_files=(
+        "${target_dir}/${windows_target}/release/oppla-${version}-${channel}.pdb.gz"
+        "${target_dir}/${windows_target}/release/cli-${version}-${channel}.pdb.gz"
+        "${target_dir}/${windows_target}/release/auto_update_helper-${version}-${channel}.pdb.gz"
+        "${target_dir}/${windows_target}/release/explorer_command_injector-${version}-${channel}.pdb.gz"
+    )
+
+    for debug_file in "${debug_files[@]}"; do
+        if [ -f "$debug_file" ]; then
+            blob_key="${channel}/$(basename "$debug_file")"
+            upload_to_blob_store_public \
+                "oppla-debug-symbols" \
+                "$debug_file" \
+                "$blob_key"
+        fi
+    done
+fi
+
+# Compress remote_server
+echo "Compressing remote_server..."
+if [ -f "${target_dir}/${windows_target}/release/remote_server.exe" ]; then
+    gzip -f --stdout --best "${target_dir}/${windows_target}/release/remote_server.exe" > "${target_dir}/oppla-remote-server-windows-${arch}.gz"
+fi
+
+if [ "$local_only" = true ]; then
+    echo "Local build complete. Application prepared at: $app_dir"
+    if [ "$open_result" = true ]; then
+        # Try to open directory (may not work on macOS for Windows builds)
+        if command -v open >/dev/null 2>&1; then
+            open "$app_dir"
+        elif command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "$app_dir"
+        fi
+    fi
+    exit 0
+fi
+
+# Create archive
+echo "Creating archive..."
+if [ "$channel" == "dev" ]; then
+    commit=$(git rev-parse HEAD | cut -c 1-7)
+    archive_name="oppla-${commit}-windows-${arch}.zip"
+else
+    archive_name="oppla-windows-${arch}.zip"
+fi
+
+archive_path="${target_dir}/release/${archive_name}"
+
+# Remove existing archive if it exists
+rm -f "${archive_path}"
+
+# Create ZIP archive
+pushd "$temp_dir" > /dev/null
+if command -v zip >/dev/null 2>&1; then
+    zip -r "${archive_path}" "oppla${suffix}" -q
+elif command -v tar >/dev/null 2>&1; then
+    tar -czf "${archive_path}" "oppla${suffix}"
+else
+    echo "Error: Neither zip nor tar found. Cannot create archive." >&2
+    exit 1
+fi
+popd > /dev/null
+
+echo "Archive created: $archive_path"
+
+# Clean up temp directory
+rm -rf "$temp_dir"
+
+# Open result directory if requested
+if [ "$open_result" = true ]; then
+    result_dir="$(dirname "$archive_path")"
+    if command -v open >/dev/null 2>&1; then
+        open "$result_dir"
+    elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$result_dir"
+    fi
+fi
+
+echo "Windows bundling complete!"
+exit 0

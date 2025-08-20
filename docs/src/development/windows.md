@@ -253,9 +253,9 @@ For more information on this, please see [win32 docs](https://learn.microsoft.co
 
 #### Zed fails to launch
 
-Currently, Zed uses Vulkan as its graphics API on Windows. However, Vulkan isn't always the most reliable on Windows, so if Zed fails to launch, it's likely a Vulkan-related issue.
+Currently, Oppla uses Vulkan as its graphics API on Windows. However, Vulkan isn't always the most reliable on Windows, so if Oppla fails to launch, it's likely a Vulkan-related issue.
 
-You can check the Zed log at:
+You can check the Oppla log at:
 `C:\Users\YOU\AppData\Local\Zed\logs\Zed.log`
 
 If you see messages like:

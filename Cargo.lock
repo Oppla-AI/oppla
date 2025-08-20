@@ -14751,6 +14751,7 @@ dependencies = [
  "languages",
  "log",
  "open_ai",
+ "oppla_llm_client",
  "parking_lot",
  "project",
  "reqwest_client",
