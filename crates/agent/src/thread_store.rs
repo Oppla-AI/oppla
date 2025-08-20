@@ -893,7 +893,7 @@ impl ThreadsDatabase {
                 )
             "})?()
         .map_err(|e| anyhow!("Failed to create threads table: {}", e))?;
-        
+
         connection.exec(indoc! {"
                 CREATE TABLE IF NOT EXISTS thread_memories (
                     id TEXT PRIMARY KEY,
@@ -906,7 +906,7 @@ impl ThreadsDatabase {
                 )
             "})?()
         .map_err(|e| anyhow!("Failed to create thread_memories table: {}", e))?;
-        
+
         connection.exec(indoc! {"
                 CREATE INDEX IF NOT EXISTS idx_thread_memories_thread_id 
                 ON thread_memories(thread_id)

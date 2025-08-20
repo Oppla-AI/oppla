@@ -94,7 +94,7 @@ impl Render for AgentModelSelector {
         let delegate = &self.selector.read(cx).delegate;
         let model = delegate.active_model(cx);
         let is_auto_mode = delegate.is_auto_mode();
-        
+
         let model_name = if is_auto_mode {
             SharedString::from("Auto")
         } else {

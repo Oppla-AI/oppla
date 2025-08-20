@@ -102,8 +102,8 @@ impl EmbeddingProvider for CloudEmbeddingProvider {
                         .await
                         .context("Failed to read response body")?;
 
-                    let response: CloudEmbeddingResponse =
-                        serde_json::from_str(&body).context("Failed to parse embedding response")?;
+                    let response: CloudEmbeddingResponse = serde_json::from_str(&body)
+                        .context("Failed to parse embedding response")?;
 
                     // Convert to Embedding type
                     let embeddings = response
@@ -114,16 +114,20 @@ impl EmbeddingProvider for CloudEmbeddingProvider {
 
                     return Ok(embeddings);
                 }
-                
+
                 // Check for expired token and retry once
-                if !refreshed_token 
-                    && response.headers().get(EXPIRED_LLM_TOKEN_HEADER_NAME).is_some() {
+                if !refreshed_token
+                    && response
+                        .headers()
+                        .get(EXPIRED_LLM_TOKEN_HEADER_NAME)
+                        .is_some()
+                {
                     log::info!("Token expired for /embeddings, refreshing and retrying...");
                     token = llm_api_token.refresh(&client).await?;
                     refreshed_token = true;
                     continue;
                 }
-                
+
                 // If not successful and not an expired token issue, return error
                 let mut body = String::new();
                 response.body_mut().read_to_string(&mut body).await?;

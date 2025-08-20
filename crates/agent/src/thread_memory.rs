@@ -1,10 +1,10 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use uuid::Uuid;
 use sqlez::connection::Connection;
+use std::sync::Arc;
 use std::sync::Mutex;
+use uuid::Uuid;
 
 /// Represents a compressed memory of a conversation thread
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -46,13 +46,15 @@ impl ThreadMemory {
         compressed_tokens: usize,
     ) -> Self {
         let now = Utc::now();
-        let start_message_id = original_message_ids.first()
+        let start_message_id = original_message_ids
+            .first()
             .cloned()
             .unwrap_or_else(|| "unknown".to_string());
-        let end_message_id = original_message_ids.last()
+        let end_message_id = original_message_ids
+            .last()
             .cloned()
             .unwrap_or_else(|| "unknown".to_string());
-        
+
         Self {
             id: Uuid::new_v4().to_string(),
             thread_id,
@@ -91,7 +93,7 @@ impl ThreadMemory {
         self.edited_at = Some(Utc::now());
         self.updated_at = Utc::now();
     }
-    
+
     pub fn compression_percentage(&self) -> f32 {
         (1.0 - self.compression_ratio) * 100.0
     }
@@ -130,10 +132,7 @@ impl ThreadMemoryManager {
     }
 
     pub fn find_memory(&self, memory_id: &str) -> Option<Arc<ThreadMemory>> {
-        self.memories
-            .iter()
-            .find(|m| m.id == memory_id)
-            .cloned()
+        self.memories.iter().find(|m| m.id == memory_id).cloned()
     }
 
     pub fn update_memory(
@@ -212,19 +211,22 @@ impl ThreadMemoryManager {
         for memory in active_memories {
             context.push_str(&format!(
                 "[Memory: {}]\n{}\n\n",
-                memory.summary,
-                memory.compressed_content
+                memory.summary, memory.compressed_content
             ));
         }
         context.push_str("=== End of Memories ===\n");
         context
     }
-    
-    pub fn save_memory_to_db(&self, memory: &ThreadMemory, connection: &Arc<Mutex<Connection>>) -> Result<()> {
+
+    pub fn save_memory_to_db(
+        &self,
+        memory: &ThreadMemory,
+        connection: &Arc<Mutex<Connection>>,
+    ) -> Result<()> {
         let memory_json = serde_json::to_string(memory)?;
-        
+
         let conn = connection.lock().unwrap();
-        
+
         conn.exec_bound::<(String, String, String, f32, i64, String)>(indoc::indoc! {"
             INSERT OR REPLACE INTO thread_memories (
                 id, thread_id, summary, compression_ratio, tokens_saved, data
@@ -237,44 +239,52 @@ impl ThreadMemoryManager {
             memory.tokens_saved as i64,
             memory_json,
         ))?;
-        
+
         Ok(())
     }
-    
-    pub fn load_memories_from_db(&mut self, thread_id: &str, connection: &Arc<Mutex<Connection>>) -> Result<()> {
+
+    pub fn load_memories_from_db(
+        &mut self,
+        thread_id: &str,
+        connection: &Arc<Mutex<Connection>>,
+    ) -> Result<()> {
         let conn = connection.lock().unwrap();
-        
+
         type MemoryRow = (String, String, String, f32, i64, String);
-        
+
         let mut select = conn.select_bound::<&str, MemoryRow>(indoc::indoc! {"
             SELECT id, thread_id, summary, compression_ratio, tokens_saved, data
             FROM thread_memories
             WHERE thread_id = ?
             ORDER BY id DESC
         "})?;
-        
+
         self.memories.clear();
         self.total_saved_tokens = 0;
-        
+
         let rows = select(thread_id)?;
-        
+
         for (_id, _thread_id, _summary, _ratio, tokens_saved, data_json) in rows {
             let memory: ThreadMemory = serde_json::from_str(&data_json)?;
-            
+
             self.total_saved_tokens += tokens_saved as usize;
             self.memories.push(Arc::new(memory));
         }
-        
+
         Ok(())
     }
-    
-    pub fn delete_memory_from_db(&self, memory_id: &str, connection: &Arc<Mutex<Connection>>) -> Result<()> {
+
+    pub fn delete_memory_from_db(
+        &self,
+        memory_id: &str,
+        connection: &Arc<Mutex<Connection>>,
+    ) -> Result<()> {
         let conn = connection.lock().unwrap();
-        
+
         let sql = "DELETE FROM thread_memories WHERE id = ?";
         let mut delete = conn.exec_bound::<&str>(sql)?;
         delete(memory_id)?;
-        
+
         Ok(())
     }
 }
@@ -287,14 +297,14 @@ pub fn mock_compress_messages(
     let combined = messages.join(" ");
     let original_tokens = combined.len() / 4;
     let target_tokens = (original_tokens as f32 * target_ratio) as usize;
-    
+
     let compressed = if combined.len() > 200 {
         format!("{}...", &combined[..200])
     } else {
         combined.clone()
     };
-    
+
     let summary = format!("Compressed {} messages", messages.len());
-    
+
     (compressed, summary, original_tokens, target_tokens)
 }

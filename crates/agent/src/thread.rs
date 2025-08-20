@@ -115,7 +115,7 @@ impl MessageId {
     pub fn as_usize(&self) -> usize {
         self.0
     }
-    
+
     fn post_inc(&mut self) -> Self {
         Self(post_inc(&mut self.0))
     }
@@ -674,29 +674,29 @@ impl Thread {
         self.compression_state.last_compression_at = Some(message_id);
         self.compression_state.total_compressions += 1;
     }
-    
+
     /// Get the current compression watermark
     pub fn compression_watermark(&self) -> Option<MessageId> {
         self.compression_watermark
     }
-    
+
     /// Check if compression is currently in progress
     pub fn is_compressing(&self) -> bool {
         self.compression_state.is_compressing
     }
-    
+
     /// Set compression in progress flag
     pub fn set_compressing(&mut self, is_compressing: bool) {
         self.compression_state.is_compressing = is_compressing;
     }
-    
+
     /// Estimate the token count for the current messages
     pub fn estimate_token_count(&self, _model: &Arc<dyn LanguageModel>, _cx: &App) -> u64 {
         // For now, use a simple estimate - will be replaced with actual token counting
         // Rough estimate: 1 token per 4 characters
-        
+
         let mut total_chars = 0usize;
-        
+
         // If we have a compression watermark, count compressed memory + post-watermark messages
         if let Some(watermark) = self.compression_watermark {
             // Add compressed memory token estimate
@@ -704,11 +704,13 @@ impl Thread {
                 // Use the actual compressed token count if available
                 total_chars += latest_memory.compressed_tokens * 4; // Convert back to chars estimate
             }
-            
+
             // Find watermark position and count only messages after it
             if let Some(watermark_index) = self.messages.iter().position(|m| m.id == watermark) {
                 for msg in &self.messages[watermark_index + 1..] {
-                    let text_len: usize = msg.segments.iter()
+                    let text_len: usize = msg
+                        .segments
+                        .iter()
                         .map(|seg| match seg {
                             MessageSegment::Text(text) => text.len(),
                             MessageSegment::Thinking { text, .. } => text.len(),
@@ -720,9 +722,13 @@ impl Thread {
             }
         } else {
             // No compression, count all messages
-            total_chars = self.messages.iter()
+            total_chars = self
+                .messages
+                .iter()
                 .map(|msg| {
-                    let text_len: usize = msg.segments.iter()
+                    let text_len: usize = msg
+                        .segments
+                        .iter()
                         .map(|seg| match seg {
                             MessageSegment::Text(text) => text.len(),
                             MessageSegment::Thinking { text, .. } => text.len(),
@@ -733,15 +739,15 @@ impl Thread {
                 })
                 .sum();
         }
-        
+
         (total_chars / 4) as u64
     }
-    
+
     /// Check if we should trigger compression based on token usage
     pub fn should_compress(&self, model: &dyn LanguageModel) -> bool {
         let max_tokens = model.max_token_count() as usize;
-        let current_tokens = (self.cumulative_token_usage.input_tokens + 
-                             self.cumulative_token_usage.output_tokens) as usize;
+        let current_tokens = (self.cumulative_token_usage.input_tokens
+            + self.cumulative_token_usage.output_tokens) as usize;
         let threshold = (max_tokens as f64 * 0.8) as usize;
         current_tokens >= threshold
     }
@@ -749,7 +755,7 @@ impl Thread {
     /// Create a mock memory for testing (before backend is ready)
     pub fn create_mock_memory(&self, message_ids: Vec<MessageId>) -> ThreadMemory {
         use crate::thread_memory::mock_compress_messages;
-        
+
         let messages: Vec<String> = message_ids
             .iter()
             .filter_map(|id| self.message(*id))
@@ -1406,20 +1412,24 @@ impl Thread {
         }
 
         self.remaining_turns -= 1;
-        
+
         // Check if compression is needed before sending the request
         if crate::auto_compact::AutoCompactTool::should_compress(self, &model, cx) {
-            log::info!("🗜️ Compression required for thread {} - will compress before sending to model", self.id);
+            log::info!(
+                "🗜️ Compression required for thread {} - will compress before sending to model",
+                self.id
+            );
             // Collect data needed for compression before spawning
             let thread_id = self.id.clone();
-            let messages_to_compress = crate::auto_compact::AutoCompactTool::get_messages_to_compress(self);
+            let messages_to_compress =
+                crate::auto_compact::AutoCompactTool::get_messages_to_compress(self);
             let project_client = self.project.read(cx).client().clone();
-            
+
             // Clone model and intent for use after compression
             let model_clone = model.clone();
             let intent_clone = intent;
             let window_clone = window;
-            
+
             // Spawn async task that performs compression first, then sends to model
             cx.spawn(async move |thread, mut cx| {
                 // First, perform compression and wait for it to complete
@@ -1431,8 +1441,9 @@ impl Thread {
                     model_clone.clone(),
                     thread_id.clone(),
                     &mut cx,
-                ).await;
-                
+                )
+                .await;
+
                 match compression_result {
                     Ok(_) => {
                         log::info!("✅ Compression completed for thread {}", thread_id);
@@ -1441,10 +1452,12 @@ impl Thread {
                         log::error!("⚠️ Compression failed for thread {}: {:?}", thread_id, e);
                     }
                 }
-                
+
                 // After compression, trigger the completion on the main thread
                 // We use read_with to get the thread entity and then spawn a new UI task
-                let thread_strong = thread.upgrade().ok_or_else(|| anyhow::anyhow!("Thread was dropped"))?;
+                let thread_strong = thread
+                    .upgrade()
+                    .ok_or_else(|| anyhow::anyhow!("Thread was dropped"))?;
                 cx.update_entity(&thread_strong, |thread, cx| {
                     log::info!("📤 Now sending compressed content to model");
                     thread.flush_notifications(model_clone.clone(), intent_clone, cx);
@@ -1457,16 +1470,23 @@ impl Thread {
                         cx,
                     );
                 })?;
-                
+
                 Ok::<(), anyhow::Error>(())
-            }).detach();  // Detach to avoid blocking UI
+            })
+            .detach(); // Detach to avoid blocking UI
         } else {
             // No compression needed, proceed directly
             let current_tokens = self.estimate_token_count(&model, cx);
             let max_tokens = model.max_token_count();
             let percentage = (current_tokens as f64 / max_tokens as f64 * 100.0) as u32;
-            log::debug!("📊 Thread {} token usage: {}/{} ({}%)", self.id, current_tokens, max_tokens, percentage);
-            
+            log::debug!(
+                "📊 Thread {} token usage: {}/{} ({}%)",
+                self.id,
+                current_tokens,
+                max_tokens,
+                percentage
+            );
+
             self.flush_notifications(model.clone(), intent, cx);
             let _checkpoint = self.finalize_pending_checkpoint(cx);
             self.stream_completion(
@@ -1611,14 +1631,16 @@ impl Thread {
         }
 
         let mut message_ix_to_cache = None;
-        
+
         // Check if we have a compression watermark and compressed content
         let start_from_index = if let Some(watermark) = self.compression_watermark {
             // Find the watermark position
-            let watermark_index = self.messages.iter()
+            let watermark_index = self
+                .messages
+                .iter()
                 .position(|m| m.id == watermark)
                 .unwrap_or(0);
-            
+
             // Add compressed content as an assistant message if we have memories
             if let Some(latest_memory) = self.memory_manager.get_memories().last() {
                 request.messages.push(LanguageModelRequestMessage {
@@ -1630,20 +1652,20 @@ impl Thread {
                     cache: true,
                 });
             }
-            
+
             // Start from message after watermark
             watermark_index + 1
         } else {
             0
         };
-        
+
         // Process messages (either all or only after watermark)
         for (idx, message) in self.messages.iter().enumerate() {
             // Skip messages before the watermark if compression is active
             if idx < start_from_index {
                 continue;
             }
-            
+
             // ui_only messages are for the UI only, not for the model
             if message.ui_only {
                 continue;
