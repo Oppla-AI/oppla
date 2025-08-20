@@ -294,10 +294,10 @@ impl State {
         if response.status().is_success() {
             let mut body = String::new();
             response.body_mut().read_to_string(&mut body).await?;
-            
+
             // Log the raw models response exactly as received from server
-            log::info!("📊 /models raw API Response: {}", body);
-            
+            // log::info!("📊 /models raw API Response: {}", body);
+
             return Ok(serde_json::from_str(&body)?);
         } else {
             let mut body = String::new();
@@ -863,7 +863,7 @@ impl LanguageModel for CloudLanguageModel {
                             generate_content_request,
                         })?,
                     };
-                    
+
                     loop {
                         let request = http_client::Request::builder()
                             .method(Method::POST)
@@ -889,16 +889,22 @@ impl LanguageModel for CloudLanguageModel {
 
                             return Ok(response_body.tokens as u64);
                         }
-                        
+
                         // Check for expired token and retry once
-                        if !refreshed_token 
-                            && response.headers().get(EXPIRED_LLM_TOKEN_HEADER_NAME).is_some() {
-                            log::info!("Token expired for /count_tokens, refreshing and retrying...");
+                        if !refreshed_token
+                            && response
+                                .headers()
+                                .get(EXPIRED_LLM_TOKEN_HEADER_NAME)
+                                .is_some()
+                        {
+                            log::info!(
+                                "Token expired for /count_tokens, refreshing and retrying..."
+                            );
                             token = llm_api_token.refresh(&client).await?;
                             refreshed_token = true;
                             continue;
                         }
-                        
+
                         // If not successful and not an expired token issue, return error
                         let headers = response.headers().clone();
                         let mut response_body = String::new();
