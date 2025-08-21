@@ -55,6 +55,21 @@ if [[ -n $apt ]]; then
     deps+=( libstdc++-10-dev )
   fi
 
+  # Fix potential dpkg corruption first
+  if ! dpkg -l >/dev/null 2>&1; then
+    echo "Detected dpkg corruption, attempting to fix..."
+    # Backup corrupted status file
+    $maysudo mv /var/lib/dpkg/status /var/lib/dpkg/status.corrupted.$(date +%Y%m%d_%H%M%S) || true
+    # Try to restore from backup
+    if [ -f /var/lib/dpkg/status-old ]; then
+      $maysudo cp /var/lib/dpkg/status-old /var/lib/dpkg/status
+    else
+      $maysudo touch /var/lib/dpkg/status
+    fi
+    # Configure dpkg
+    $maysudo dpkg --configure -a || true
+  fi
+
   # Fix corrupted apt lists before update
   $maysudo rm -rf /var/lib/apt/lists/*
   $maysudo "$apt" clean
