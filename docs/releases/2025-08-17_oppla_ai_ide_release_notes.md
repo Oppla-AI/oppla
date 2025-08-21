@@ -21,7 +21,7 @@ What’s new
 - Expertise: Terraform, Kubernetes, Docker, monitoring, SRE practices
 - Tools: full terminal access for infrastructure management
 
-3) Marketing Specialist Profile
+3) Branding Specialist Profile
 - Focus: content creation, SEO, brand strategy
 - Expertise: digital marketing, analytics, customer engagement
 - Tools: content editing, web search, file organization (no code execution)
@@ -41,7 +41,7 @@ Key features and benefits
 
 How to use
 - Open the Agent panel in Oppla AI IDE
-- Open the profile dropdown and select Architect, DevOps, or Marketing Specialist
+- Open the profile dropdown and select Architect, DevOps, or Branding Specialist
 - Review the descriptive text to understand the profile’s focus and capabilities
 - Start working; the AI will load the appropriate prompt template and tool permissions automatically
 - For project-specific prompts, ensure your project’s rules are defined; profiles will inherit them
@@ -64,7 +64,7 @@ Impact and value
 Known limitations and considerations
 - Architect profile: full code access only; terminal access is restricted for safety
 - DevOps profile: includes full terminal access for infrastructure management
-- Marketing Specialist profile: restricted to content editing, web search, and file organization; no direct code execution
+- Branding Specialist profile: restricted to content editing, web search, and file organization; no direct code execution
 - As with any new AI prompt system, occasional profile overlap can occur; switching profiles mid-session may reset some context to the new profile’s perspective
 
 Future improvements (tentative)

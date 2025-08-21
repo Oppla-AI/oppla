@@ -910,9 +910,9 @@
         }
       },
       "marketing-specialist": {
-        "name": "Marketing Specialist",
+        "name": "Branding",
         "prompt_template": "marketing_system_prompt",
-        "role_description": "Marketing specialist focused on content creation and brand strategy",
+        "role_description": "Branding specialist focused on content creation and brand strategy",
         "enable_all_context_servers": false,
         "tools": {
           "copy_path": true,
