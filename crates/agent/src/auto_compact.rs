@@ -27,12 +27,12 @@ impl AutoCompactTool {
         // Get current token count
         let total_tokens = thread.estimate_token_count(model, cx);
         let max_tokens = model.max_token_count();
-        // TESTING: Lowered to 20% for testing, should be 0.8 in production
-        let threshold = (max_tokens as f64 * 0.2) as u64;
+        // Use 80% of model capacity as the threshold in production
+        let threshold = (max_tokens as f64 * 0.8) as u64;
 
         // Log the raw models response exactly as received from server
-        log::info!("Threshold what actually has model: {}", max_tokens);
-        log::info!("Threshold of model calculated: {}", threshold);
+        // log::info!("Threshold what actually has model: {}", max_tokens);
+        // log::info!("Threshold of model calculated: {}", threshold);
 
         total_tokens > threshold
     }
@@ -108,12 +108,12 @@ impl AutoCompactTool {
 
         match compression_result {
             Ok(response) => {
-                log::info!(
-                    "✅ Compression successful: {} -> {} tokens ({}% ratio)",
-                    response.original_tokens,
-                    response.compressed_tokens,
-                    (response.compression_ratio * 100.0) as u32
-                );
+                // log::info!(
+                //     "✅ Compression successful: {} -> {} tokens ({}% ratio)",
+                //     response.original_tokens,
+                //     response.compressed_tokens,
+                //     (response.compression_ratio * 100.0) as u32
+                // );
                 // Create memory record from response
                 let memory = ThreadMemory {
                     id: Uuid::new_v4().to_string(),
