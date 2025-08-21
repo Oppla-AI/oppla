@@ -11184,7 +11184,7 @@ dependencies = [
 
 [[package]]
 name = "oppla"
-version = "0.201.16"
+version = "0.201.17"
 dependencies = [
  "activity_indicator",
  "agent",
