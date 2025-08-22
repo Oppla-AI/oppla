@@ -315,6 +315,25 @@ jobs:
         with:
           clean: false
 
+      - name: Enable Windows long path support
+        shell: powershell
+        run: |
+          # Enable long path support in Git globally
+          git config --system core.longpaths true
+          
+          # Enable long path support in Windows registry (requires admin on GitHub runners)
+          try {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -Type DWord -Force
+            Write-Host "Windows long path support enabled in registry"
+          } catch {
+            Write-Host "Could not modify registry (may not have admin rights), continuing anyway"
+          }
+          
+          # Set cargo to use short paths for the git checkouts
+          mkdir -p $env:USERPROFILE\.cargo
+          Add-Content $env:USERPROFILE\.cargo\config.toml "[net]"
+          Add-Content $env:USERPROFILE\.cargo\config.toml "git-fetch-with-cli = true"
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -366,6 +385,18 @@ jobs:
           if ([string]::IsNullOrEmpty("${{ secrets.AZURE_TENANT_ID }}")) {
             Write-Host "No Azure signing credentials found, building without code signing"
           }
+          
+          # Try to clone the problematic dependency with shallow depth to avoid long paths
+          try {
+            $petPath = "$env:USERPROFILE\.cargo\git\checkouts"
+            if (Test-Path $petPath) {
+              Get-ChildItem -Path $petPath -Filter "*python-environment-tools*" -Recurse | Remove-Item -Recurse -Force
+              Write-Host "Cleaned up python-environment-tools cache"
+            }
+          } catch {
+            Write-Host "Could not clean cargo git cache"
+          }
+          
           .\script\bundle-windows.ps1
 
       - name: Upload Windows Installer
