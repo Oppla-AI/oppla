@@ -263,15 +263,21 @@ pub struct DirectoryContextHandle {
 pub struct DirectoryContext {
     pub handle: DirectoryContextHandle,
     pub full_path: Arc<Path>,
-    pub descendants: Vec<DirectoryContextDescendant>,
+    pub tree_structure: SharedString,
+    pub file_count: usize,
+    pub dir_count: usize,
+    pub total_size_bytes: u64,
+    pub important_files: Vec<DirectoryContextFile>,
 }
 
 #[derive(Debug, Clone)]
-pub struct DirectoryContextDescendant {
+pub struct DirectoryContextFile {
     /// Path within the directory.
     pub rel_path: Arc<Path>,
-    pub fenced_codeblock: SharedString,
+    pub size_bytes: u64,
+    pub content: Option<SharedString>,
 }
+
 
 impl DirectoryContextHandle {
     pub fn eq_for_key(&self, other: &Self) -> bool {
@@ -301,56 +307,114 @@ impl DirectoryContextHandle {
 
         let directory_path = entry.path.clone();
         let directory_full_path = worktree_ref.full_path(&directory_path).into();
-
-        let file_paths = collect_files_in_path(worktree_ref, &directory_path);
-        let descendants_future = future::join_all(file_paths.into_iter().map(|path| {
-            let worktree_ref = worktree.read(cx);
-            let worktree_id = worktree_ref.id();
-            let full_path = worktree_ref.full_path(&path);
-
-            let rel_path = path
-                .strip_prefix(&directory_path)
-                .log_err()
-                .map_or_else(|| path.clone(), |rel_path| rel_path.into());
-
-            let open_task = project.update(cx, |project, cx| {
-                project.buffer_store().update(cx, |buffer_store, cx| {
-                    let project_path = ProjectPath { worktree_id, path };
-                    buffer_store.open_buffer(project_path, cx)
-                })
-            });
-
-            // TODO: report load errors instead of just logging
-            let rope_task = cx.spawn(async move |cx| {
-                let buffer = open_task.await.log_err()?;
-                let rope = buffer
-                    .read_with(cx, |buffer, _cx| buffer.as_rope().clone())
-                    .log_err()?;
-                Some((rope, buffer))
-            });
-
-            cx.background_spawn(async move {
-                let (rope, buffer) = rope_task.await?;
-                let fenced_codeblock = MarkdownCodeBlock {
-                    tag: &codeblock_tag(&full_path, None),
-                    text: &rope.to_string(),
+        let worktree_id = worktree_ref.id();
+        
+        // Generate tree structure
+        let mut stats = DirectoryStats {
+            file_count: 0,
+            dir_count: 0,
+            total_size_bytes: 0,
+        };
+        
+        let tree_str = generate_tree_structure(
+            worktree_ref,
+            &directory_path,
+            "",
+            true,
+            0,
+            5, // Max depth for tree display
+            &mut stats,
+        );
+        
+        // Collect important files that should have their content included
+        let mut important_file_paths = Vec::new();
+        for entry in worktree_ref.entries(false, 0) {
+            if entry.is_file() {
+                if let Ok(_rel_path) = entry.path.strip_prefix(&directory_path) {
+                    // For now, use a simple check based on filename only
+                    // We'll estimate size as 0 since Entry doesn't have size info
+                    if should_include_file_content(&entry.path, 0) {
+                        important_file_paths.push(entry.path.clone());
+                    }
                 }
-                .to_string()
-                .into();
-                let descendant = DirectoryContextDescendant {
-                    rel_path,
-                    fenced_codeblock,
-                };
-                Some((descendant, buffer))
+            }
+        }
+        
+        // Prepare data for loading important files
+        let important_file_info: Vec<_> = important_file_paths
+            .into_iter()
+            .map(|path| {
+                let full_path = worktree_ref.full_path(&path);
+                let rel_path: Arc<Path> = path
+                    .strip_prefix(&directory_path)
+                    .ok()
+                    .map(|p| p.into())
+                    .unwrap_or_else(|| path.clone());
+                
+                (full_path, rel_path, path)
             })
-        }));
+            .collect();
+        
+        let important_file_tasks: Vec<_> = important_file_info
+            .iter()
+            .map(|(_, _, path)| {
+                project.update(cx, |project, cx| {
+                    project.buffer_store().update(cx, |buffer_store, cx| {
+                        let project_path = ProjectPath { worktree_id, path: path.clone() };
+                        buffer_store.open_buffer(project_path, cx)
+                    })
+                })
+            })
+            .collect();
+
+        // Load content for important files only
+        let important_files_future = future::join_all(
+            important_file_info
+                .into_iter()
+                .zip(important_file_tasks.into_iter())
+                .map(|((full_path, rel_path, _), open_task)| {
+                    cx.spawn(async move |cx| {
+                        let buffer = open_task.await.log_err()?;
+                        let rope = buffer
+                            .read_with(cx, |buffer, _cx| buffer.as_rope().clone())
+                            .log_err()?;
+                        
+                        let content = MarkdownCodeBlock {
+                            tag: &codeblock_tag(&full_path, None),
+                            text: &rope.to_string(),
+                        }
+                        .to_string()
+                        .into();
+                        
+                        Some((DirectoryContextFile {
+                            rel_path,
+                            size_bytes: 0, // Size not available from Entry
+                            content: Some(content),
+                        }, buffer))
+                    })
+                })
+        );
+
+        let tree_structure = tree_str.into();
+        let file_count = stats.file_count;
+        let dir_count = stats.dir_count;
+        let total_size_bytes = stats.total_size_bytes;
 
         cx.background_spawn(async move {
-            let (descendants, buffers) = descendants_future.await.into_iter().flatten().unzip();
+            let (important_files, buffers): (Vec<_>, Vec<_>) = important_files_future
+                .await
+                .into_iter()
+                .flatten()
+                .unzip();
+            
             let context = AgentContext::Directory(DirectoryContext {
                 handle: self,
                 full_path: directory_full_path,
-                descendants,
+                tree_structure,
+                file_count,
+                dir_count,
+                total_size_bytes,
+                important_files,
             });
             Some((context, buffers))
         })
@@ -359,15 +423,29 @@ impl DirectoryContextHandle {
 
 impl Display for DirectoryContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut is_first = true;
-        for descendant in &self.descendants {
-            if !is_first {
-                write!(f, "\n")?;
-            } else {
-                is_first = false;
+        // Write directory header with path and statistics
+        writeln!(f, "Directory: {}", self.full_path.display())?;
+        writeln!(f, "Total files: {}", self.file_count)?;
+        writeln!(f, "Total directories: {}", self.dir_count)?;
+        writeln!(f, "Total size: {}", format_file_size(self.total_size_bytes))?;
+        writeln!(f)?;
+        
+        // Write tree structure
+        writeln!(f, "Structure:")?;
+        write!(f, "{}", self.tree_structure)?;
+        
+        // Write important file contents if any
+        if !self.important_files.is_empty() {
+            writeln!(f)?;
+            writeln!(f, "--- Important Files ---")?;
+            for file in &self.important_files {
+                if let Some(content) = &file.content {
+                    writeln!(f)?;
+                    write!(f, "{}", content)?;
+                }
             }
-            write!(f, "{}", descendant.fenced_codeblock)?;
         }
+        
         Ok(())
     }
 }
@@ -995,18 +1073,113 @@ pub fn load_context(
     })
 }
 
-fn collect_files_in_path(worktree: &Worktree, path: &Path) -> Vec<Arc<Path>> {
-    let mut files = Vec::new();
 
-    for entry in worktree.child_entries(path) {
-        if entry.is_dir() {
-            files.extend(collect_files_in_path(worktree, &entry.path));
-        } else if entry.is_file() {
-            files.push(entry.path.clone());
-        }
+#[derive(Debug)]
+struct DirectoryStats {
+    file_count: usize,
+    dir_count: usize,
+    total_size_bytes: u64,
+}
+
+fn generate_tree_structure(
+    worktree: &Worktree,
+    path: &Path,
+    prefix: &str,
+    _is_last: bool,
+    depth: usize,
+    max_depth: usize,
+    stats: &mut DirectoryStats,
+) -> String {
+    if depth > max_depth {
+        return String::new();
     }
 
-    files
+    let mut result = String::new();
+    
+    let entries = worktree.child_entries(path);
+    let mut sorted_entries: Vec<_> = entries.collect();
+    sorted_entries.sort_by(|a, b| {
+        // Directories first, then files
+        match (a.is_dir(), b.is_dir()) {
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            _ => a.path.file_name().cmp(&b.path.file_name()),
+        }
+    });
+
+    for (index, entry) in sorted_entries.iter().enumerate() {
+        let is_last_entry = index == sorted_entries.len() - 1;
+        let connector = if is_last_entry { "└── " } else { "├── " };
+        
+        let name = entry.path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("<unnamed>");
+        
+        if entry.is_dir() {
+            stats.dir_count += 1;
+            result.push_str(&format!("{}{}{}/\n", prefix, connector, name));
+            
+            let new_prefix = format!("{}{}   ", prefix, if is_last_entry { " " } else { "│" });
+            result.push_str(&generate_tree_structure(
+                worktree,
+                &entry.path,
+                &new_prefix,
+                is_last_entry,
+                depth + 1,
+                max_depth,
+                stats,
+            ));
+        } else if entry.is_file() {
+            stats.file_count += 1;
+            // Entry doesn't have size information, so we'll just show the filename
+            result.push_str(&format!("{}{}{}\n", prefix, connector, name));
+        }
+    }
+    
+    result
+}
+
+fn format_file_size(bytes: u64) -> String {
+    const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
+    let mut size = bytes as f64;
+    let mut unit_index = 0;
+    
+    while size >= 1024.0 && unit_index < UNITS.len() - 1 {
+        size /= 1024.0;
+        unit_index += 1;
+    }
+    
+    if unit_index == 0 {
+        format!("{} {}", bytes, UNITS[unit_index])
+    } else {
+        format!("{:.1} {}", size, UNITS[unit_index])
+    }
+}
+
+fn should_include_file_content(path: &Path, _size_bytes: u64) -> bool {
+    // Important configuration files that should be included
+    // Since we can't easily get file size from Entry, we'll just check by name
+    let important_files = [
+        "Cargo.toml",
+        "package.json",
+        "pyproject.toml",
+        "requirements.txt",
+        "README.md",
+        "README.txt",
+        ".env.example",
+        "Dockerfile",
+        "docker-compose.yml",
+        ".gitignore",
+    ];
+    
+    if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
+        if important_files.contains(&file_name) {
+            return true;
+        }
+    }
+    
+    false
 }
 
 fn codeblock_tag(full_path: &Path, line_range: Option<Range<Point>>) -> String {
