@@ -1,4 +1,4 @@
-name: Oppla Build (macOS, Linux & Windows)
+name: Oppla Bundle (macOS, Linux & Windows)
 
 on:
   push:
@@ -330,9 +330,11 @@ jobs:
           }
           
           # Set cargo to use short paths for the git checkouts
-          mkdir -p $env:USERPROFILE\.cargo
-          Add-Content $env:USERPROFILE\.cargo\config.toml "[net]"
-          Add-Content $env:USERPROFILE\.cargo\config.toml "git-fetch-with-cli = true"
+          if (!(Test-Path "$env:USERPROFILE\.cargo")) {
+            New-Item -ItemType Directory -Path "$env:USERPROFILE\.cargo" -Force | Out-Null
+          }
+          Add-Content "$env:USERPROFILE\.cargo\config.toml" "[net]" -ErrorAction SilentlyContinue
+          Add-Content "$env:USERPROFILE\.cargo\config.toml" "git-fetch-with-cli = true" -ErrorAction SilentlyContinue
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
