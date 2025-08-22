@@ -278,7 +278,6 @@ pub struct DirectoryContextFile {
     pub content: Option<SharedString>,
 }
 
-
 impl DirectoryContextHandle {
     pub fn eq_for_key(&self, other: &Self) -> bool {
         self.entry_id == other.entry_id
@@ -308,14 +307,14 @@ impl DirectoryContextHandle {
         let directory_path = entry.path.clone();
         let directory_full_path = worktree_ref.full_path(&directory_path).into();
         let worktree_id = worktree_ref.id();
-        
+
         // Generate tree structure
         let mut stats = DirectoryStats {
             file_count: 0,
             dir_count: 0,
             total_size_bytes: 0,
         };
-        
+
         let tree_str = generate_tree_structure(
             worktree_ref,
             &directory_path,
@@ -325,7 +324,7 @@ impl DirectoryContextHandle {
             5, // Max depth for tree display
             &mut stats,
         );
-        
+
         // Collect important files that should have their content included
         let mut important_file_paths = Vec::new();
         for entry in worktree_ref.entries(false, 0) {
@@ -339,7 +338,7 @@ impl DirectoryContextHandle {
                 }
             }
         }
-        
+
         // Prepare data for loading important files
         let important_file_info: Vec<_> = important_file_paths
             .into_iter()
@@ -350,17 +349,20 @@ impl DirectoryContextHandle {
                     .ok()
                     .map(|p| p.into())
                     .unwrap_or_else(|| path.clone());
-                
+
                 (full_path, rel_path, path)
             })
             .collect();
-        
+
         let important_file_tasks: Vec<_> = important_file_info
             .iter()
             .map(|(_, _, path)| {
                 project.update(cx, |project, cx| {
                     project.buffer_store().update(cx, |buffer_store, cx| {
-                        let project_path = ProjectPath { worktree_id, path: path.clone() };
+                        let project_path = ProjectPath {
+                            worktree_id,
+                            path: path.clone(),
+                        };
                         buffer_store.open_buffer(project_path, cx)
                     })
                 })
@@ -378,21 +380,24 @@ impl DirectoryContextHandle {
                         let rope = buffer
                             .read_with(cx, |buffer, _cx| buffer.as_rope().clone())
                             .log_err()?;
-                        
+
                         let content = MarkdownCodeBlock {
                             tag: &codeblock_tag(&full_path, None),
                             text: &rope.to_string(),
                         }
                         .to_string()
                         .into();
-                        
-                        Some((DirectoryContextFile {
-                            rel_path,
-                            size_bytes: 0, // Size not available from Entry
-                            content: Some(content),
-                        }, buffer))
+
+                        Some((
+                            DirectoryContextFile {
+                                rel_path,
+                                size_bytes: 0, // Size not available from Entry
+                                content: Some(content),
+                            },
+                            buffer,
+                        ))
                     })
-                })
+                }),
         );
 
         let tree_structure = tree_str.into();
@@ -401,12 +406,9 @@ impl DirectoryContextHandle {
         let total_size_bytes = stats.total_size_bytes;
 
         cx.background_spawn(async move {
-            let (important_files, buffers): (Vec<_>, Vec<_>) = important_files_future
-                .await
-                .into_iter()
-                .flatten()
-                .unzip();
-            
+            let (important_files, buffers): (Vec<_>, Vec<_>) =
+                important_files_future.await.into_iter().flatten().unzip();
+
             let context = AgentContext::Directory(DirectoryContext {
                 handle: self,
                 full_path: directory_full_path,
@@ -429,11 +431,11 @@ impl Display for DirectoryContext {
         writeln!(f, "Total directories: {}", self.dir_count)?;
         writeln!(f, "Total size: {}", format_file_size(self.total_size_bytes))?;
         writeln!(f)?;
-        
+
         // Write tree structure
         writeln!(f, "Structure:")?;
         write!(f, "{}", self.tree_structure)?;
-        
+
         // Write important file contents if any
         if !self.important_files.is_empty() {
             writeln!(f)?;
@@ -445,7 +447,7 @@ impl Display for DirectoryContext {
                 }
             }
         }
-        
+
         Ok(())
     }
 }
@@ -1073,7 +1075,6 @@ pub fn load_context(
     })
 }
 
-
 #[derive(Debug)]
 struct DirectoryStats {
     file_count: usize,
@@ -1095,7 +1096,7 @@ fn generate_tree_structure(
     }
 
     let mut result = String::new();
-    
+
     let entries = worktree.child_entries(path);
     let mut sorted_entries: Vec<_> = entries.collect();
     sorted_entries.sort_by(|a, b| {
@@ -1109,17 +1110,22 @@ fn generate_tree_structure(
 
     for (index, entry) in sorted_entries.iter().enumerate() {
         let is_last_entry = index == sorted_entries.len() - 1;
-        let connector = if is_last_entry { "└── " } else { "├── " };
-        
-        let name = entry.path
+        let connector = if is_last_entry {
+            "└── "
+        } else {
+            "├── "
+        };
+
+        let name = entry
+            .path
             .file_name()
             .and_then(|name| name.to_str())
             .unwrap_or("<unnamed>");
-        
+
         if entry.is_dir() {
             stats.dir_count += 1;
             result.push_str(&format!("{}{}{}/\n", prefix, connector, name));
-            
+
             let new_prefix = format!("{}{}   ", prefix, if is_last_entry { " " } else { "│" });
             result.push_str(&generate_tree_structure(
                 worktree,
@@ -1136,7 +1142,7 @@ fn generate_tree_structure(
             result.push_str(&format!("{}{}{}\n", prefix, connector, name));
         }
     }
-    
+
     result
 }
 
@@ -1144,12 +1150,12 @@ fn format_file_size(bytes: u64) -> String {
     const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
     let mut size = bytes as f64;
     let mut unit_index = 0;
-    
+
     while size >= 1024.0 && unit_index < UNITS.len() - 1 {
         size /= 1024.0;
         unit_index += 1;
     }
-    
+
     if unit_index == 0 {
         format!("{} {}", bytes, UNITS[unit_index])
     } else {
@@ -1172,13 +1178,13 @@ fn should_include_file_content(path: &Path, _size_bytes: u64) -> bool {
         "docker-compose.yml",
         ".gitignore",
     ];
-    
+
     if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
         if important_files.contains(&file_name) {
             return true;
         }
     }
-    
+
     false
 }
 
