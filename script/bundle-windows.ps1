@@ -25,12 +25,13 @@ if ($Help) {
 
 Push-Location -Path crates/oppla
 $channel = Get-Content "RELEASE_CHANNEL"
-$env:ZED_RELEASE_CHANNEL = $channel
+$env:OPPLA_RELEASE_CHANNEL = $channel
+$env:ZED_RELEASE_CHANNEL = $channel  # Keep for backward compatibility
 Pop-Location
 
 function CheckEnvironmentVariables {
     $requiredVars = @(
-        'ZED_WORKSPACE', 'RELEASE_VERSION', 'ZED_RELEASE_CHANNEL'
+        'ZED_WORKSPACE', 'RELEASE_VERSION', 'OPPLA_RELEASE_CHANNEL'
     )
     
     $optionalVars = @(
@@ -84,11 +85,11 @@ function GenerateLicenses {
     $ErrorActionPreference = $oldErrorActionPreference
 }
 
-function BuildZedAndItsFriends {
-    Write-Output "Building Zed and its friends, for channel: $channel"
-    # Build zed.exe, cli.exe and auto_update_helper.exe
-    cargo build --release --package zed --package cli --package auto_update_helper
-    Copy-Item -Path ".\target\release\zed.exe" -Destination "$innoDir\Zed.exe" -Force
+function BuildOpplaAndItsFriends {
+    Write-Output "Building Oppla and its friends, for channel: $channel"
+    # Build oppla.exe, cli.exe and auto_update_helper.exe
+    cargo build --release --package oppla --package cli --package auto_update_helper
+    Copy-Item -Path ".\target\release\oppla.exe" -Destination "$innoDir\Oppla.exe" -Force
     Copy-Item -Path ".\target\release\cli.exe" -Destination "$innoDir\cli.exe" -Force
     Copy-Item -Path ".\target\release\auto_update_helper.exe" -Destination "$innoDir\auto_update_helper.exe" -Force
     # Build explorer_command_injector.dll
@@ -103,18 +104,18 @@ function BuildZedAndItsFriends {
             cargo build --release --package explorer_command_injector
         }
     }
-    Copy-Item -Path ".\target\release\explorer_command_injector.dll" -Destination "$innoDir\zed_explorer_command_injector.dll" -Force
+    Copy-Item -Path ".\target\release\explorer_command_injector.dll" -Destination "$innoDir\oppla_explorer_command_injector.dll" -Force
 }
 
-function ZipZedAndItsFriendsDebug {
+function ZipOpplaAndItsFriendsDebug {
     $items = @(
-        ".\target\release\zed.pdb",
+        ".\target\release\oppla.pdb",
         ".\target\release\cli.pdb",
         ".\target\release\auto_update_helper.pdb",
         ".\target\release\explorer_command_injector.pdb"
     )
 
-    Compress-Archive -Path $items -DestinationPath ".\target\release\zed-$env:RELEASE_VERSION-$env:ZED_RELEASE_CHANNEL.dbg.zip" -Force
+    Compress-Archive -Path $items -DestinationPath ".\target\release\oppla-$env:RELEASE_VERSION-$env:OPPLA_RELEASE_CHANNEL.dbg.zip" -Force
 }
 
 function MakeAppx {
@@ -131,81 +132,81 @@ function MakeAppx {
     }
     Copy-Item -Path "$manifestFile" -Destination "$innoDir\make_appx\AppxManifest.xml"
     # Add makeAppx.exe to Path
-    $sdk = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64"
+    $sdk = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
     $env:Path += ';' + $sdk
-    makeAppx.exe pack /d "$innoDir\make_appx" /p "$innoDir\zed_explorer_command_injector.appx" /nv
+    makeAppx.exe pack /d "$innoDir\make_appx" /p "$innoDir\oppla_explorer_command_injector.appx" /nv
 }
 
-function SignZedAndItsFriends {
-    $files = "$innoDir\Zed.exe,$innoDir\cli.exe,$innoDir\auto_update_helper.exe,$innoDir\zed_explorer_command_injector.dll,$innoDir\zed_explorer_command_injector.appx"
+function SignOpplaAndItsFriends {
+    $files = "$innoDir\Oppla.exe,$innoDir\cli.exe,$innoDir\auto_update_helper.exe,$innoDir\oppla_explorer_command_injector.dll,$innoDir\oppla_explorer_command_injector.appx"
     & "$innoDir\sign.ps1" $files
 }
 
 function CollectFiles {
-    Move-Item -Path "$innoDir\zed_explorer_command_injector.appx" -Destination "$innoDir\appx\zed_explorer_command_injector.appx" -Force
-    Move-Item -Path "$innoDir\zed_explorer_command_injector.dll" -Destination "$innoDir\appx\zed_explorer_command_injector.dll" -Force
-    Move-Item -Path "$innoDir\cli.exe" -Destination "$innoDir\bin\zed.exe" -Force
+    Move-Item -Path "$innoDir\oppla_explorer_command_injector.appx" -Destination "$innoDir\appx\oppla_explorer_command_injector.appx" -Force
+    Move-Item -Path "$innoDir\oppla_explorer_command_injector.dll" -Destination "$innoDir\appx\oppla_explorer_command_injector.dll" -Force
+    Move-Item -Path "$innoDir\cli.exe" -Destination "$innoDir\bin\oppla.exe" -Force
     Move-Item -Path "$innoDir\auto_update_helper.exe" -Destination "$innoDir\tools\auto_update_helper.exe" -Force
 }
 
 function BuildInstaller {
-    $issFilePath = "$innoDir\zed.iss"
+    $issFilePath = "$innoDir\oppla.iss"
     switch ($channel) {
         "stable" {
             $appId = "{{2DB0DA96-CA55-49BB-AF4F-64AF36A86712}"
             $appIconName = "app-icon"
-            $appName = "Zed"
-            $appDisplayName = "Zed"
-            $appSetupName = "ZedEditorUserSetup-x64-$env:RELEASE_VERSION"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Stable-Instance-Mutex"
-            $appExeName = "Zed"
-            $regValueName = "Zed"
-            $appUserId = "ZedIndustries.Zed"
-            $appShellNameShort = "Z&ed"
-            $appAppxFullName = "ZedIndustries.Zed_1.0.0.0_neutral__japxn1gcva8rg"
+            $appName = "Oppla"
+            $appDisplayName = "Oppla"
+            $appSetupName = "OpplaEditorUserSetup-x64-$env:RELEASE_VERSION"
+            # The mutex name here should match the mutex name in crates\oppla\src\oppla\windows_only_instance.rs
+            $appMutex = "Oppla-Stable-Instance-Mutex"
+            $appExeName = "Oppla"
+            $regValueName = "Oppla"
+            $appUserId = "OpplaIndustries.Oppla"
+            $appShellNameShort = "O&ppla"
+            $appAppxFullName = "OpplaIndustries.Oppla_1.0.0.0_neutral__japxn1gcva8rg"
         }
         "preview" {
             $appId = "{{F70E4811-D0E2-4D88-AC99-D63752799F95}"
             $appIconName = "app-icon-preview"
-            $appName = "Zed Preview"
-            $appDisplayName = "Zed Preview"
-            $appSetupName = "ZedEditorUserSetup-x64-$env:RELEASE_VERSION-preview"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Preview-Instance-Mutex"
-            $appExeName = "Zed"
-            $regValueName = "ZedPreview"
-            $appUserId = "ZedIndustries.Zed.Preview"
-            $appShellNameShort = "Z&ed Preview"
-            $appAppxFullName = "ZedIndustries.Zed.Preview_1.0.0.0_neutral__japxn1gcva8rg"
+            $appName = "Oppla Preview"
+            $appDisplayName = "Oppla Preview"
+            $appSetupName = "OpplaEditorUserSetup-x64-$env:RELEASE_VERSION-preview"
+            # The mutex name here should match the mutex name in crates\oppla\src\oppla\windows_only_instance.rs
+            $appMutex = "Oppla-Preview-Instance-Mutex"
+            $appExeName = "Oppla"
+            $regValueName = "OpplaPreview"
+            $appUserId = "OpplaIndustries.Oppla.Preview"
+            $appShellNameShort = "O&ppla Preview"
+            $appAppxFullName = "OpplaIndustries.Oppla.Preview_1.0.0.0_neutral__japxn1gcva8rg"
         }
         "nightly" {
             $appId = "{{1BDB21D3-14E7-433C-843C-9C97382B2FE0}"
             $appIconName = "app-icon-nightly"
-            $appName = "Zed Nightly"
-            $appDisplayName = "Zed Nightly"
-            $appSetupName = "ZedEditorUserSetup-x64-$env:RELEASE_VERSION-nightly"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Nightly-Instance-Mutex"
-            $appExeName = "Zed"
-            $regValueName = "ZedNightly"
-            $appUserId = "ZedIndustries.Zed.Nightly"
-            $appShellNameShort = "Z&ed Editor Nightly"
-            $appAppxFullName = "ZedIndustries.Zed.Nightly_1.0.0.0_neutral__japxn1gcva8rg"
+            $appName = "Oppla Nightly"
+            $appDisplayName = "Oppla Nightly"
+            $appSetupName = "OpplaEditorUserSetup-x64-$env:RELEASE_VERSION-nightly"
+            # The mutex name here should match the mutex name in crates\oppla\src\oppla\windows_only_instance.rs
+            $appMutex = "Oppla-Nightly-Instance-Mutex"
+            $appExeName = "Oppla"
+            $regValueName = "OpplaNightly"
+            $appUserId = "OpplaIndustries.Oppla.Nightly"
+            $appShellNameShort = "O&ppla Editor Nightly"
+            $appAppxFullName = "OpplaIndustries.Oppla.Nightly_1.0.0.0_neutral__japxn1gcva8rg"
         }
         "dev" {
             $appId = "{{8357632E-24A4-4F32-BA97-E575B4D1FE5D}"
             $appIconName = "app-icon-dev"
-            $appName = "Zed Dev"
-            $appDisplayName = "Zed Dev"
-            $appSetupName = "ZedEditorUserSetup-x64-$env:RELEASE_VERSION-dev"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Dev-Instance-Mutex"
-            $appExeName = "Zed"
-            $regValueName = "ZedDev"
-            $appUserId = "ZedIndustries.Zed.Dev"
-            $appShellNameShort = "Z&ed Dev"
-            $appAppxFullName = "ZedIndustries.Zed.Dev_1.0.0.0_neutral__japxn1gcva8rg"
+            $appName = "Oppla Dev"
+            $appDisplayName = "Oppla Dev"
+            $appSetupName = "OpplaEditorUserSetup-x64-$env:RELEASE_VERSION-dev"
+            # The mutex name here should match the mutex name in crates\oppla\src\oppla\windows_only_instance.rs
+            $appMutex = "Oppla-Dev-Instance-Mutex"
+            $appExeName = "Oppla"
+            $regValueName = "OpplaDev"
+            $appUserId = "OpplaIndustries.Oppla.Dev"
+            $appShellNameShort = "O&ppla Dev"
+            $appAppxFullName = "OpplaIndustries.Oppla.Dev_1.0.0.0_neutral__japxn1gcva8rg"
         }
         default {
             Write-Error "can't bundle installer for $channel."
@@ -271,22 +272,22 @@ $env:RELEASE_VERSION = $version
 CheckEnvironmentVariables
 PrepareForBundle
 GenerateLicenses
-BuildZedAndItsFriends
+BuildOpplaAndItsFriends
 MakeAppx
-SignZedAndItsFriends
-ZipZedAndItsFriendsDebug
+SignOpplaAndItsFriends
+ZipOpplaAndItsFriendsDebug
 CollectFiles
 BuildInstaller
 
-$debugArchive = ".\target\release\zed-$env:RELEASE_VERSION-$env:ZED_RELEASE_CHANNEL.dbg.zip"
-$debugStoreKey = "$env:ZED_RELEASE_CHANNEL/zed-$env:RELEASE_VERSION-$env:ZED_RELEASE_CHANNEL.dbg.zip"
-UploadToBlobStorePublic -BucketName "zed-debug-symbols" -FileToUpload $debugArchive -BlobStoreKey $debugStoreKey
+$debugArchive = ".\target\release\oppla-$env:RELEASE_VERSION-$env:OPPLA_RELEASE_CHANNEL.dbg.zip"
+$debugStoreKey = "$env:OPPLA_RELEASE_CHANNEL/oppla-$env:RELEASE_VERSION-$env:OPPLA_RELEASE_CHANNEL.dbg.zip"
+UploadToBlobStorePublic -BucketName "oppla-debug-symbols" -FileToUpload $debugArchive -BlobStoreKey $debugStoreKey
 
 if ($buildSuccess) {
     Write-Output "Build successful"
     if ($Install) {
-        Write-Output "Installing Zed..."
-        Start-Process -FilePath "$env:ZED_WORKSPACE/target/ZedEditorUserSetup-x64-$env:RELEASE_VERSION.exe"
+        Write-Output "Installing Oppla..."
+        Start-Process -FilePath "$env:ZED_WORKSPACE/target/OpplaEditorUserSetup-x64-$env:RELEASE_VERSION.exe"
     }
     exit 0
 }

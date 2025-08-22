@@ -1,4 +1,4 @@
-name: Oppla Build (macOS & Linux)
+name: Oppla Build (macOS, Linux & Windows)
 
 on:
   push:
@@ -23,6 +23,7 @@ on:
           - linux-only
           - linux-x86_64-only
           - linux-aarch64-only
+          - windows-only
 
 permissions:
   contents: write  # Required for creating releases and uploading artifacts
@@ -287,11 +288,110 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ============================================
+  # Windows x86_64 Build Job
+  # ============================================
+  windows_x86_64_bundle:
+    timeout-minutes: 90
+    name: Windows x86_64 Build
+    runs-on: windows-2022  # GitHub-hosted Windows runner with VS 2022
+    if: |
+      (github.event_name == 'workflow_dispatch' && contains('all windows-only', github.event.inputs.platforms)) ||
+      github.event_name == 'push' ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      contains(github.event.pull_request.labels.*.name, 'build-windows')
+    env:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ACCOUNT_NAME: ${{ secrets.ACCOUNT_NAME }}
+      CERT_PROFILE_NAME: ${{ secrets.CERT_PROFILE_NAME }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      FILE_DIGEST: ${{ secrets.FILE_DIGEST }}
+      TIMESTAMP_DIGEST: ${{ secrets.TIMESTAMP_DIGEST }}
+      TIMESTAMP_SERVER: ${{ secrets.TIMESTAMP_SERVER }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install Inno Setup
+        shell: powershell
+        run: |
+          Write-Host "Downloading Inno Setup..."
+          Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "innosetup.exe"
+          Write-Host "Installing Inno Setup..."
+          Start-Process -FilePath ".\innosetup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-" -Wait
+          Write-Host "Inno Setup installed"
+
+      - name: Determine version and release channel
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: powershell
+        run: |
+          $VERSION = "${{ github.ref }}".Replace("refs/tags/", "")
+          echo "RELEASE_VERSION=$VERSION" >> $env:GITHUB_ENV
+          if ($VERSION -like "*-pre") {
+            echo "RELEASE_CHANNEL=preview" >> $env:GITHUB_ENV
+          } else {
+            echo "RELEASE_CHANNEL=stable" >> $env:GITHUB_ENV
+          }
+
+      - name: Set ZED_WORKSPACE environment variable
+        shell: powershell
+        run: |
+          echo "ZED_WORKSPACE=${{ github.workspace }}" >> $env:GITHUB_ENV
+
+      - name: Build Windows Bundle
+        shell: powershell
+        run: |
+          $env:ZED_WORKSPACE = "${{ github.workspace }}"
+          # Skip Azure signing if credentials not available
+          if ([string]::IsNullOrEmpty("${{ secrets.AZURE_TENANT_ID }}")) {
+            Write-Host "No Azure signing credentials found, building without code signing"
+          }
+          .\script\bundle-windows.ps1
+
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: oppla-${{ github.sha }}-windows-x86_64-installer
+          path: target/OpplaEditorUserSetup-x64-*.exe
+          retention-days: 7
+
+      - name: Upload Windows artifacts to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          draft: true
+          prerelease: ${{ env.RELEASE_CHANNEL == 'preview' }}
+          files: |
+            target/OpplaEditorUserSetup-x64-*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
   # Summary Job (runs after all builds complete)
   # ============================================
   build_summary:
     name: Build Summary
-    needs: [macos_bundle, linux_x86_64_bundle, linux_aarch64_bundle]
+    needs: [macos_bundle, linux_x86_64_bundle, linux_aarch64_bundle, windows_x86_64_bundle]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -324,10 +424,19 @@ jobs:
             echo "❌ Linux aarch64 build: FAILED"
           fi
           
+          if [[ "${{ needs.windows_x86_64_bundle.result }}" == "success" ]]; then
+            echo "✅ Windows x86_64 build: SUCCESS"
+          elif [[ "${{ needs.windows_x86_64_bundle.result }}" == "skipped" ]]; then
+            echo "⏭️  Windows x86_64 build: SKIPPED"
+          else
+            echo "❌ Windows x86_64 build: FAILED"
+          fi
+          
           # Fail if any required job failed
           if [[ "${{ needs.macos_bundle.result }}" == "failure" ]] || \
              [[ "${{ needs.linux_x86_64_bundle.result }}" == "failure" ]] || \
-             [[ "${{ needs.linux_aarch64_bundle.result }}" == "failure" ]]; then
+             [[ "${{ needs.linux_aarch64_bundle.result }}" == "failure" ]] || \
+             [[ "${{ needs.windows_x86_64_bundle.result }}" == "failure" ]]; then
             echo ""
             echo "❌ One or more builds failed!"
             exit 1
