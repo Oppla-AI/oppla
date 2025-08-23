@@ -642,7 +642,7 @@ wasmtime = { version = "29", default-features = false, features = [
 ] }
 wasmtime-wasi = "29"
 which = "6.0.0"
-windows = { version = "0.61", features = ["Win32_System_Console"] }
+windows = { version = "0.61", features = ["Win32", "Win32_System", "Win32_System_Console", "Win32_Foundation"] }
 windows-core = "0.61"
 wit-component = "0.221"
 workspace-hack = "0.1.0"

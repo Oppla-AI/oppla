@@ -76,8 +76,9 @@ jobs:
           xcode-select -p
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          toolchain: stable
           components: rustfmt, clippy
 
       - name: Cache cargo registry
@@ -337,9 +338,10 @@ jobs:
           Add-Content "$env:USERPROFILE\.cargo\config.toml" "git-fetch-with-cli = true" -ErrorAction SilentlyContinue
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          targets: x86_64-pc-windows-msvc
+          toolchain: stable
+          target: x86_64-pc-windows-msvc
           components: rustfmt, clippy
 
       - name: Cache cargo registry
