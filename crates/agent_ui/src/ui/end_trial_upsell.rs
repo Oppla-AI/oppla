@@ -33,7 +33,7 @@ impl RenderOnce for EndTrialUpsell {
             )
             .child(
                 List::new()
-                    .child(BulletItem::new("500 prompts with Claude models"))
+                    .child(BulletItem::new("500 prompts with our Premium Models"))
                     .child(BulletItem::new(
                         "Unlimited edit predictions with Zeta, our open-source model",
                     )),
@@ -70,7 +70,7 @@ impl RenderOnce for EndTrialUpsell {
             )
             .child(
                 List::new()
-                    .child(BulletItem::new("50 prompts with the Claude models"))
+                    .child(BulletItem::new("50 prompts with the Oppla hosted models"))
                     .child(BulletItem::new("2,000 accepted edit predictions")),
             );
 

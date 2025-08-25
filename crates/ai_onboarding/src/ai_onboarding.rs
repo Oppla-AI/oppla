@@ -151,18 +151,20 @@ impl ZedAiOnboarding {
             )
             .child(
                 List::new()
-                    .child(BulletItem::new("50 prompts per month with Claude models"))
                     .child(BulletItem::new(
-                        "2,000 accepted edit predictions with Zeta, our open-source model",
+                        "50 prompts per month with Oppla hosted models",
+                    ))
+                    .child(BulletItem::new(
+                        "2,000 accepted edit predictions with Oppla, our open-source model",
                     )),
             )
     }
 
     fn pro_trial_definition(&self) -> impl IntoElement {
         List::new()
-            .child(BulletItem::new("150 prompts with Claude models"))
+            .child(BulletItem::new("150 prompts with Oppla hosted models"))
             .child(BulletItem::new(
-                "Unlimited accepted edit predictions with Zeta, our open-source model",
+                "Unlimited accepted edit predictions with Oppla, our open-source model",
             ))
     }
 
@@ -182,9 +184,11 @@ impl ZedAiOnboarding {
                 )
                 .child(
                     List::new()
-                        .child(BulletItem::new("500 prompts per month with Claude models"))
                         .child(BulletItem::new(
-                            "Unlimited accepted edit predictions with Zeta, our open-source model",
+                            "500 prompts per month with our Premium Models",
+                        ))
+                        .child(BulletItem::new(
+                            "Unlimited accepted edit predictions with Oppla, our open-source model",
                         ))
                         .child(BulletItem::new("$20 USD per month")),
                 )
@@ -343,9 +347,9 @@ impl ZedAiOnboarding {
             )
             .child(
                 List::new()
-                    .child(BulletItem::new("150 prompts with Claude models"))
+                    .child(BulletItem::new("150 prompts with Oppla hosted models"))
                     .child(BulletItem::new(
-                        "Unlimited edit predictions with Zeta, our open-source model",
+                        "Unlimited edit predictions with Oppla, our open-source model",
                     )),
             )
             .when_some(
@@ -382,9 +386,9 @@ impl ZedAiOnboarding {
             )
             .child(
                 List::new()
-                    .child(BulletItem::new("500 prompts with Claude models"))
+                    .child(BulletItem::new("500 prompts with our Premium Models"))
                     .child(BulletItem::new(
-                        "Unlimited edit predictions with Zeta, our open-source model",
+                        "Unlimited edit predictions with Oppla, our open-source model",
                     )),
             )
             .child(
