@@ -1183,7 +1183,7 @@ mod tests {
         });
 
         thread
-            .update(cx, |thread, cx| thread.send_raw("Hello from Zed!", cx))
+            .update(cx, |thread, cx| thread.send_raw("Hello from Oppla!", cx))
             .await
             .unwrap();
 
@@ -1193,7 +1193,7 @@ mod tests {
             indoc! {r#"
             ## User
 
-            Hello from Zed!
+            Hello from Oppla!
 
             ## Assistant
 

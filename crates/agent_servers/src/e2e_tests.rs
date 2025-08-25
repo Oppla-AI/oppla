@@ -18,7 +18,7 @@ pub async fn test_basic(server: impl AgentServer + 'static, cx: &mut TestAppCont
     let thread = new_test_thread(server, project.clone(), "/private/tmp", cx).await;
 
     thread
-        .update(cx, |thread, cx| thread.send_raw("Hello from Zed!", cx))
+        .update(cx, |thread, cx| thread.send_raw("Hello from Oppla!", cx))
         .await
         .unwrap();
 

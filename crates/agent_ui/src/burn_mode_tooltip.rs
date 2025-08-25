@@ -19,9 +19,9 @@ impl BurnModeTooltip {
 impl Render for BurnModeTooltip {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let (icon, color) = if self.selected {
-            (IconName::ZedBurnModeOn, Color::Error)
+            (IconName::OpplaBurnModeOn, Color::Error)
         } else {
-            (IconName::ZedBurnMode, Color::Default)
+            (IconName::OpplaBurnMode, Color::Default)
         };
 
         let turned_on = h_flex()

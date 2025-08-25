@@ -279,7 +279,7 @@ impl Render for Onboarding {
                                     .items_center()
                                     .child(Headline::new("Welcome to Oppla"))
                                     .child(
-                                        Label::new("The editor for what's next")
+                                        Label::new("From idea to app — and beyond.")
                                             .color(Color::Muted)
                                             .italic(),
                                     ),

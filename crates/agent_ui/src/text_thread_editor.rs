@@ -1987,9 +1987,9 @@ impl TextThreadEditor {
         let active_completion_mode = context.completion_mode();
         let burn_mode_enabled = active_completion_mode == CompletionMode::Burn;
         let icon = if burn_mode_enabled {
-            IconName::ZedBurnModeOn
+            IconName::OpplaBurnModeOn
         } else {
-            IconName::ZedBurnMode
+            IconName::OpplaBurnMode
         };
 
         Some(

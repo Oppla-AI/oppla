@@ -18,7 +18,7 @@ pub struct ClaudeZedMcpServer {
     server: context_server::listener::McpServer,
 }
 
-pub const SERVER_NAME: &str = "zed";
+pub const SERVER_NAME: &str = "oppla";
 
 impl ClaudeZedMcpServer {
     pub async fn new(

@@ -240,9 +240,9 @@ impl Render for InlineCompletionButton {
                 let enabled = self.editor_enabled.unwrap_or(true);
 
                 let zeta_icon = if enabled {
-                    IconName::ZedPredict
+                    IconName::OpplaPredict
                 } else {
-                    IconName::ZedPredictDisabled
+                    IconName::OpplaPredictDisabled
                 };
 
                 if zeta::should_show_upsell_modal(&self.user_store, cx) {
@@ -648,7 +648,7 @@ impl InlineCompletionButton {
             menu = menu.item(
                 ContextMenuEntry::new("This file is excluded.")
                     .disabled(true)
-                    .icon(IconName::ZedPredictDisabled)
+                    .icon(IconName::OpplaPredictDisabled)
                     .icon_size(IconSize::Small),
             );
         }

@@ -9011,7 +9011,7 @@ impl Editor {
                 el.bg(status_colors.error_background)
                     .border_color(status_colors.error.opacity(0.6))
                     .pl_2()
-                    .child(Icon::new(IconName::ZedPredictError).color(Color::Error))
+                    .child(Icon::new(IconName::OpplaPredictError).color(Color::Error))
                     .cursor_default()
                     .hoverable_tooltip(move |_window, cx| {
                         cx.new(|_| MissingEditPredictionKeybindingTooltip).into()
@@ -9094,7 +9094,7 @@ impl Editor {
                         h_flex()
                             .flex_1()
                             .gap_2()
-                            .child(Icon::new(IconName::ZedPredict))
+                            .child(Icon::new(IconName::OpplaPredict))
                             .child(Label::new("Accept Terms of Service"))
                             .child(div().w_full())
                             .child(
@@ -9115,7 +9115,7 @@ impl Editor {
                 .h_full()
                 .flex_1()
                 .gap_2()
-                .child(Icon::new(IconName::ZedPredict))
+                .child(Icon::new(IconName::OpplaPredict))
         }
 
         let completion = match &self.active_inline_completion {
@@ -9140,12 +9140,12 @@ impl Editor {
                                     use text::ToPoint as _;
                                     if target.text_anchor.to_point(&snapshot).row > cursor_point.row
                                     {
-                                        Icon::new(IconName::ZedPredictDown)
+                                        Icon::new(IconName::OpplaPredictDown)
                                     } else {
-                                        Icon::new(IconName::ZedPredictUp)
+                                        Icon::new(IconName::OpplaPredictUp)
                                     }
                                 }
-                                InlineCompletion::Edit { .. } => Icon::new(IconName::ZedPredict),
+                                InlineCompletion::Edit { .. } => Icon::new(IconName::OpplaPredict),
                             }))
                             .child(
                                 h_flex()
@@ -9330,9 +9330,9 @@ impl Editor {
                     .flex_1()
                     .child(
                         if target.text_anchor.to_point(&snapshot).row > cursor_point.row {
-                            Icon::new(IconName::ZedPredictDown)
+                            Icon::new(IconName::OpplaPredictDown)
                         } else {
-                            Icon::new(IconName::ZedPredictUp)
+                            Icon::new(IconName::OpplaPredictUp)
                         },
                     )
                     .child(Label::new("Jump to Edit")),
@@ -9368,7 +9368,7 @@ impl Editor {
                     render_relative_row_jump("", cursor_point.row, first_edit_row)
                         .into_any_element()
                 } else {
-                    Icon::new(IconName::ZedPredict).into_any_element()
+                    Icon::new(IconName::OpplaPredict).into_any_element()
                 };
 
                 Some(

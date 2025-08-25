@@ -624,7 +624,7 @@ pub trait LanguageModelProvider: 'static {
     fn id(&self) -> LanguageModelProviderId;
     fn name(&self) -> LanguageModelProviderName;
     fn icon(&self) -> IconName {
-        IconName::ZedAssistant
+        IconName::OpplaAssistant
     }
     fn default_model(&self, cx: &App) -> Option<Arc<dyn LanguageModel>>;
     fn default_fast_model(&self, cx: &App) -> Option<Arc<dyn LanguageModel>>;

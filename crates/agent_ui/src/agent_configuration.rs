@@ -608,6 +608,7 @@ impl AgentConfiguration {
                     // Build the URL with token and callback port
                     let url = format!(
                         "https://app.oppla.ai/home/ide?token={}&callback_port={}",
+                        //"http://localhost:3001/home/ide?token={}&callback_port={}",
                         token, port
                     );
 
@@ -1028,12 +1029,12 @@ impl AgentConfiguration {
 
         let (source_icon, source_tooltip) = if is_from_extension {
             (
-                IconName::ZedMcpExtension,
+                IconName::OpplaMcpExtension,
                 "This MCP server was installed from an extension.",
             )
         } else {
             (
-                IconName::ZedMcpCustom,
+                IconName::OpplaMcpCustom,
                 "This custom MCP server was installed directly.",
             )
         };

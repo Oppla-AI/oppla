@@ -2863,7 +2863,7 @@ impl AgentPanel {
 
         if can_enable_burn_mode {
             let burn_mode_button = Button::new("enable_burn_retry", "Enable Burn Mode and Retry")
-                .icon(IconName::ZedBurnMode)
+                .icon(IconName::OpplaBurnMode)
                 .icon_position(IconPosition::Start)
                 .icon_size(IconSize::Small)
                 .label_size(LabelSize::Small)

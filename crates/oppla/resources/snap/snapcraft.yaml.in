@@ -2,10 +2,10 @@ name: oppla
 title: Oppla
 base: core24
 version: "$RELEASE_VERSION"
-summary: The editor for what's next
+summary: From idea to app — and beyond.
 description: |
-  Oppla is a modern open-source code editor, built from the ground up in Rust with
-  a GPU-accelerated renderer. We help you build software faster than ever before.
+  Oppla is an AI platform for building and validating products: analyze feedback and signals,
+  prioritize opportunities, run experiments with feature flags, and generate context-aware code to go from prototype to production.
 grade: stable
 confinement: classic
 compression: lzo

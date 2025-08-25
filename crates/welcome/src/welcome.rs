@@ -117,7 +117,7 @@ impl Render for WelcomePage {
                             )
                             .child(
                                 h_flex().w_full().justify_center().child(
-                                    Label::new("The editor for what's next")
+                                    Label::new("From idea to app — and beyond.")
                                         .color(Color::Muted)
                                         .italic(),
                                 ),
@@ -181,7 +181,7 @@ impl Render for WelcomePage {
                                                 edit_prediction_label,
                                             )
                                             .disabled(edit_prediction_provider_is_zed)
-                                            .icon(IconName::ZedPredict)
+                                            .icon(IconName::OpplaPredict)
                                             .icon_size(IconSize::XSmall)
                                             .icon_color(Color::Muted)
                                             .icon_position(IconPosition::Start)

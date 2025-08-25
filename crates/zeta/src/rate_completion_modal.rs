@@ -578,7 +578,7 @@ impl Render for RateCompletionModal {
                             .border_b_1()
                             .border_color(border_color)
                             .child(
-                                Icon::new(IconName::ZedPredict)
+                                Icon::new(IconName::OpplaPredict)
                                     .size(IconSize::Small)
                             )
                             .child(
