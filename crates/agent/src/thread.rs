@@ -460,7 +460,20 @@ impl Thread {
         cx: &mut Context<Self>,
     ) -> Self {
         let (detailed_summary_tx, detailed_summary_rx) = postage::watch::channel();
-        let configured_model = LanguageModelRegistry::read_global(cx).default_model();
+        // Try to get the default model from registry, if not available try cloud provider
+        let mut configured_model = LanguageModelRegistry::read_global(cx).default_model();
+        if configured_model.is_none() {
+            let registry = LanguageModelRegistry::read_global(cx);
+            if let Some(cloud_provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID)
+            {
+                if let Some(default_model) = cloud_provider.default_model(cx) {
+                    configured_model = Some(ConfiguredModel {
+                        provider: cloud_provider.clone(),
+                        model: default_model,
+                    });
+                }
+            }
+        }
         let profile_id = AgentSettings::get_global(cx).default_profile.clone();
 
         Self {
@@ -817,7 +830,23 @@ impl Thread {
 
     pub fn get_or_init_configured_model(&mut self, cx: &App) -> Option<ConfiguredModel> {
         if self.configured_model.is_none() {
+            // First try to get the default from the registry
             self.configured_model = LanguageModelRegistry::read_global(cx).default_model();
+
+            // If the registry doesn't have a default, try to get it from the cloud provider
+            if self.configured_model.is_none() {
+                let registry = LanguageModelRegistry::read_global(cx);
+                if let Some(cloud_provider) =
+                    registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID)
+                {
+                    if let Some(default_model) = cloud_provider.default_model(cx) {
+                        self.configured_model = Some(ConfiguredModel {
+                            provider: cloud_provider.clone(),
+                            model: default_model,
+                        });
+                    }
+                }
+            }
         }
         self.configured_model.clone()
     }

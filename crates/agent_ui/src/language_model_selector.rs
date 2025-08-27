@@ -111,6 +111,17 @@ impl LanguageModelPickerDelegate {
                         };
 
                         if needs_update {
+                            // Update the registry's default model
+                            LanguageModelRegistry::global(cx).update(cx, |registry, cx| {
+                                registry.set_default_model(
+                                    Some(ConfiguredModel {
+                                        provider: provider.clone(),
+                                        model: default_model.clone(),
+                                    }),
+                                    cx,
+                                );
+                            });
+
                             // Call the on_model_changed callback to update the thread's model
                             (self.on_model_changed.clone())(default_model, cx);
                         }
@@ -153,6 +164,21 @@ impl LanguageModelPickerDelegate {
                 };
 
                 if needs_update {
+                    // Update the registry's default model
+                    if let Some(cloud_provider) =
+                        registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID)
+                    {
+                        LanguageModelRegistry::global(cx).update(cx, |registry, cx| {
+                            registry.set_default_model(
+                                Some(ConfiguredModel {
+                                    provider: cloud_provider.clone(),
+                                    model: default_model.clone(),
+                                }),
+                                cx,
+                            );
+                        });
+                    }
+
                     (on_model_changed.clone())(default_model, cx);
                 }
             }
@@ -196,6 +222,20 @@ impl LanguageModelPickerDelegate {
                                         };
 
                                         if needs_update {
+                                            // Update the registry's default model
+                                            LanguageModelRegistry::global(cx).update(
+                                                cx,
+                                                |registry, cx| {
+                                                    registry.set_default_model(
+                                                        Some(ConfiguredModel {
+                                                            provider: provider.clone(),
+                                                            model: default_model.clone(),
+                                                        }),
+                                                        cx,
+                                                    );
+                                                },
+                                            );
+
                                             (picker.delegate.on_model_changed.clone())(
                                                 default_model,
                                                 cx,

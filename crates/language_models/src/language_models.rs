@@ -4,7 +4,7 @@ use ::settings::{Settings, SettingsStore};
 use client::{Client, UserStore};
 use collections::HashSet;
 use gpui::{App, Context, Entity};
-use language_model::{LanguageModelProviderId, LanguageModelRegistry};
+use language_model::{ConfiguredModel, LanguageModelProviderId, LanguageModelRegistry};
 use provider::deepseek::DeepSeekLanguageModelProvider;
 
 pub mod provider;
@@ -103,10 +103,23 @@ fn register_language_model_providers(
     client: Arc<Client>,
     cx: &mut Context<LanguageModelRegistry>,
 ) {
-    registry.register_provider(
-        CloudLanguageModelProvider::new(user_store.clone(), client.clone(), cx),
-        cx,
-    );
+    let cloud_provider = CloudLanguageModelProvider::new(user_store.clone(), client.clone(), cx);
+    registry.register_provider(cloud_provider, cx);
+
+    // If registry doesn't have a default model, try to get it from the cloud provider
+    if registry.default_model().is_none() {
+        if let Some(cloud_provider) = registry.provider(&language_model::ZED_CLOUD_PROVIDER_ID) {
+            if let Some(default_model) = cloud_provider.default_model(cx) {
+                registry.set_default_model(
+                    Some(ConfiguredModel {
+                        provider: cloud_provider.clone(),
+                        model: default_model,
+                    }),
+                    cx,
+                );
+            }
+        }
+    }
 
     registry.register_provider(
         AnthropicLanguageModelProvider::new(client.http_client(), cx),

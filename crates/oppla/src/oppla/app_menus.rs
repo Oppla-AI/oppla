@@ -266,7 +266,7 @@ pub fn app_menus() -> Vec<Menu> {
                 MenuItem::action(
                     "Join the Team",
                     super::OpenBrowser {
-                        url: "https://zed.dev/jobs".into(),
+                        url: "https://oppla.ai".into(),
                     },
                 ),
             ],
