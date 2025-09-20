@@ -44,8 +44,8 @@ use std::{
 };
 use theme::ThemeSettings;
 use ui::{
-    ButtonSize, Color, ContextMenu, ContextMenuEntry, ContextMenuItem, DecoratedIcon, IconButton,
-    IconButtonShape, IconDecoration, IconDecorationKind, IconName, IconSize, Indicator, Label,
+    ButtonSize, ButtonStyle, Color, ContextMenu, ContextMenuEntry, ContextMenuItem, DecoratedIcon,
+    IconButton, IconButtonShape, IconDecoration, IconDecorationKind, IconName, IconSize, Indicator,
     PopoverMenu, PopoverMenuHandle, Tab, TabBar, TabPosition, Tooltip, prelude::*,
     right_click_menu,
 };
@@ -3624,9 +3624,39 @@ impl Render for Pane {
                             if has_worktrees {
                                 placeholder
                             } else {
+                                // Enhanced empty state: highlight key features and guide to open a project
                                 placeholder.child(
-                                    Label::new("Open a file or project to get started.")
-                                        .color(Color::Muted),
+                                    v_flex()
+                                        .gap_3()
+                                        .items_center()
+                                        .child(
+                                            Button::new("open-project", "Open a project")
+                                                .icon(IconName::FolderOpen)
+                                                .icon_size(IconSize::XSmall)
+                                                .style(ButtonStyle::Subtle)
+                                                .on_click(|_, window, cx| {
+                                                    window.dispatch_action(
+                                                        oppla_actions::OpenRecent::default()
+                                                            .boxed_clone(),
+                                                        cx,
+                                                    )
+                                                }),
+                                        )
+                                        .child(
+                                            h_flex().gap_4().justify_center().child(
+                                                Button::new("feat-ai", "Oppla AI")
+                                                    .icon(IconName::OpplaAssistant)
+                                                    .icon_size(IconSize::XSmall)
+                                                    .style(ButtonStyle::Subtle)
+                                                    .on_click(|_, window, cx| {
+                                                        window.dispatch_action(
+                                                            oppla_actions::assistant::ToggleFocus
+                                                                .boxed_clone(),
+                                                            cx,
+                                                        )
+                                                    }),
+                                            ),
+                                        ),
                                 )
                             }
                         }

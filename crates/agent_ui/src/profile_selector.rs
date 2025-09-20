@@ -107,15 +107,18 @@ impl ProfileSelector {
         settings: &AgentSettings,
         cx: &App,
     ) -> ContextMenuEntry {
-        let documentation = match profile_name.to_lowercase().as_str() {
+        let documentation = match profile_id.as_str() {
             builtin_profiles::WRITE => Some("Get help to write anything."),
             builtin_profiles::ASK => Some("Chat about your codebase."),
             builtin_profiles::MINIMAL => Some("Chat about anything with no tools."),
             builtin_profiles::ARCHITECT => Some("Design and architect systems."),
             builtin_profiles::DEVOPS => Some("Manage infrastructure and deployments."),
             builtin_profiles::MARKETING_SPECIALIST => {
-                Some("Create marketing content and strategies.")
+                Some("Branding specialist: content, positioning, and strategy.")
             }
+            builtin_profiles::PRODUCT_ENGINEER => Some(
+                "Cross‑functional product engineer: PM, architecture, full‑stack, branding, and DevOps.",
+            ),
             _ => None,
         };
         let thread_profile_id = self.thread.read(cx).profile().id();

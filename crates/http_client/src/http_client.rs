@@ -213,7 +213,7 @@ impl HttpClientWithUrl {
     pub fn build_zed_api_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://app.oppla.ai/home" => "https://api.oppla.dev",
+            "https://oppla.dev" => "https://api.oppla.dev",
             "http://localhost:3000" => "http://localhost:8080",
             other => other,
         };
@@ -228,8 +228,8 @@ impl HttpClientWithUrl {
     pub fn build_zed_llm_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://app.oppla.ai/home" => "https://llm.oppla.dev",
-            //"https://app.oppla.ai/home" => "http://localhost:8787",
+            "https://oppla.dev" => "https://llm.oppla.dev",
+            //"https://oppla.dev" => "http://localhost:8787",
             "http://localhost:3000" => "http://localhost:8787",
             other => other,
         };
@@ -244,7 +244,7 @@ impl HttpClientWithUrl {
     pub fn build_zed_ext_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://app.oppla.ai/home" => "https://api.zed.dev",
+            "https://oppla.dev" => "https://api.zed.dev",
             "http://localhost:3000" => "http://localhost:8080",
             other => other,
         };
@@ -259,7 +259,7 @@ impl HttpClientWithUrl {
     pub fn build_oppla_api_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://app.oppla.ai/home" => "https://app.oppla.ai",
+            "https://oppla.dev" => "https://app.oppla.ai",
             "http://localhost:3000" => "http://localhost:3001",
             other => other,
         };

@@ -934,6 +934,33 @@
           "web_search": true
         }
       }
+      ,
+      "product-engineer": {
+        "name": "Product Engineer",
+        "prompt_template": "product_engineer_system_prompt",
+        "role_description": "Cross‑functional product engineer combining product management, architecture, full‑stack engineering, branding/marketing, and DevOps.",
+        "enable_all_context_servers": true,
+        "tools": {
+          "copy_path": true,
+          "create_directory": true,
+          "delete_path": true,
+          "diagnostics": true,
+          "edit_file": true,
+          "fetch": true,
+          "file_search": true,
+          "list_directory": true,
+          "project_notifications": true,
+          "move_path": true,
+          "now": true,
+          "find_path": true,
+          "read_file": true,
+          "grep": true,
+          "terminal": true,
+          "thinking": true,
+          "web_search": true,
+          "open": true
+        }
+      }
     },
     // Where to show notifications when the agent has either completed
     // its response, or else needs confirmation before it can run a
@@ -1878,7 +1905,7 @@
   },
   // The server to connect to. If the environment variable
   // ZED_SERVER_URL is set, it will override this setting.
-  "server_url": "https://app.oppla.ai/home",
+  "server_url": "https://oppla.dev",
   // Settings overrides to use when using Oppla Preview.
   // Mostly useful for developers who are managing multiple instances of Oppla.
   "preview": {

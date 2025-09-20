@@ -151,7 +151,9 @@ pub struct AgentConfiguration {
     _registry_subscription: Subscription,
     scroll_handle: ScrollHandle,
     scrollbar_state: ScrollbarState,
+    #[allow(dead_code)]
     task_sync_expanded: bool,
+    #[allow(dead_code)]
     task_sync_data: Option<TaskSyncData>,
 }
 
@@ -584,6 +586,7 @@ impl AgentConfiguration {
             .child(self.render_modifier_to_send(cx))
     }
 
+    #[allow(dead_code)]
     fn sync_task(&mut self, cx: &mut Context<Self>) {
         // Get the client to acquire JWT token
         let client = Client::global(cx).clone();
@@ -607,7 +610,7 @@ impl AgentConfiguration {
 
                     // Build the URL with token and callback port
                     let url = format!(
-                        "https://app.oppla.ai/home/ide?token={}&callback_port={}",
+                        "https://oppla.dev/ide?token={}&callback_port={}",
                         //"http://localhost:3001/home/ide?token={}&callback_port={}",
                         token, port
                     );
@@ -723,11 +726,13 @@ impl AgentConfiguration {
         .detach_and_log_err(cx);
     }
 
+    #[allow(dead_code)]
     fn sync_latest_task(&mut self, cx: &mut Context<Self>) {
         // Use the same sync flow as sync_task to open the sync page
         self.sync_task(cx);
     }
 
+    #[allow(dead_code)]
     fn clear_task_sync(&mut self, cx: &mut Context<Self>) {
         // Clear the synced task data
         self.task_sync_data = None;
@@ -741,6 +746,7 @@ impl AgentConfiguration {
     }
 
     // Method to update sync data after successful sync from web app
+    #[allow(dead_code)]
     pub fn update_sync_data(&mut self, data: TaskSyncData, cx: &mut Context<Self>) {
         self.task_sync_data = Some(data.clone());
 
@@ -760,6 +766,7 @@ impl AgentConfiguration {
         cx.notify();
     }
 
+    #[allow(dead_code)]
     fn render_task_sync_section(
         &mut self,
         _window: &mut Window,
@@ -1380,7 +1387,8 @@ impl Render for AgentConfiguration {
                     .size_full()
                     .overflow_y_scroll()
                     .child(self.render_general_settings_section(cx))
-                    .child(self.render_task_sync_section(window, cx))
+                    // Temporarily disabled: Task Context Sync panel
+                    // .child(self.render_task_sync_section(window, cx))
                     .child(self.render_context_servers_section(window, cx))
                     .child(self.render_provider_configuration_section(cx)),
             )

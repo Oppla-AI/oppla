@@ -14,11 +14,12 @@ pub mod builtin_profiles {
     pub const ARCHITECT: &str = "architect";
     pub const DEVOPS: &str = "devops";
     pub const MARKETING_SPECIALIST: &str = "marketing-specialist";
+    pub const PRODUCT_ENGINEER: &str = "product-engineer";
 
     pub fn is_builtin(profile_id: &AgentProfileId) -> bool {
         matches!(
             profile_id.as_str(),
-            WRITE | ASK | MINIMAL | ARCHITECT | DEVOPS | MARKETING_SPECIALIST
+            WRITE | ASK | MINIMAL | ARCHITECT | DEVOPS | MARKETING_SPECIALIST | PRODUCT_ENGINEER
         )
     }
 }

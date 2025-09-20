@@ -36,6 +36,7 @@ vim_mode_setting.workspace = true
 workspace-hack.workspace = true
 workspace.workspace = true
 oppla_actions.workspace = true
+ai_onboarding.workspace = true
 
 [dev-dependencies]
 editor = { workspace = true, features = ["test-support"] }

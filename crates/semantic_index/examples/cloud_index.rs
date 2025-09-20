@@ -20,8 +20,8 @@ fn main() {
         // Initialize HTTP client with base URL
         let http = Arc::new(HttpClientWithUrl::new(
             reqwest_client::ReqwestClient::new(),
-            "https://app.oppla.ai/home", // This will be mapped to the LLM endpoint
-            None,                        // No proxy
+            "https://oppla.dev", // This will be mapped to the LLM endpoint
+            None,                // No proxy
         ));
 
         // Get client and token

@@ -5,7 +5,6 @@ use cli::{CliRequest, CliResponse, ipc::IpcSender};
 use cli::{IpcHandshake, ipc};
 use client::parse_zed_link;
 use collections::HashMap;
-use db::kvp::KEY_VALUE_STORE;
 use editor::Editor;
 use fs::Fs;
 use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
@@ -24,7 +23,6 @@ use std::thread;
 use std::time::Duration;
 use util::ResultExt;
 use util::paths::PathWithPosition;
-use welcome::{FIRST_OPEN, show_welcome_view};
 use workspace::item::ItemHandle;
 use workspace::{AppState, OpenOptions, SerializedWorkspaceLocation, Workspace};
 
@@ -376,25 +374,16 @@ async fn open_workspaces(
     };
 
     if grouped_locations.is_empty() {
-        // If we have no paths to open, show the welcome screen if this is the first launch
-        if matches!(KEY_VALUE_STORE.read_kvp(FIRST_OPEN), Ok(None)) {
-            cx.update(|cx| show_welcome_view(app_state, cx).detach())
-                .log_err();
-        }
-        // If not the first launch, show an empty window with empty editor
-        else {
-            cx.update(|cx| {
-                let open_options = OpenOptions {
-                    env,
-                    ..Default::default()
-                };
-                workspace::open_new(open_options, app_state, cx, |workspace, window, cx| {
-                    Editor::new_file(workspace, &Default::default(), window, cx)
-                })
+        // If we have no paths to open, just open an empty workspace without any default page/file.
+        cx.update(|cx| {
+            let open_options = OpenOptions {
+                env,
+                ..Default::default()
+            };
+            workspace::open_new(open_options, app_state, cx, |_workspace, _window, _cx| {})
                 .detach();
-            })
-            .log_err();
-        }
+        })
+        .log_err();
     } else {
         // If there are paths to open, open a workspace for each grouping of paths
         let mut errored = false;

@@ -1,3 +1,4 @@
+use ai_onboarding::ZedAiOnboarding;
 use client::{DisableAiSettings, TelemetrySettings, telemetry::Telemetry};
 use db::kvp::KEY_VALUE_STORE;
 use gpui::{
@@ -123,6 +124,73 @@ impl Render for WelcomePage {
                                 ),
                             ),
                     )
+                    // Oppla onboarding: sign-in -> accept ToS -> start trial (always shown)
+                    .child({
+                        if let Some(workspace) = self.workspace.upgrade() {
+                            let onboarding = {
+                                let (client, user_store) = {
+                                    let ws = workspace.read(cx);
+                                    (ws.client().clone(), ws.user_store().clone())
+                                };
+                                ZedAiOnboarding::new(
+                                    client,
+                                    &user_store,
+                                    // No-op continue callback from the welcome screen
+                                    Arc::new(|_, _| {}),
+                                    cx,
+                                )
+                                .without_headers()
+                            };
+
+                            v_flex()
+                                .gap_2()
+                                .child(
+                                    h_flex()
+                                        .w_full()
+                                        .justify_center()
+                                        .child(
+                                            Label::new("Onboarding")
+                                                .size(LabelSize::XSmall)
+                                                .color(Color::Muted),
+                                        ),
+                                )
+                                .child(
+                                    div()
+                                        .w_full()
+                                        .p_3()
+                                        .rounded_lg()
+                                        .border_1()
+                                        .border_color(cx.theme().colors().border_variant)
+                                        .child(onboarding),
+                                )
+                                .when(
+                                    workspace
+                                        .read(cx)
+                                        .user_store()
+                                        .read(cx)
+                                        .trial_started_at()
+                                        .is_some(),
+                                    |parent| {
+                                        parent.child(
+                                            h_flex()
+                                                .w_full()
+                                                .justify_center()
+                                                .child(
+                                                    Label::new(
+                                                        "Congrats — you’re in. Try not to break anything."
+                                                    )
+                                                    .italic()
+                                                    .color(Color::Muted),
+                                                ),
+                                        )
+                                    },
+                                )
+                                .into_any_element()
+                        } else {
+                            // If no workspace, render nothing
+                            div().into_any_element()
+                        }
+                    })
                     .child(
                         h_flex()
                             .items_start()

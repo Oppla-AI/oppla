@@ -18773,6 +18773,7 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 name = "welcome"
 version = "0.1.0"
 dependencies = [
+ "ai_onboarding",
  "anyhow",
  "client",
  "component",

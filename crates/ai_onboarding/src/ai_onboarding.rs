@@ -82,6 +82,9 @@ pub struct ZedAiOnboarding {
     pub sign_in: Arc<dyn Fn(&mut Window, &mut App)>,
     pub accept_terms_of_service: Arc<dyn Fn(&mut Window, &mut App)>,
     pub dismiss_onboarding: Option<Arc<dyn Fn(&mut Window, &mut App)>>,
+    // When false, suppresses large headings inside the onboarding card so it can be embedded
+    // within other pages that already provide a title.
+    pub show_headers: bool,
 }
 
 impl ZedAiOnboarding {
@@ -117,6 +120,7 @@ impl ZedAiOnboarding {
                 .detach();
             }),
             dismiss_onboarding: None,
+            show_headers: true,
         }
     }
 
@@ -125,6 +129,11 @@ impl ZedAiOnboarding {
         dismiss_callback: impl Fn(&mut Window, &mut App) + 'static,
     ) -> Self {
         self.dismiss_onboarding = Some(Arc::new(dismiss_callback));
+        self
+    }
+
+    pub fn without_headers(mut self) -> Self {
+        self.show_headers = false;
         self
     }
 
@@ -155,7 +164,7 @@ impl ZedAiOnboarding {
                         "50 prompts per month with Oppla hosted models",
                     ))
                     .child(BulletItem::new(
-                        "2,000 accepted edit predictions with Oppla, our open-source model",
+                        "2,000 accepted edit predictions with Oppla",
                     )),
             )
     }
@@ -164,7 +173,7 @@ impl ZedAiOnboarding {
         List::new()
             .child(BulletItem::new("150 prompts with Oppla hosted models"))
             .child(BulletItem::new(
-                "Unlimited accepted edit predictions with Oppla, our open-source model",
+                "Unlimited accepted edit predictions with Oppla",
             ))
     }
 
@@ -188,7 +197,7 @@ impl ZedAiOnboarding {
                             "500 prompts per month with our Premium Models",
                         ))
                         .child(BulletItem::new(
-                            "Unlimited accepted edit predictions with Oppla, our open-source model",
+                            "Unlimited accepted edit predictions with Oppla",
                         ))
                         .child(BulletItem::new("$20 USD per month")),
                 )
@@ -217,17 +226,23 @@ impl ZedAiOnboarding {
                     List::new()
                         .child(self.pro_trial_definition())
                         .child(BulletItem::new(
-                            "Try it out for 14 days for free, no credit card required",
+                            "Try it out for 7 days for free, no credit card required",
                         )),
                 )
                 .child(
-                    Button::new("pro", "Start Free Trial")
-                        .full_width()
-                        .style(ButtonStyle::Tinted(ui::TintColor::Accent))
-                        .on_click(move |_, _window, cx| {
-                            telemetry::event!("Start Trial Clicked", state = "post-sign-in");
-                            cx.open_url(&zed_urls::start_trial_url(cx))
-                        }),
+                    h_flex().w_full().child(
+                        div().mx_auto().child(
+                            Button::new("pro", "Start Free Trial")
+                                .style(ButtonStyle::Tinted(ui::TintColor::Accent))
+                                .on_click(move |_, _window, cx| {
+                                    telemetry::event!(
+                                        "Start Trial Clicked",
+                                        state = "post-sign-in"
+                                    );
+                                    cx.open_url(&zed_urls::start_trial_url(cx))
+                                }),
+                        ),
+                    ),
                 )
             }
         })
@@ -272,27 +287,34 @@ impl ZedAiOnboarding {
     fn render_sign_in_disclaimer(&self, _cx: &mut App) -> AnyElement {
         let signing_in = matches!(self.sign_in_status, SignInStatus::SigningIn);
 
-        v_flex()
-            .gap_1()
-            .child(Headline::new("Welcome to Oppla AI"))
+        let mut content = v_flex().w_full().gap_1();
+
+        if self.show_headers {
+            content = content.child(Headline::new("Welcome to Oppla AI"));
+        }
+
+        content
             .child(
-                Label::new("Sign in to try Oppla Pro for 14 days, no credit card required.")
+                Label::new("Sign in to try Oppla Pro for 7 days, no credit card required.")
                     .color(Color::Muted)
                     .mb_2(),
             )
             .child(self.pro_trial_definition())
             .child(
-                Button::new("sign_in", "Try Oppla Pro for Free")
-                    .disabled(signing_in)
-                    .full_width()
-                    .style(ButtonStyle::Tinted(ui::TintColor::Accent))
-                    .on_click({
-                        let callback = self.sign_in.clone();
-                        move |_, window, cx| {
-                            telemetry::event!("Start Trial Clicked", state = "pre-sign-in");
-                            callback(window, cx)
-                        }
-                    }),
+                h_flex().w_full().child(
+                    div().mx_auto().child(
+                        Button::new("sign_in", "Try Oppla Pro for Free")
+                            .disabled(signing_in)
+                            .style(ButtonStyle::Tinted(ui::TintColor::Accent))
+                            .on_click({
+                                let callback = self.sign_in.clone();
+                                move |_, window, cx| {
+                                    telemetry::event!("Start Trial Clicked", state = "pre-sign-in");
+                                    callback(window, cx)
+                                }
+                            }),
+                    ),
+                ),
             )
             .into_any_element()
     }
@@ -300,10 +322,13 @@ impl ZedAiOnboarding {
     fn render_free_plan_state(&self, cx: &mut App) -> AnyElement {
         let young_account_banner = YoungAccountBanner;
 
-        v_flex()
-            .relative()
-            .gap_1()
-            .child(Headline::new("Welcome to Oppla AI"))
+        let mut content = v_flex().w_full().relative().gap_1();
+
+        if self.show_headers {
+            content = content.child(Headline::new("Welcome to Oppla AI"));
+        }
+
+        content
             .map(|this| {
                 if self.account_too_young {
                     this.child(young_account_banner)
@@ -336,21 +361,20 @@ impl ZedAiOnboarding {
     }
 
     fn render_trial_state(&self, _cx: &mut App) -> AnyElement {
-        v_flex()
-            .relative()
-            .gap_1()
-            .child(Headline::new("Welcome to the Oppla Pro Trial"))
+        let mut content = v_flex().relative().gap_1();
+        if self.show_headers {
+            content = content.child(Headline::new("Welcome to the Oppla Pro Trial"));
+        }
+        content
             .child(
-                Label::new("Here's what you get for the next 14 days:")
+                Label::new("Here's what you get for the next 7 days:")
                     .color(Color::Muted)
                     .mb_2(),
             )
             .child(
                 List::new()
                     .child(BulletItem::new("150 prompts with Oppla hosted models"))
-                    .child(BulletItem::new(
-                        "Unlimited edit predictions with Oppla, our open-source model",
-                    )),
+                    .child(BulletItem::new("Unlimited edit predictions with Oppla")),
             )
             .when_some(
                 self.dismiss_onboarding.as_ref(),
@@ -376,9 +400,11 @@ impl ZedAiOnboarding {
     }
 
     fn render_pro_plan_state(&self, _cx: &mut App) -> AnyElement {
-        v_flex()
-            .gap_1()
-            .child(Headline::new("Welcome to Oppla Pro"))
+        let mut content = v_flex().gap_1();
+        if self.show_headers {
+            content = content.child(Headline::new("Welcome to Oppla Pro"));
+        }
+        content
             .child(
                 Label::new("Here's what you get:")
                     .color(Color::Muted)
@@ -387,9 +413,7 @@ impl ZedAiOnboarding {
             .child(
                 List::new()
                     .child(BulletItem::new("500 prompts with our Premium Models"))
-                    .child(BulletItem::new(
-                        "Unlimited edit predictions with Oppla, our open-source model",
-                    )),
+                    .child(BulletItem::new("Unlimited edit predictions with Oppla")),
             )
             .child(
                 Button::new("pro", "Continue with Oppla Pro")
@@ -446,6 +470,7 @@ impl Component for ZedAiOnboarding {
                 sign_in: Arc::new(|_, _| {}),
                 accept_terms_of_service: Arc::new(|_, _| {}),
                 dismiss_onboarding: None,
+                show_headers: true,
             }
             .into_any_element()
         }
