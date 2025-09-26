@@ -15,9 +15,8 @@ use crate::ui::NewThreadButton;
 use crate::{
     AddContextServer, AgentDiffPane, ContinueThread, ContinueWithBurnMode,
     DeleteRecentlyOpenThread, ExpandMessageEditor, Follow, InlineAssistant, NewTextThread,
-    NewThread, OpenActiveThreadAsMarkdown, OpenAgentDiff, OpenHistory,
-    ResetTrialEndUpsell, ResetTrialUpsell, ToggleBurnMode, ToggleContextPicker,
-    ToggleNavigationMenu, ToggleOptionsMenu,
+    NewThread, OpenActiveThreadAsMarkdown, OpenAgentDiff, OpenHistory, ResetTrialEndUpsell,
+    ResetTrialUpsell, ToggleBurnMode, ToggleContextPicker, ToggleNavigationMenu, ToggleOptionsMenu,
     acp::AcpThreadView,
     active_thread::{self, ActiveThread, ActiveThreadEvent},
     agent_configuration::{AgentConfiguration, AssistantConfigurationEvent},
@@ -914,9 +913,16 @@ impl AgentPanel {
         context_editor.focus_handle(cx).focus(window);
     }
 
-    fn new_prompt_with_text(&mut self, prompt_text: &str, window: &mut Window, cx: &mut Context<Self>) {
+    fn new_prompt_with_text(
+        &mut self,
+        prompt_text: &str,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         // Create a new thread
-        let thread = self.thread_store.update(cx, |this, cx| this.create_thread(cx));
+        let thread = self
+            .thread_store
+            .update(cx, |this, cx| this.create_thread(cx));
 
         // Create context store for this thread
         let context_store = cx.new(|_cx| {

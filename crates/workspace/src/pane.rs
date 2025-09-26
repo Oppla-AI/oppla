@@ -3416,7 +3416,11 @@ fn default_render_tab_bar_buttons(
 }
 
 impl Pane {
-    fn render_agent_center_view(&self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render_agent_center_view(
+        &self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> impl IntoElement {
         // Display centered agent chat interface
         if let Some(workspace) = self.workspace.upgrade() {
             let has_worktrees = workspace
@@ -3444,15 +3448,14 @@ impl Pane {
                             v_flex()
                                 .gap_3()
                                 .items_center()
+                                .child(Headline::new("Welcome to Oppla").size(HeadlineSize::XLarge))
                                 .child(
-                                    Headline::new("Welcome to Oppla")
-                                        .size(HeadlineSize::XLarge)
-                                )
-                                .child(
-                                    Label::new("Context stays. Context grows. Build without limits.")
-                                        .color(Color::Muted)
-                                        .size(LabelSize::Large)
-                                )
+                                    Label::new(
+                                        "Context stays. Context grows. Build without limits.",
+                                    )
+                                    .color(Color::Muted)
+                                    .size(LabelSize::Large),
+                                ),
                         )
                         .child(
                             h_flex()
@@ -3465,11 +3468,10 @@ impl Pane {
                                         .style(ButtonStyle::Filled)
                                         .on_click(move |_, window, cx| {
                                             window.dispatch_action(
-                                                oppla_actions::assistant::ToggleFocus
-                                                    .boxed_clone(),
+                                                oppla_actions::assistant::ToggleFocus.boxed_clone(),
                                                 cx,
                                             )
-                                        })
+                                        }),
                                 )
                                 .when(!has_worktrees, |div| {
                                     div.child(
@@ -3482,9 +3484,9 @@ impl Pane {
                                                         .boxed_clone(),
                                                     cx,
                                                 )
-                                            })
+                                            }),
                                     )
-                                })
+                                }),
                         )
                         .child(
                             v_flex()
@@ -3494,7 +3496,7 @@ impl Pane {
                                 .child(
                                     Label::new("Quick Actions")
                                         .size(LabelSize::Large)
-                                        .color(Color::Muted)
+                                        .color(Color::Muted),
                                 )
                                 .child(
                                     div()
@@ -3507,54 +3509,46 @@ impl Pane {
                                             h_flex()
                                                 .gap_3()
                                                 .justify_center()
-                                                .child(
-                                                    div()
-                                                        .w(px(280.0))
-                                                        .child(self.render_suggestion_button(
-                                                            "Analyze my codebase context",
-                                                            IconName::FileTree,
-                                                            window,
-                                                            cx
-                                                        ))
-                                                )
-                                                .child(
-                                                    div()
-                                                        .w(px(280.0))
-                                                        .child(self.render_suggestion_button(
-                                                            "Build a new feature with AI",
-                                                            IconName::Sparkle,
-                                                            window,
-                                                            cx
-                                                        ))
-                                                )
+                                                .child(div().w(px(280.0)).child(
+                                                    self.render_suggestion_button(
+                                                        "Analyze my codebase context",
+                                                        IconName::FileTree,
+                                                        window,
+                                                        cx,
+                                                    ),
+                                                ))
+                                                .child(div().w(px(280.0)).child(
+                                                    self.render_suggestion_button(
+                                                        "Build a new feature with AI",
+                                                        IconName::Sparkle,
+                                                        window,
+                                                        cx,
+                                                    ),
+                                                )),
                                         )
                                         .child(
                                             h_flex()
                                                 .gap_3()
                                                 .justify_center()
-                                                .child(
-                                                    div()
-                                                        .w(px(280.0))
-                                                        .child(self.render_suggestion_button(
-                                                            "Review and improve my code",
-                                                            IconName::Code,
-                                                            window,
-                                                            cx
-                                                        ))
-                                                )
-                                                .child(
-                                                    div()
-                                                        .w(px(280.0))
-                                                        .child(self.render_suggestion_button(
-                                                            "What should I build next?",
-                                                            IconName::MessageBubbles,
-                                                            window,
-                                                            cx
-                                                        ))
-                                                )
-                                        )
-                                )
-                        )
+                                                .child(div().w(px(280.0)).child(
+                                                    self.render_suggestion_button(
+                                                        "Review and improve my code",
+                                                        IconName::Code,
+                                                        window,
+                                                        cx,
+                                                    ),
+                                                ))
+                                                .child(div().w(px(280.0)).child(
+                                                    self.render_suggestion_button(
+                                                        "What should I build next?",
+                                                        IconName::MessageBubbles,
+                                                        window,
+                                                        cx,
+                                                    ),
+                                                )),
+                                        ),
+                                ),
+                        ),
                 )
         } else {
             div()
@@ -3780,8 +3774,7 @@ impl Render for Pane {
                                 .child(item.to_any())
                         } else {
                             // Show agent center view when pane is empty
-                            div
-                                .id("pane_placeholder")
+                            div.id("pane_placeholder")
                                 .size_full()
                                 .child(self.render_agent_center_view(window, cx))
                         }
