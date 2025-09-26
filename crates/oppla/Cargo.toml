@@ -2,7 +2,7 @@
 description = "The fast, collaborative code editor."
 edition.workspace = true
 name = "oppla"
-version = "0.201.26"
+version = "0.201.27"
 publish.workspace = true
 license = "GPL-3.0-or-later"
 authors = ["Oppla Team <hi@oppla.dev>"]
