@@ -15,8 +15,9 @@ use crate::ui::NewThreadButton;
 use crate::{
     AddContextServer, AgentDiffPane, ContinueThread, ContinueWithBurnMode,
     DeleteRecentlyOpenThread, ExpandMessageEditor, Follow, InlineAssistant, NewTextThread,
-    NewThread, OpenActiveThreadAsMarkdown, OpenAgentDiff, OpenHistory, ResetTrialEndUpsell,
-    ResetTrialUpsell, ToggleBurnMode, ToggleContextPicker, ToggleNavigationMenu, ToggleOptionsMenu,
+    NewThread, OpenActiveThreadAsMarkdown, OpenAgentDiff, OpenHistory,
+    ResetTrialEndUpsell, ResetTrialUpsell, ToggleBurnMode, ToggleContextPicker,
+    ToggleNavigationMenu, ToggleOptionsMenu,
     acp::AcpThreadView,
     active_thread::{self, ActiveThread, ActiveThreadEvent},
     agent_configuration::{AgentConfiguration, AssistantConfigurationEvent},
@@ -55,7 +56,7 @@ use language_model::{
 use oppla_actions::{
     DecreaseBufferFontSize, IncreaseBufferFontSize, ResetBufferFontSize,
     agent::{OpenConfiguration, OpenOnboardingModal, ResetOnboarding, ToggleModelSelector},
-    assistant::{OpenRulesLibrary, ToggleFocus},
+    assistant::{OpenAgentWithPrompt, OpenRulesLibrary, ToggleFocus},
 };
 use oppla_llm_client::{CompletionIntent, UsageLimit};
 use project::{Project, ProjectPath, Worktree};
@@ -110,6 +111,14 @@ pub fn init(cx: &mut App) {
                     if let Some(panel) = workspace.panel::<AgentPanel>(cx) {
                         workspace.focus_panel::<AgentPanel>(window, cx);
                         panel.update(cx, |panel, cx| panel.new_prompt_editor(window, cx));
+                    }
+                })
+                .register_action(|workspace, action: &OpenAgentWithPrompt, window, cx| {
+                    if let Some(panel) = workspace.panel::<AgentPanel>(cx) {
+                        workspace.focus_panel::<AgentPanel>(window, cx);
+                        panel.update(cx, |panel, cx| {
+                            panel.new_prompt_with_text(&action.prompt, window, cx)
+                        });
                     }
                 })
                 .register_action(|workspace, action: &NewExternalAgentThread, window, cx| {
@@ -903,6 +912,65 @@ impl AgentPanel {
             cx,
         );
         context_editor.focus_handle(cx).focus(window);
+    }
+
+    fn new_prompt_with_text(&mut self, prompt_text: &str, window: &mut Window, cx: &mut Context<Self>) {
+        // Create a new thread
+        let thread = self.thread_store.update(cx, |this, cx| this.create_thread(cx));
+
+        // Create context store for this thread
+        let context_store = cx.new(|_cx| {
+            ContextStore::new(
+                self.project.downgrade(),
+                Some(self.thread_store.downgrade()),
+            )
+        });
+
+        // Create active thread wrapper
+        let active_thread = cx.new(|cx| {
+            ActiveThread::new(
+                thread.clone(),
+                self.thread_store.clone(),
+                self.context_store.clone(),
+                context_store.clone(),
+                self.language_registry.clone(),
+                self.workspace.clone(),
+                window,
+                cx,
+            )
+        });
+
+        // Create message editor
+        let message_editor = cx.new(|cx| {
+            MessageEditor::new(
+                self.fs.clone(),
+                self.workspace.clone(),
+                self.user_store.clone(),
+                context_store.clone(),
+                self.prompt_store.clone(),
+                self.thread_store.downgrade(),
+                self.context_store.downgrade(),
+                Some(self.history_store.downgrade()),
+                thread.clone(),
+                window,
+                cx,
+            )
+        });
+
+        // Set the prompt text in the message editor
+        message_editor.update(cx, |editor, cx| {
+            editor.set_text(prompt_text, window, cx);
+        });
+
+        // Focus the message editor
+        message_editor.focus_handle(cx).focus(window);
+
+        // Set the active view to the thread
+        let thread_view = ActiveView::thread(active_thread.clone(), message_editor, window, cx);
+        self.set_active_view(thread_view, window, cx);
+
+        // Set active thread for agent diff
+        AgentDiff::set_active_thread(&self.workspace, thread.clone(), window, cx);
     }
 
     fn new_external_thread(

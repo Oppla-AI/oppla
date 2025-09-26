@@ -44,10 +44,10 @@ use std::{
 };
 use theme::ThemeSettings;
 use ui::{
-    ButtonSize, ButtonStyle, Color, ContextMenu, ContextMenuEntry, ContextMenuItem, DecoratedIcon,
-    IconButton, IconButtonShape, IconDecoration, IconDecorationKind, IconName, IconSize, Indicator,
-    PopoverMenu, PopoverMenuHandle, Tab, TabBar, TabPosition, Tooltip, prelude::*,
-    right_click_menu,
+    Button, ButtonSize, ButtonStyle, Color, ContextMenu, ContextMenuEntry, ContextMenuItem,
+    DecoratedIcon, Headline, HeadlineSize, IconButton, IconButtonShape, IconDecoration,
+    IconDecorationKind, IconName, IconPosition, IconSize, Indicator, Label, LabelSize, PopoverMenu,
+    PopoverMenuHandle, Tab, TabBar, TabPosition, Tooltip, prelude::*, right_click_menu,
 };
 use util::{ResultExt, debug_panic, maybe, truncate_and_remove_front};
 
@@ -3415,6 +3415,179 @@ fn default_render_tab_bar_buttons(
     (None, right_children)
 }
 
+impl Pane {
+    fn render_agent_center_view(&self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // Display centered agent chat interface
+        if let Some(workspace) = self.workspace.upgrade() {
+            let has_worktrees = workspace
+                .read(cx)
+                .project()
+                .read(cx)
+                .visible_worktrees(cx)
+                .next()
+                .is_some();
+
+            v_flex()
+                .size_full()
+                .bg(cx.theme().colors().editor_background)
+                .justify_center()
+                .items_center()
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap_6()
+                        .max_w(px(800.0))
+                        .w_full()
+                        .px_8()
+                        .child(
+                            v_flex()
+                                .gap_3()
+                                .items_center()
+                                .child(
+                                    Headline::new("Welcome to Oppla")
+                                        .size(HeadlineSize::XLarge)
+                                )
+                                .child(
+                                    Label::new("Context stays. Context grows. Build without limits.")
+                                        .color(Color::Muted)
+                                        .size(LabelSize::Large)
+                                )
+                        )
+                        .child(
+                            h_flex()
+                                .gap_4()
+                                .justify_center()
+                                .child(
+                                    Button::new("open-agent-panel", "Start with AI")
+                                        .icon(IconName::MessageBubbles)
+                                        .icon_position(IconPosition::Start)
+                                        .style(ButtonStyle::Filled)
+                                        .on_click(move |_, window, cx| {
+                                            window.dispatch_action(
+                                                oppla_actions::assistant::ToggleFocus
+                                                    .boxed_clone(),
+                                                cx,
+                                            )
+                                        })
+                                )
+                                .when(!has_worktrees, |div| {
+                                    div.child(
+                                        Button::new("open-project", "Open Project")
+                                            .icon(IconName::FolderOpen)
+                                            .icon_position(IconPosition::Start)
+                                            .on_click(|_, window, cx| {
+                                                window.dispatch_action(
+                                                    oppla_actions::OpenRecent::default()
+                                                        .boxed_clone(),
+                                                    cx,
+                                                )
+                                            })
+                                    )
+                                })
+                        )
+                        .child(
+                            v_flex()
+                                .gap_4()
+                                .w_full()
+                                .items_center()
+                                .child(
+                                    Label::new("Quick Actions")
+                                        .size(LabelSize::Large)
+                                        .color(Color::Muted)
+                                )
+                                .child(
+                                    div()
+                                        .flex()
+                                        .flex_col()
+                                        .gap_3()
+                                        .w_full()
+                                        .max_w(px(600.0))
+                                        .child(
+                                            h_flex()
+                                                .gap_3()
+                                                .justify_center()
+                                                .child(
+                                                    div()
+                                                        .w(px(280.0))
+                                                        .child(self.render_suggestion_button(
+                                                            "Analyze my codebase context",
+                                                            IconName::FileTree,
+                                                            window,
+                                                            cx
+                                                        ))
+                                                )
+                                                .child(
+                                                    div()
+                                                        .w(px(280.0))
+                                                        .child(self.render_suggestion_button(
+                                                            "Build a new feature with AI",
+                                                            IconName::Sparkle,
+                                                            window,
+                                                            cx
+                                                        ))
+                                                )
+                                        )
+                                        .child(
+                                            h_flex()
+                                                .gap_3()
+                                                .justify_center()
+                                                .child(
+                                                    div()
+                                                        .w(px(280.0))
+                                                        .child(self.render_suggestion_button(
+                                                            "Review and improve my code",
+                                                            IconName::Code,
+                                                            window,
+                                                            cx
+                                                        ))
+                                                )
+                                                .child(
+                                                    div()
+                                                        .w(px(280.0))
+                                                        .child(self.render_suggestion_button(
+                                                            "What should I build next?",
+                                                            IconName::MessageBubbles,
+                                                            window,
+                                                            cx
+                                                        ))
+                                                )
+                                        )
+                                )
+                        )
+                )
+        } else {
+            div()
+        }
+    }
+
+    fn render_suggestion_button(
+        &self,
+        label: &'static str,
+        icon: IconName,
+        _window: &Window,
+        _cx: &Context<Self>,
+    ) -> impl IntoElement {
+        let prompt = label.to_string();
+        Button::new(label, label)
+            .style(ButtonStyle::Subtle)
+            .full_width()
+            .icon(icon)
+            .icon_position(IconPosition::Start)
+            .icon_color(Color::Accent)
+            .label_size(LabelSize::Default)
+            .on_click(move |_, window, cx| {
+                // Open agent panel with pre-filled prompt
+                window.dispatch_action(
+                    Box::new(oppla_actions::assistant::OpenAgentWithPrompt {
+                        prompt: prompt.clone(),
+                    }),
+                    cx,
+                );
+            })
+    }
+}
+
 impl Focusable for Pane {
     fn focus_handle(&self, _cx: &App) -> FocusHandle {
         self.focus_handle.clone()
@@ -3585,7 +3758,7 @@ impl Render for Pane {
                 pane.child((self.render_tab_bar.clone())(self, window, cx))
             })
             .child({
-                let has_worktrees = project.read(cx).visible_worktrees(cx).next().is_some();
+                let _has_worktrees = project.read(cx).visible_worktrees(cx).next().is_some();
                 // main content
                 div()
                     .flex_1()
@@ -3606,59 +3779,11 @@ impl Render for Pane {
                                 .child(self.toolbar.clone())
                                 .child(item.to_any())
                         } else {
-                            let placeholder = div
+                            // Show agent center view when pane is empty
+                            div
                                 .id("pane_placeholder")
-                                .h_flex()
                                 .size_full()
-                                .justify_center()
-                                .on_click(cx.listener(
-                                    move |this, event: &ClickEvent, window, cx| {
-                                        if event.up.click_count == 2 {
-                                            window.dispatch_action(
-                                                this.double_click_dispatch_action.boxed_clone(),
-                                                cx,
-                                            );
-                                        }
-                                    },
-                                ));
-                            if has_worktrees {
-                                placeholder
-                            } else {
-                                // Enhanced empty state: highlight key features and guide to open a project
-                                placeholder.child(
-                                    v_flex()
-                                        .gap_3()
-                                        .items_center()
-                                        .child(
-                                            Button::new("open-project", "Open a project")
-                                                .icon(IconName::FolderOpen)
-                                                .icon_size(IconSize::XSmall)
-                                                .style(ButtonStyle::Subtle)
-                                                .on_click(|_, window, cx| {
-                                                    window.dispatch_action(
-                                                        oppla_actions::OpenRecent::default()
-                                                            .boxed_clone(),
-                                                        cx,
-                                                    )
-                                                }),
-                                        )
-                                        .child(
-                                            h_flex().gap_4().justify_center().child(
-                                                Button::new("feat-ai", "Oppla AI")
-                                                    .icon(IconName::OpplaAssistant)
-                                                    .icon_size(IconSize::XSmall)
-                                                    .style(ButtonStyle::Subtle)
-                                                    .on_click(|_, window, cx| {
-                                                        window.dispatch_action(
-                                                            oppla_actions::assistant::ToggleFocus
-                                                                .boxed_clone(),
-                                                            cx,
-                                                        )
-                                                    }),
-                                            ),
-                                        ),
-                                )
-                            }
+                                .child(self.render_agent_center_view(window, cx))
                         }
                     })
                     .child(

@@ -323,6 +323,15 @@ pub mod assistant {
     pub struct InlineAssist {
         pub prompt: Option<String>,
     }
+
+    /// Opens the agent panel with a pre-filled prompt to start a conversation.
+    #[derive(Clone, Default, Deserialize, PartialEq, JsonSchema, Action)]
+    #[action(namespace = assistant)]
+    #[serde(deny_unknown_fields)]
+    pub struct OpenAgentWithPrompt {
+        /// The prompt text to pre-fill in the message editor
+        pub prompt: String,
+    }
 }
 
 pub mod debugger {
